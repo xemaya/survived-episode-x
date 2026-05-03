@@ -1,0 +1,36 @@
+A pixel art trading card sheet for a Chinese office life game — 9 DEFENSE / SLACKING cards in a 3x3 grid. Style: SFC/16-bit pixel art, consistent with prior reference sheets, designed to look like a Yu-Gi-Oh / Hearthstone style card collection but with corporate satire content.
+
+LAYOUT — 3x3 grid of trading cards on a clean cream/white background. Each card has:
+- Card frame: pixel art ornate border (cubicle gray-blue #5A7080 base, with old document brown #7A5838 inner trim)
+- Card title at top (Chinese primary + English subtitle, pixel font)
+- Central illustration (the card's effect, ~70% of card area, showing the player or relevant scene)
+- AP cost icon top-left (pixel lightbulb badge with number 1/2/3)
+- Card type label bottom: "防御 / DEFENSE" in small text
+- Brief flavor text or effect description in pixel font
+
+THE 9 CARDS (top-left to bottom-right):
+
+ROW 1:
+1. 装病 / "Call In Sick" — AP 1 — Illustration: player's hand holding a pixel thermometer to forehead with one eye open peeking, fake distress face, sick leave slip in other hand. Effect: 跳过今日 KPI 检查
+2. 装睡 / "Pretend Sleep" — AP 1 — Illustration: player slumped in chair at meeting, head tilted back, eyes closed, single Z floating above head, boss in background didn't notice. Effect: 会议中跳过点名
+3. 装忙 / "Look Busy" — AP 1 — Illustration: player at desk with multiple windows of fake spreadsheets open, intense fake-focus face, fingers typing aimlessly. Effect: 1 回合不被注意
+
+ROW 2:
+4. 摸鱼 / "Slack Off" — AP 1 — Illustration: top-down view of player's desk: phone hidden behind keyboard showing meme content, free hand still typing, screen showing legitimate work. Effect: 恢复 1 健康
+5. 拖延会议 / "Stall the Meeting" — AP 2 — Illustration: player raising one finger ("一个问题"), expressions of weary patience around table, clock visibly later than expected. Effect: 推迟事件 1 天
+6. 躲会议 / "Dodge Meeting" — AP 2 — Illustration: player in stairwell holding phone to ear pretending to call, meeting room visible in background. Effect: 跳过 1 个会议事件
+
+ROW 3:
+7. 提早溜 / "Sneak Out Early" — AP 2 — Illustration: player's silhouette walking briskly toward the elevator at 5:01pm, clock visible, others still working. Effect: 立即结束今日,保留 AP
+8. 咖啡续命 / "Caffeine IV" — AP 1 — Illustration: player at coffee machine, both hands on a giant cold coffee, eyes wide and slightly bloodshot. Effect: 恢复 2 行动力
+9. 装系统故障 / "Blame the System" — AP 1 — Illustration: player pointing at frozen blue screen, HR in background looking skeptical but unable to disprove. Effect: 取消 1 次任务派发
+
+EACH ILLUSTRATION shows a moment of dark-humor office survival, consistent with art-bible 喜丧美学.
+
+PALETTE: same world palette — 打工人黄 #C8A85A skin, 灰蓝 #5A7080 frames/walls, 棕 #7A5838 wood/trim, 白 #E8E0CC card body, 屏幕蓝 #2C4A6E for screen elements. Card frames use a slightly darkened version of the cubicle gray-blue.
+
+TOP TITLE: "行动卡 · 防御套牌 / Action Cards · Defense Deck" in pixel font.
+
+CRITICAL: Each card must be VISUALLY DISTINCT in its illustration so players can recognize cards at a glance. The 9 illustrations should NOT look the same.
+
+Output: PNG, 1024x1024, single composite card sheet, ready to be cropped into individual card sprites for the in-game card play UI.

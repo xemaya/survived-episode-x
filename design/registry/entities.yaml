@@ -1,0 +1,330 @@
+# Game World Entity Registry
+#
+# PURPOSE: Single source of truth for all named game-world facts that appear
+# in more than one document. Skills check this before writing new content to
+# detect cross-doc inconsistencies at authoring time.
+#
+# RULES:
+#   - Only register facts that cross system boundaries. Internal-only facts
+#     (a formula used in one GDD only) do NOT need to be registered.
+#   - Never delete entries — set status: deprecated instead.
+#   - When a value changes: update the value, set revised: to today's date,
+#     and add a comment with the old value and which GDD changed it.
+#   - source: is the authoritative GDD — the one that "owns" this fact.
+#     Other GDDs that reference it list themselves in referenced_by.
+#   - When a new GDD references an existing entry, append its path to
+#     referenced_by. Do not create a duplicate entry.
+#
+# WRITTEN BY: /design-system (Phase 5 — after GDD sections are approved)
+#             /consistency-check (when resolving conflicts)
+# READ BY:    /design-system (Phase 2 — before authoring begins, and after
+#               Section C/D writes to conflict-check new entities/formulas)
+#             /consistency-check (primary input — grep-first, GDD-second)
+#             /review-all-gdds (Phase 1 — baseline for Phase 2 checks)
+#             /architecture-review (data structure and interface validation)
+#
+# SEARCH PATTERNS (for skills using Grep):
+#   All entity names:        Grep pattern="^  - name:" path="design/registry/entities.yaml"
+#   Specific entity:         Grep pattern="  - name: goblin" path="design/registry/entities.yaml"
+#   All items:               Grep pattern="^  - name:" path="design/registry/entities.yaml" (items section)
+#   What combat.md owns:     Grep pattern="source: design/gdd/combat.md"
+#   What inventory.md uses:  Grep pattern="referenced_by.*inventory"
+#   All gold values:          Grep pattern="value_gold:"
+#   Deprecated entries:      Grep pattern="status: deprecated"
+#
+# FORMAT: YAML. Consistent indentation is critical for grep reliability.
+#   Sections: entities | items | formulas | constants
+#   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
+
+version: 1
+last_updated: "2026-04-26"
+
+# ─── ENTITIES ────────────────────────────────────────────────────────────────
+# Named game-world objects: enemies, NPCs, characters, factions, bosses.
+# Register an entity here when it appears in more than one GDD — e.g., an
+# enemy defined in combat.md that also drops items listed in inventory.md.
+#
+# Required fields: name, status, source, referenced_by, added
+# Attribute fields: any key stats that could appear in another GDD
+#   (health, damage, drops, faction, etc.)
+
+entities: []
+
+# Example (remove when first real entry is added):
+#
+# entities:
+#   - name: goblin
+#     status: active              # active | deprecated
+#     source: design/gdd/combat.md
+#     referenced_by:
+#       - design/gdd/combat.md
+#       - design/gdd/inventory.md
+#     health: 40
+#     damage: 8
+#     drops:
+#       - item: goblin_arm        # must match an entry in items section
+#         qty: 1
+#         drop_rate: 0.8          # 0.0–1.0
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── ITEMS ───────────────────────────────────────────────────────────────────
+# Named collectables, equipment, consumables, crafting materials, currency.
+# Register an item when its name or value appears in more than one GDD.
+#
+# Required fields: name, status, source, referenced_by, added
+# Attribute fields: value_gold, weight, stackable, category, and any stat
+#   modifiers that another system (e.g., economy, crafting) might reference.
+
+items: []
+
+# Example:
+#
+# items:
+#   - name: goblin_arm
+#     status: active
+#     source: design/gdd/combat.md   # drop defined in combat GDD
+#     referenced_by:
+#       - design/gdd/combat.md
+#       - design/gdd/inventory.md    # inventory GDD lists its weight/stack rules
+#       - design/gdd/economy.md      # economy GDD references its sell price
+#     value_gold: 5
+#     weight: 1
+#     stackable: true
+#     category: crafting_material
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── FORMULAS ────────────────────────────────────────────────────────────────
+# Named calculations with defined variables and output ranges.
+# Register a formula when its output feeds into another system's input,
+# or when another GDD references it by name.
+#
+# Required fields: name, status, source, referenced_by, variables[],
+#   output_range[min, max], added
+# Optional: expression (the actual formula), notes
+
+formulas: []
+
+# Example:
+#
+# formulas:
+#   - name: damage_formula
+#     status: active
+#     source: design/gdd/combat.md
+#     referenced_by:
+#       - design/gdd/combat.md
+#       - design/gdd/progression.md   # progression GDD scales attack variable
+#     variables:
+#       - attack
+#       - defense
+#       - crit_chance
+#       - crit_multiplier
+#     output_range: [0, 999]
+#     expression: "max(0, attack - defense) * (1 + crit_chance * crit_multiplier)"
+#     notes: "Output feeds into health-system damage intake. Min is 0 (armour
+#       can absorb all damage). Max is uncapped in formula but tuning knob
+#       damage_cap in combat.md clamps at 999."
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── CONSTANTS ───────────────────────────────────────────────────────────────
+# Named numerical values referenced across multiple systems.
+# Register a constant when it is defined in one GDD but another GDD must
+# agree with it (e.g., gold carry limit defined in economy but checked in
+# inventory, or base inventory slots defined in inventory but displayed in HUD).
+#
+# Required fields: name, status, source, referenced_by, value, unit, added
+
+constants:
+  - name: autosave_perf_hard_ceiling_ms
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 50
+    unit: ms
+    added: 2026-04-22
+    revised: 2026-04-26
+    notes: "Pillar 5 硬约束——单次 autosave 端到端耗时上限。HUD '已存'指示器在此预算内必须可见。超过必须触发降级策略（分帧拆解 / 背景线程）。HDD + AV 扫描场景的 p99 实测见 Save System OQ-03。Scene & Day Flow #6 Rule 4 + Edge 2.3 引用作为启动序列 meta load HDD+AV 容忍上限。"
+
+  - name: archive_hard_cap_count
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+    value: 200
+    unit: runs
+    added: 2026-04-22
+    revised: 2026-04-23
+    notes: "档案柜硬上限。达上限后 Block new Run + 弹'档案柜已满，请手动清档'对话框，玩家在 Main Menu → Archive 列表逐条选档删除（禁批量删）。Save System Rule 23 落地；OQ-01 于 2026-04-23 resolved。Run Meta System GDD 需列入 referenced_by 并实现 Archive 列表 UI。软警告阈值 archive_soft_warning_count=180 为独立 knob。"
+
+  - name: current_schema_version
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+    value: 1
+    unit: integer
+    added: 2026-04-22
+    revised: ""
+    notes: "单调递增整数，每次 save schema 字段变更 +1。MVP 阶段不支持迁移（旧版视同损坏）；VS 起引入 migrate_vN_to_vN_plus_1 链。所有序列化到 save 的下游系统（AP / NPC / KPI / Event Script / Action Card / Run Meta）应在其 GDD 声明自身 sub-schema 随此版本演进。"
+
+  - name: final_transition_duration_ms
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+      - design/gdd/input-handler.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 1500
+    unit: ms
+    added: 2026-04-23
+    revised: 2026-04-26
+    notes: "离职证明 transition 总时长硬上限（Save System Rule 21 跨 GDD 锁定值）。#16 KPI Review & Game Over UI GDD 在实现离职证明播片时必须遵守：`final_transition_duration_ms ≤ 1500` + `final_transition_easing = NONE`（禁 ease-in / ease-out / bounce / elastic，线性或即时切换）。违反即 Pillar 3 'Papers Please 冷静打卡机'tone 漂向 Stardew 温柔仪式。AC-FUNC-12 通过 UI profiler 断言。Input Handler #2 Section G 引用此 knob 作为 #16 skippable 注册的 tone 守门约束（Input 提供 skip 入口但不可推翻 transition tone）。"
+
+  - name: locale_lock_watchdog_ms
+    status: active
+    source: design/gdd/localization-hooks.md
+    referenced_by:
+      - design/gdd/localization-hooks.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 30000
+    unit: ms
+    added: 2026-04-25
+    revised: 2026-04-26
+    notes: "Localization Hooks Rule 5 + Edge 4.6 + AC-ROBUST-03 [RISK GUARD R-LOC-3] 守门常量。当 Scene & Day Flow Controller (#6) 设置 `locale_switch_locked = true` 后因 bug 永不 clear,Localization 自动 watchdog 触发 —— `push_error` + 强制 flush pending locale + reset lock flag。30 s 超任何 plausible 演出时长同时捕 genuine lock leak,防 Pillar 5 locale 切换 indefinitely block。Scene & Day Flow #6 GDD 须 document '演出 time budget 不得超 30 s,否则 Localization 强制 override'(contract awareness 而非双向调优)。值变更须同步 review Rule 5 protocol + Edge 4.6 + AC-ROBUST-03 断言参数。"
+
+  - name: audio_preload_budget_ms
+    status: active
+    source: design/gdd/audio-manager.md
+    referenced_by:
+      - design/gdd/audio-manager.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 200
+    unit: ms
+    added: 2026-04-25
+    revised: 2026-04-26
+    notes: "Audio Manager Rule 5 + AC-PERF-01 守门常量。Loading Scene 内 audio bank preload(29 MVP assets ~520KB)+ FontManager 等并行任务总耗时 CI blocking 上限。超时则 Pillar 5 5 秒进入承诺受压。Scene & Day Flow #6 GDD 须 document audio preload 在 Loading Scene 序列中的位置 + 与 Localization preload (<100ms) 并行调度策略。"
+
+  - name: audio_loading_watchdog_ms
+    status: active
+    source: design/gdd/audio-manager.md
+    referenced_by:
+      - design/gdd/audio-manager.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 10000
+    unit: ms
+    added: 2026-04-25
+    revised: 2026-04-26
+    notes: "Audio Manager Edge 3.5 + AC-ROBUST-03 [RISK GUARD R-AUD-3] 守门常量。当 Scene & Day Flow Controller (#6) 因 bug 永不调 `_mark_ready()` 时,Audio Manager LOADING 态自动 watchdog 触发 —— 强制转 READY + flush pending Ambient/Music queue + push_error。10 s 超任何合法 preload 时长(audio_preload_budget_ms 200ms × 50 倍余量)同时捕 genuine 卡死。**与 locale_lock_watchdog_ms (30000) 不同尺度**:Localization watchdog 是演出 lock(可能合法长达数十秒),Audio watchdog 是 LOADING 启动期(应短)。Scene & Day Flow #6 GDD 须 document `_mark_ready()` 调用契约 + 与 Audio LOADING watchdog 时序约束。"
+
+  - name: audio_bank_total_size_mb
+    status: active
+    source: design/gdd/audio-manager.md
+    referenced_by:
+      - design/gdd/audio-manager.md
+      - design/art/art-bible.md
+    value: 30
+    unit: mb
+    added: 2026-04-25
+    revised: ""
+    notes: "Audio Manager Rule 5 + AC-PERF-02 lint 守门 + art-bible §8.5 显存预算听觉对应约束。`tools/audio_lint.gd` CI 阻塞 PR 当 `assets/audio/` 总文件大小超 30 MB。MVP 估算 ~520 KB 远低于上限(留 ~58× 余量供野心版扩展配音 / 多 BGM 等)。变更须 review Pillar 5 内存预算 + sound-designer 资产规模与 art-bible §8.5 总显存对照。"
+
+  - name: bgm_loop_length_max_sec
+    status: active
+    source: design/gdd/audio-manager.md
+    referenced_by:
+      - design/gdd/audio-manager.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 120
+    unit: sec
+    added: 2026-04-25
+    revised: 2026-04-26
+    notes: "Audio Manager Rule 7 + AC-FUNC-07 配乐时长上限。Pillar 5 地铁可玩性约束 —— 玩家暂停 / 关 app 时 Music Bus 不阻塞退出(单 loop 最长 120 秒)。Scene & Day Flow #6 演出时长契约 must respect: KPI Review / GAME OVER 演出超 120 秒触发 BGM 自然 loop 续接(无 stinger,Rule 7 锁定)。值变更同步 review audio-director 配乐 brief + Pillar 5 退出延迟测试。"
+
+  - name: lighting_loading_watchdog_ms
+    status: active
+    source: design/gdd/lighting-visual-state.md
+    referenced_by:
+      - design/gdd/lighting-visual-state.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 10000
+    unit: ms
+    added: 2026-04-25
+    revised: 2026-04-26
+    notes: "Lighting & Visual State Controller Rule 2 + Edge 3.5 + AC-ROBUST-02 [RISK GUARD R-LVS-2] 守门常量。LOADING 态超时强制转 READY + flush pending queue + push_error。**与 audio_loading_watchdog_ms = 10000 同模式同值**(Audio + Lighting 均启动 LOADING 守门),与 locale_lock_watchdog_ms = 30000 不同尺度(Loc 演出 lock 可能合法长达 30 秒)。Scene & Day Flow #6 GDD 须 document `_mark_ready()` 调用契约 + 启动序列时序约束。"
+
+  - name: notice_board_max_entries
+    status: active
+    source: design/gdd/lighting-visual-state.md
+    referenced_by:
+      - design/gdd/lighting-visual-state.md
+      - design/art/art-bible.md
+      - design/gdd/scene-day-flow-controller.md
+    value: 24
+    unit: entries
+    added: 2026-04-25
+    revised: 2026-04-26
+    notes: "Lighting Rule 5 + Edge Cat 5 + AC-ROBUST-05 [RISK GUARD R-LVS-5] 守门常量。`notice_board_age` Array 上限(2 年月数)。FIFO 驱逐溢出元素防长跑玩家 Save 体积无限蔓延。art-bible §6.5 累积视觉 4 维度之一。Save Rule 6 序列化体积 + Rule 13 snapshot_id 单调约束的累积 state 侧约束。值变更须 review Save 体积预算 + art-director 累积视觉时间线设定。"
+
+  - name: meta_settings_debounce_ms
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+      - design/gdd/input-handler.md
+      - design/gdd/localization-hooks.md
+      - design/gdd/audio-manager.md
+      - design/gdd/scene-day-flow-controller.md
+      - design/gdd/main-menu-pause-settings-ui.md
+    value: 500
+    unit: ms
+    added: 2026-04-24
+    revised: 2026-04-28
+    notes: "Save System Rule 14 锁定的玩家设置（音量 / 语言 / 叙事密度 / gamepad 布局 / keymap）写入 meta.save 的防抖窗口。**5 GDD 消费者**：Input Handler #2 Rule 8(keymap 改后 emit `keymap_changed`);Localization Hooks #3 Rule 5(locale 改后 emit `locale_changed`);Audio Manager #4 Rule 2(音量改后 emit `bus_volume_changed`,4 bus dB);Main Menu #17 Section C Rule 7(4 类 settings 信号合流至 #6 单 timer,本 GDD emit 不独立防抖)。所有信号统一被 Save 订阅,防抖 500 ms 后单次写 meta。值变更须同时 review Save Rule 14 + 5 GDD 各自 Section G/Rule 引用 + Settings UI #17 反馈期望。"
+
+  - name: kpi_review_intro_duration_ms
+    status: active
+    source: docs/architecture/adr-0007-kpi-review-three-track-anchor.md
+    referenced_by:
+      - design/gdd/kpi-review-game-over-ui.md
+      - design/gdd/lighting-visual-state.md
+      - design/gdd/audio-manager.md
+      - design/gdd/kpi-reverse-threshold-system.md
+      - docs/architecture/adr-0007-kpi-review-three-track-anchor.md
+    value: 800
+    unit: ms
+    added: 2026-04-28
+    revised: ""
+    notes: "ADR-0007 仲裁(B-SCN4-1):月末 KPI Review 进入三轨同步锚 — UI fade-in(`#16` Tween EASE_IN_OUT)+ Lighting palette swap(`#5` CanvasModulate 紫色)+ Audio cross-fade(`#4` 月末 BGM + stinger)同时长 800ms。区别于 GAMEOVER 1500ms transition 的短 ritual。`#9 KPI` 在 `kpi_review_started` emit 时三轨 same-frame 启动。值变更须同时 review 三 GDD Section C + ADR-0007 决策 + 玩家测试节奏感反馈。registry tuning 单点修改即可同步三系统。"
+
+# Example:
+#
+# constants:
+#   - name: gold_carry_limit
+#     status: active
+#     source: design/gdd/economy.md
+#     referenced_by:
+#       - design/gdd/economy.md
+#       - design/gdd/inventory.md   # inventory enforces the carry limit
+#       - design/gdd/ui.md          # HUD displays current gold vs limit
+#     value: 9999
+#     unit: gold
+#     added: 2026-03-26
+#     revised: ""
+#
+#   - name: base_inventory_slots
+#     status: active
+#     source: design/gdd/inventory.md
+#     referenced_by:
+#       - design/gdd/inventory.md
+#       - design/gdd/progression.md  # progression unlocks additional slots
+#     value: 20
+#     unit: slots
+#     added: 2026-03-26
+#     revised: ""

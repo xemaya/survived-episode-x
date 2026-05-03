@@ -1,0 +1,18 @@
+Pixel art sprite, SFC / Super Famicom era detail (16-bit pixel art, NOT vector or smooth illustration). Strict pixel grid, no anti-aliasing on outlines, limited 16-color palette.
+
+Subject: A weary middle-aged Chinese male office worker, late 30s. Default black short hair (no highlight gloss). No distinct gender features. Wearing a standard navy business suit, slightly rumpled, white shirt, loosened red tie. Body slightly hunched forward with lowered visual weight — conveying "已经在这待了很久" (been here too long). A stainless-steel thermos cup permanently held in his left hand, forming a small 3px raised silhouette protrusion — this is the ONLY prominent contour bump on the character.
+
+Pose: Standing at a cubicle, 3/4 facing right, full body visible, neutral idle stance.
+
+Setting / Background: Behind him is the gray-blue cubicle partition wall, faint overhead fluorescent light, blank documents on the desk.
+
+Strict color palette (adhere closely):
+- Skin tone (fluorescent-lit yellow): #C8A85A
+- Cubicle gray-blue: #5A7080
+- Old document brown: #7A5838
+- Paper / ceiling white: #E8E0CC
+- Screen blue glow accent: #2C4A6E
+
+Visual identity goal: "first glance recognition, second glance indictment" — a visually familiar Chinese office worker who quietly broadcasts that he won't last long here. Aesthetic must read as authentic SFC-era pixel sprite, not modern hi-res illustration.
+
+Output: PNG with solid neutral background, single character centered, no UI elements, no text.

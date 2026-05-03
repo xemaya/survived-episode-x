@@ -1,0 +1,43 @@
+A pixel art game scene illustration — a late-night overtime scene in a Chinese open-plan office. Style: SFC/16-bit pixel art, consistent with prior reference sheets, dominant blue tonality.
+
+SETTING — Open-plan office at night, viewed from a slightly elevated 3/4 perspective. Most lights are off except for scattered desk lamps and computer screen glows. Through the windows, total black night with distant skyscraper lights as 1px dots.
+
+DOMINANT LIGHT SOURCE: Computer monitors, all glowing the signature 屏幕蓝 #2C4A6E. The blue light reflects off everyone's faces and the floor.
+
+FOCAL CHARACTER (center): The PLAYER — middle-aged Chinese male in navy suit, but now:
+- Tie is FULLY OFF, draped over chair back
+- Shirt collar unbuttoned
+- Eye bags significantly deeper (4-5px) than the daytime reference
+- Face lit by harsh blue monitor glow (skin tone goes from #C8A85A toward #2C4A6E shadow tint)
+- Slumped in chair, hunched even more than daytime
+- Stainless steel thermos cup on desk — visibly EMPTY (lid open, no steam)
+- Open takeout box (Chinese food container with chopsticks) next to keyboard, half eaten
+- Multiple empty 红牛 / Redbull energy drink cans stacked on desk
+- Computer shows a complex spreadsheet that goes past the screen edge
+
+OTHER NPCs visible in the background (smaller, peripheral):
+- Far back: 卷王 Tryhard at his desk, still typing aggressively, even more eye bags than player — clearly enjoying this somehow
+- Mid-distance: 摆烂族 Slacker actually asleep at his desk, mouth slightly open, drool 1px below mouth corner
+- Near: an empty cubicle with the chair tipped backward, desk lamp left on (someone fled hours ago)
+
+ENVIRONMENTAL DETAILS:
+- Wall clock visible: shows 23:47 in pixel font
+- Ceiling fluorescent lights are MOSTLY OFF (only 2 of the 8 lights still on, casting harsh pools of light)
+- Cleaning Auntie's mop bucket abandoned in corridor — she's already gone home
+- A single small green plant on a desk, leaves drooping (the office's only living thing, also dying)
+
+MOOD: Quiet, isolated, not dramatic — this is normal for them. The horror is the casualness. "This is just Tuesday."
+
+TITLE BANNER (small, top corner): "加班夜 / Overtime Night · 第 X 集" in pixel font
+
+PALETTE — heavy emphasis on:
+- 屏幕蓝 #2C4A6E (dominant — this scene IS the blue glow)
+- 灰蓝 #5A7080 (cubicle structure, 60% of frame)
+- 打工人黄 #C8A85A (skin, but desaturated by blue light)
+- 棕 #7A5838 (desk wood)
+- 白 #E8E0CC (only on the few remaining ceiling lights, very limited)
+- A tiny accent of 老板金 #E0B050 ONLY on a single visible KPI trophy on player's desk (irony — he won an award and is still here at midnight)
+
+VISUAL IDENTITY: This scene must read as the visual climax of art-bible's "时钟光语" principle — "加班的蓝光压着你". The blue should feel oppressive, not stylish.
+
+Output: PNG, 1024x1024, single composite scene illustration, SFC pixel art consistent with prior reference sheets, suitable for use as a story event scene background.

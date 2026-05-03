@@ -1,0 +1,45 @@
+# === macOS noise ===
+.DS_Store
+**/.DS_Store
+
+# === Node / pnpm / Vite (for future game/ subdir) ===
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# === Tauri ===
+src-tauri/target/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === Generated files ===
+game/src/generated/
+
+# === Local env ===
+.env
+.env.local
+.env.*.local
+
+# === Test outputs ===
+coverage/
+
+# === Engine switch (Godot → TS+PixiJS+Tauri) ===
+# These dirs/files are abandoned per docs/superpowers/specs/2026-05-03-engine-switch-design.md §1.
+# Kept in working tree until physically deleted at Slice 1 P0; ignored here so git status stays clean.
+/src/
+/tests/
+/addons/
+/project.godot
+/.godot/
+/assets/data/
+/assets/shaders/
+/assets/sprites/**/*.import
+/assets/sprites/**/*.uid
+/design/research/
+
+# === GdUnit4 addon, never committed (per tests/README.md, contributors install locally) ===
+addons/gdunit4/

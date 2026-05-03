@@ -1,0 +1,30 @@
+A pixel art trading card sheet for a Chinese office life game — 9 OFFENSE / RELATIONSHIP cards in a 3x3 grid. Style: SFC/16-bit pixel art, consistent with prior reference sheets and the matching DEFENSE card deck.
+
+LAYOUT — 3x3 grid identical to the defense deck layout. Same card frame style, same fonts, same border treatment for visual cohesion (the two decks should look like one game's set). Card type label bottom: "进攻 / OFFENSE" or "关系 / SOCIAL" depending on card.
+
+THE 9 CARDS (top-left to bottom-right):
+
+ROW 1 — OFFENSE (proactive KPI/career moves):
+1. 主动汇报 / "Volunteer Report" — AP 2 — Illustration: player standing in front of Boss's desk holding a tablet/folder, presenting with confident-but-tired posture, Boss looking interested. Effect: 业绩 +1, 健康 -1
+2. 邀功 / "Take Credit" — AP 2 — Illustration: player in boss's office holding a chart that has another coworker's name visible (faded out), player's confident smile, victim coworker visible peeking through doorway shocked. Effect: 业绩 +2, 关系 -1
+3. PUA 反击 / "Counter-PUA" — AP 3 — Illustration: player calmly responding while Boss is mid-rant, speech bubble shows player citing chicken-soup quote back, Boss caught off-guard. Effect: 取消 1 次 Boss 训斥事件
+
+ROW 2 — SOCIAL (relationship plays):
+4. 拍马屁 / "Suck Up" — AP 1 — Illustration: player slightly bowing toward Boss, hand-over-heart gesture, exaggerated smile with closed eyes, gold sparkle effect on Boss's ego. Effect: Boss 关系 +1
+5. 抱大腿 / "Cling to Power" — AP 2 — Illustration: player handing a Boss a styrofoam cup of breakfast soy milk and you-tiao (Chinese breakfast), early morning office, Boss accepting. Effect: Boss 关系 +2, 工龄 +1 day
+6. 跨部门套话 / "Inter-Dept Schmooze" — AP 2 — Illustration: player and 隔壁部门代表 (Other Dept Rep, in blue color scheme) exchanging business cards in corridor, both with diplomatic smiles. Effect: 解锁跨部门事件
+
+ROW 3 — SOCIAL/STRATEGIC:
+7. 邮件抄送大佬 / "CC the C-Suite" — AP 1 — Illustration: close-up of computer screen showing email compose window with multiple high-rank names in CC field highlighted, player's hand on mouse cursor over Send. Effect: 推卸责任 1 次
+8. 装亲切 / "Fake Mentorship" — AP 1 — Illustration: player handing a cup of milk tea to 新人 (Rookie character), both smiling, but player has subtle scheming side-eye. Effect: 新人 关系 +2,获取 1 张随机情报
+9. 团建装积极 / "Fake Team Spirit" — AP 2 — Illustration: player at karaoke / hot pot dinner, exaggerated forced smile while singing, mic in hand, other coworkers around table with various expressions, KPI bonus number floating up "+1". Effect: 关系全员 +1, 健康 -2
+
+EACH ILLUSTRATION shows the dark comedy of corporate political maneuvering, consistent with art-bible 喜丧美学. The visual humor comes from the contrast between the polite surface and the calculating intent.
+
+PALETTE: same world palette as defense deck for cohesion. Some cards (拍马屁, 抱大腿) get a small gold #E0B050 accent (boss-power proximity glow).
+
+TOP TITLE: "行动卡 · 进攻 / 关系套牌 / Action Cards · Offense + Social Deck" in pixel font.
+
+CRITICAL: Card frames, fonts, AP icon style, and overall layout must match the defense deck EXACTLY so the two sheets look like one cohesive game's card set. Each card's illustration must be visually distinct.
+
+Output: PNG, 1024x1024, single composite card sheet, ready to be cropped into individual card sprites.

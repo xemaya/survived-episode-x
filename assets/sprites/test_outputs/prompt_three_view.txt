@@ -1,0 +1,49 @@
+A pixel art character three-view turnaround sheet for the player character in a Chinese office life game. Style: SFC/16-bit pixel art, professional character design reference, like a game studio model sheet for animation reference.
+
+LAYOUT — 3 full body views of the SAME character, side by side on a clean cream/white background:
+
+CENTER PANEL — FRONT VIEW (正面 / Front)
+Full body, facing camera directly.
+
+LEFT PANEL — SIDE VIEW (侧面 / Side, profile right-facing)
+Full body in pure side profile.
+
+RIGHT PANEL — BACK VIEW (背面 / Back)
+Full body, back of character facing camera.
+
+CHARACTER (must be IDENTICAL across all 3 views):
+A weary middle-aged Chinese male office worker, late 30s.
+- Default black short hair (no shine highlight)
+- Navy business suit, slightly rumpled blazer
+- White dress shirt visible at neck
+- Loosened red tie (visible from front and side; back view shows shirt collar tag)
+- Stainless steel thermos cup held in LEFT hand (visible in front and side; back view shows cup partially behind back)
+- Slightly hunched back posture (clearly visible in side profile — spine has subtle forward curve)
+- Tan trousers / dark slacks
+- Black leather shoes, slightly scuffed
+- Employee lanyard around neck with small badge (visible from front and side)
+
+DETAILS BANNER (bottom of sheet):
+A row of 4-5 small detail close-ups showing key elements at higher zoom:
+- 茶杯 Thermos cup detail (rim engraving, dent)
+- 工牌 Employee badge detail (with photo + name field)
+- 领带 Tie knot detail (loosened style)
+- 鞋 Shoe detail (scuffed leather)
+- 表 Watch (cheap pixel detail on wrist)
+
+LABELS (clean pixel font):
+- Top title: "玩家角色 · 三视图 / Player Character · Turnaround Sheet"
+- Each view labeled below: 正面 Front / 侧面 Side / 背面 Back
+- Detail close-ups labeled in Chinese + English
+
+STRICT COLOR PALETTE (exactly the same as previous character sheet for cohesion):
+- Skin: #C8A85A
+- Cubicle wall (background tint): very subtle, barely visible
+- Document brown #7A5838 for shoe / accent
+- Paper white #E8E0CC background
+- Suit deep navy
+- Tie red accent (small, ~1% pixel coverage)
+
+CRITICAL: All three views MUST show the SAME character — same body proportions, same hair shape, same posture (slightly hunched), same clothing details. This is a turnaround reference for animation consistency, not a character variation sheet.
+
+Output: PNG, 1024x1024, single composite turnaround reference sheet, professional character design layout.

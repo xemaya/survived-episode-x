@@ -1,0 +1,40 @@
+A complete character design reference sheet for a pixel art Chinese office life game. Style is SFC/16-bit pixel art (NOT vector or smooth illustration) — visible pixel grid, no anti-aliasing on outlines, limited color palette.
+
+CHARACTER (kept consistent across ALL panels):
+A weary middle-aged Chinese male office worker, late 30s. Default black short hair (no shine highlight). Navy business suit slightly rumpled, white shirt, loosened red tie. Stainless steel thermos cup permanently held in his LEFT hand — this 3px raised silhouette is his signature contour element. Body slightly hunched, low visual weight ("已经在这待了很久" feel).
+
+LAYOUT — A clean reference sheet on cream/white background, professional character design layout, like an old SNES game manual:
+
+Top row — 6 EXPRESSIONS (head + shoulders close-up, all hold thermos):
+- 困倦 Drowsy (eyelids heavy, half-closed)
+- 假笑 Fake smile (forced corporate cheer, eyes don't smile)
+- 暗喜 Smug (tiny mouth corner up, hidden delight)
+- 疲惫 Exhausted (dark eye bags, slumped shoulders)
+- 麻木 Numb (dead empty stare after PUA)
+- 装忙 Pretend-busy (serious face, eyes glazed)
+
+Middle row — 4 FULL BODY POSES:
+- Idle standing at cubicle
+- Hunched over keyboard, typing
+- Sneaking out for cigarette break (looking shifty)
+- Sitting in meeting, glazed expression
+
+Bottom row — 3 STATE VARIANTS (full body):
+- 摸鱼 Slacking (phone hidden under desk)
+- 加班 Overtime (tie fully off, deeper eye bags, blue screen glow on face)
+- 被开除 Just fired (holding cardboard box of personal items)
+
+Each panel has a small clean label below in Chinese (primary) and English (secondary). Subtle thin pixel borders separate panels.
+
+STRICT COLOR PALETTE (16 colors max):
+- Skin highlight #C8A85A (fluorescent-lit yellow)
+- Cubicle wall #5A7080 (gray-blue)
+- Document brown #7A5838
+- Paper/wall white #E8E0CC
+- Suit deep navy
+- Tie red accent
+- Overtime blue glow accent #2C4A6E
+
+Visual identity goal: "first glance recognition, second glance indictment" — viewer sees a familiar Chinese office worker but feels "he won't last long here". Mood is dark humor / 喜丧美学, NOT cheerful or cute.
+
+Output: PNG, single composite reference sheet image, the same character drawn consistently in every panel.

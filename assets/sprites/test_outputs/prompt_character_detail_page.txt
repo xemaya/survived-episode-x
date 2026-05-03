@@ -1,0 +1,41 @@
+A pixel art game UI mockup screen — character detail page styled as "打工人简历" (worker's resume). Style is SFC/16-bit pixel art, retro RPG menu screen aesthetic, like Final Fantasy character status screen but reskinned for Chinese office life satire.
+
+LAYOUT — A complete in-game UI screen, 1024x1024 composition:
+
+CENTER (large): Half-body portrait of the player character — a weary middle-aged Chinese male office worker, late 30s, default black short hair, navy business suit slightly rumpled, white shirt, loosened red tie, holding stainless steel thermos cup in left hand, slightly hunched, weary expression.
+
+LEFT SIDE PANEL — "属性 STATS" section (RPG-style stat block, retro pixel font):
+- 工龄 / Tenure: 42 集 (Episodes)
+- 工资 / Salary: 8500/月
+- KPI 三轨 (3-track KPI gauges, horizontal bars):
+  - 业绩 Performance: ▓▓▓░░ (mid)
+  - 关系 Relationships: ▓▓▓▓░ (good)
+  - 健康 Health: ▓▓░░░ (low)
+- 行动力 AP: 8 / 8 (with 8 small pixel lightbulb icons)
+- 状态 Status: 摸鱼中 (Slacking)
+
+RIGHT SIDE PANEL — "装备 EQUIPMENT" inventory grid (4 slots, each with pixel icon + label):
+- 茶杯 Thermos Cup (equipped — gives +1 idle defense)
+- 工牌 Employee Badge (equipped — required for entry)
+- 话术本 Script Book (equipped — for PUA defense)
+- 病假条 Sick Leave Slip (1 use remaining)
+
+TOP BANNER: Banner-style title — "活过第 42 集 / Survived Episode 42" with subtitle "已在该公司任职 1278 天 / 1278 days at this company"
+
+BOTTOM BANNER: A small footer with menu hints — "[A] 行动 Act  [B] 偷懒 Slack  [Y] 跑路 Quit  [X] 装睡 Pretend Sleep"
+
+VISUAL STYLE:
+- Retro RPG UI panels with thin pixel borders
+- Color palette matches the world palette:
+  - UI panel background: #5A7080 (cubicle gray-blue) with darker borders
+  - Skin tone in portrait: #C8A85A
+  - Document brown for accents: #7A5838
+  - Stat bar full segments: green-yellow #B8C868 / mid-yellow #C8A85A / red-amber for low
+  - Banner gold accent: #E0B050 (the rare "boss gold")
+- Pixel font for all text (NOT smooth modern font), Chinese characters primary, English secondary
+- 16-bit JRPG menu aesthetic
+- Subtle dark humor — the "EQUIPMENT" being daily-life survival tools (sick leave slip as 1-use consumable), the stats being satirical metrics
+
+Visual identity: A character status screen that looks like a normal RPG, but on closer reading is darkly funny — the player's "stats" describe a real Chinese office worker's existence as if it were a JRPG hero's adventure.
+
+Output: PNG, complete UI screen, single composite image, ready to be cropped into individual UI elements.

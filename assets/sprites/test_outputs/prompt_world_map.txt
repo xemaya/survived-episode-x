@@ -1,0 +1,41 @@
+A pixel art world map for a Chinese office life RPG game. Style: SFC/16-bit pixel art map, retro fantasy RPG aesthetic but reskinned as a corporate office floor blueprint with dark humor labels — like a fantasy map but the "kingdoms" are office zones.
+
+LAYOUT — Top-down view of a multi-floor open-plan Chinese office building, drawn in the visual style of an old RPG world map (think Dragon Quest or Final Fantasy world map) but the geography is OFFICE GEOGRAPHY:
+
+The map shows 8 distinct labeled zones connected by corridors:
+
+1. 工位区 / "The Cubicle Wastelands" — large central area, rows of cubicles, the main "battle zone", labeled with starting flag icon (player's home base)
+
+2. 茶水间 / "The Watering Hole" — small corner room with water cooler + microwave + snack table, neutral safe-ish zone for gossip
+
+3. 会议室 / "The Inquisition Hall" — large rectangular room with long table, fluorescent lit, elevated danger marker, "boss fight" zone
+
+4. 老板办公室 / "The Throne Room" — corner office with large desk, golden accent (rare "boss gold" #E0B050), DANGER icon, end-game zone
+
+5. 电梯 / "The Portal" — elevator lobby, transition zone with arrow icons indicating "escape route"
+
+6. 厕所 / "The Sanctuary" — bathroom, small room marked as safe-zone with small green icon (rare full HP recovery zone in office RPG terms)
+
+7. 抽烟区 / "The Smokers' Refuge" — outdoor balcony or stairwell, marked with smoke wisp icon, secret passage feel
+
+8. 停车场 / "The Long Way Home" — parking lot at the bottom edge, the "exit", finish line zone
+
+LABELS: Each zone has both Chinese label (primary) and English label (secondary, in fantasy-RPG-translation style — making mundane office spots sound epic). Labels are in pixel font, thin pixel border boxes.
+
+VISUAL TREATMENT:
+- Top-down isometric or pure top-down view (consistent perspective)
+- Each zone has a distinct floor pattern / color tint:
+  - Cubicle Wastelands: gray-blue grid pattern #5A7080
+  - Throne Room: gold-tinted #E0B050 accent
+  - Sanctuary (bathroom): clean white-tile pattern
+  - Smokers' Refuge: warmer brown #7A5838 outdoor wood deck
+- Connection corridors drawn with subtle pixel arrows showing flow
+- Compass rose in upper-right corner with pixel-art needle (north pointing toward "Throne Room" — visual joke)
+- Title at top: "公司平面图 · 第 X 集职场地图" / "Office Floor Map · Survived Episode X"
+- Small character icon (the player — middle-aged Chinese male in navy suit holding thermos) placed at "Cubicle Wastelands" entry point as the starting position marker
+
+STYLE NOTE: This is NOT a fantasy parchment map (we're not doing the medieval scroll cliche). Instead, it's a SATIRICAL CORPORATE BLUEPRINT — looks like a real office floor plan but rendered in 16-bit RPG pixel art aesthetic. The humor comes from the contrast: office geography labeled like a fantasy adventure map.
+
+Strict palette: world palette (打工人黄 #C8A85A, 灰蓝 #5A7080, 棕 #7A5838, 白 #E0E0CC, 蓝光 #2C4A6E), gold accent #E0B050 used sparingly (~3% of pixels).
+
+Output: PNG, 1024x1024, complete top-down map ready to be used as world overview screen, with individual zones potentially cropped for area-select UI.

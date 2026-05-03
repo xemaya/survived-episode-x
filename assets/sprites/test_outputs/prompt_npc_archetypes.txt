@@ -1,0 +1,42 @@
+A 3x3 grid character archetype reference sheet for a pixel art Chinese office life game. Style is SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette.
+
+LAYOUT: 3 rows x 3 columns, each cell shows ONE distinct office NPC archetype, half-body (waist up). Cream/white background, thin pixel borders between cells, professional reference sheet style. Each cell has a Chinese label (primary) + English label below.
+
+The 9 archetypes (read across rows top to bottom):
+
+ROW 1:
+1. 卷王 / "Tryhard" — Chinese male, late 20s, sitting straight (spine +2px taller than others), perfectly knotted tie, prominent eye bags (3px dark), staring intensely at screen, single cold coffee on left side of desk, sticky notes covered in tiny writing.
+
+2. 摆烂族 / "Slacker" — Chinese male, 30s, slumped one shoulder noticeably lower (-4px), leaning back in chair, phone reflection visible on his face (subtle blue glow), expression vacant looking up, half-hidden novel cover peeking from drawer.
+
+3. 谄媚族 / "Toady" — Chinese male, 30s, oval face shape, chin pushed forward 2px, hands clasped at chest level, "oh oh oh" agreeing mouth shape, name card holder peeking from chest pocket, shoes have visible highlight pixel on toe.
+
+ROW 2:
+4. 新人 / "Rookie" — Chinese male, early 20s, narrow build no body width, slightly long neck, hands clasped between knees, bewildered expression, backpack still beside him not yet stored, tangled lanyard on badge.
+
+5. 老油条同行 / "Veteran Coworker" — Looks similar to player character (middle-aged Chinese male, navy suit, weary) but holds a ROUNDER thermos cup (cylinder 2px wider), orange folder on his desk (player's is gray), slippers visible under desk, knowing wink expression.
+
+6. 清洁阿姨 / "Cleaning Auntie" — Chinese woman, 50s, short and wide build (+4 width, -6 height), holding a mop that becomes a third leg of her silhouette, expressionless wiping motion, apron with tiny pixel-art family photo visible on phone screen sticking out.
+
+ROW 3:
+7. Boss / 老板 — Chinese male, 40s-50s, silhouette top +8px taller (oppressive presence), hands clasped behind back, the WIDEST tie among everyone, looking down at viewer (slight overhead angle), pixel logo badge on tie clip, polished shoes with highlight outline.
+
+8. HR — Chinese woman, 30s-40s, level shoulders sitting upright, folder permanently tucked under arm, glasses with EMPTY FRAMES (no actual lenses — important detail), standard professional smile, green plant on desk (the only living thing in the office), "人才/Talent" mug visible.
+
+9. 隔壁部门代表 / "Other Dept Rep" — Chinese male, 30s, BLUE tone color scheme (vs other characters' gray), prominent department badge, walking pose (caught mid-stride), polite smile while extending business card, water bottle with department sticker, phone case matching same blue.
+
+STRICT COLOR PALETTE — same as the player character sheet (16 colors max):
+- Skin: #C8A85A (fluorescent-lit yellow)
+- Office gray-blue: #5A7080
+- Document brown: #7A5838
+- Wall white: #E8E0CC
+- Suit deep navy
+- Accent screen blue: #2C4A6E
+- Cleaning Auntie can use slightly muted earth tones
+- Other Dept Rep uses BLUE accent (#3a5a85 or similar) to visually distinguish
+
+Top of sheet: Chinese title "九原型 · 办公室众生相" + English subtitle "9 Archetypes · Office NPC Reference [SFC/16-bit]".
+
+Visual identity goal: Each archetype must be DISTINGUISHABLE BY SILHOUETTE ALONE — Boss is tallest, Cleaning Auntie is widest+shortest, Rookie is narrowest, Toady has forward chin, Slacker has dropped shoulder. The viewer should "first glance recognize the archetype, second glance feel the dark humor".
+
+Output: PNG, single composite reference sheet, all 9 characters drawn in consistent pixel art style.

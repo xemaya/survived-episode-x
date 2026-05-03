@@ -1,0 +1,1312 @@
+# Technical Requirement ID Registry
+#
+# PURPOSE: Persistent, stable IDs for every GDD technical requirement.
+# Prevents TR-ID renumbering across /architecture-review runs, which would
+# break story references.
+#
+# RULES:
+#   - IDs are PERMANENT. Never renumber, never delete (use status: deprecated).
+#   - Add new entries only at the END of each system's list.
+#   - When a GDD requirement is reworded (same intent): update `requirement`
+#     text and add a `revised` date. The ID stays the same.
+#   - When a requirement is removed from the GDD: set status: deprecated.
+#   - When a requirement is split or replaced: set status: superseded-by with
+#     the new TR-ID(s).
+#
+# WRITTEN BY: /architecture-review (appends new entries, never overwrites)
+# READ BY:    /create-stories (embed IDs in stories)
+#             /story-done (look up current requirement text at review time)
+#             /story-readiness (validate TR-ID exists and is active)
+#
+# ID FORMAT: TR-[system-slug]-[NNN]
+#   system-slug = short slug matching the GDD system name
+#   NNN = three-digit zero-padded sequence per system, starting at 001
+#
+# STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
+
+version: 2
+last_updated: "2026-05-02"
+# 2026-05-02: ADR-0017 cover TR-npc-001/002 (Sprint N+2 P0 fix)
+
+requirements:
+
+  # ── Foundation Layer ─────────────────────────────────────────────────────
+
+  # #1 Save System (10 TR)
+  - id: TR-save-001
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "三槽位 Save 文件结构(meta.save / current_run.save / archive/[run_id].save)"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-002
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "WorkerThreadPool 异步 autosave + 主线程 ARCHIVING 5 步事务边界"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-003
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "meta.run_ended 原子 fsync 先于 GAMEOVER 1500ms transition(R-AP-2 + R-KPI-2 守门)"
+    adr_coverage: [adr-0003, adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-004
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "archive 200 cap FIFO 驱逐(archive_hard_cap_count = 200)"
+    adr_coverage: [adr-0003, adr-0013]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-005
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "current_schema_version 单调递增 + MVP 不支持迁移(VS 起 _migrate_vN_to_vN+1 链)"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-006
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "JSON-primary 格式 + Resource lazy parse(SaveStateLoader)"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-007
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "meta_settings_debounce_ms = 500ms 防抖窗(5 GDD 消费者:Input/Loc/Audio/MainMenu/SceneFlow)"
+    adr_coverage: [adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-008
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "autosave_perf_hard_ceiling_ms = 50ms HDD+AV p99(主线程同步 fsync 上限)"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-009
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "content-only unlocks 5 类白名单(codex/memo/npc/event_branch/ending,Anti-P1 红线)"
+    adr_coverage: [adr-0001, adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-save-010
+    system: save
+    gdd: design/gdd/save-system.md
+    requirement: "final_transition_duration_ms = 1500ms linear easing=NONE GAMEOVER 离职证明"
+    adr_coverage: [adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #2 Input Handler (7 TR)
+  - id: TR-input-001
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "InputMap 12 actions 注册(act_pause/act_skip/act_focus_*/act_confirm)"
+    adr_coverage: [adr-0001, adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-input-002
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "3-state 状态机(NORMAL / MODAL_LOCKED / REMAPPING)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-input-003
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "skippable token 注册 API(register_skippable / unregister_skippable)+ modal stack 二阶策略"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-input-004
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "keymap_changed 防抖 500ms(meta_settings_debounce_ms 5 GDD 消费者之一)"
+    adr_coverage: [adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-input-005
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "dual-focus mode 4.6 启用(input/dual_focus_mode = true,键鼠+gamepad 同时 focus 独立)"
+    adr_coverage: [adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-input-006
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "SDL3 gamepad 4.5+ 兼容(Steam Input LOCK 透传 + OQ + Steamworks AC)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-input-007
+    system: input
+    gdd: design/gdd/input-handler.md
+    requirement: "Recursive Control disable 4.5 modal stack(嵌套 modal 锁栈)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #3 Localization Hooks (6 TR)
+  - id: TR-loc-001
+    system: loc
+    gdd: design/gdd/localization-hooks.md
+    requirement: "tr() 纪律 + key naming 规范(_IRONY 后缀 KPI/GAMEOVER 反讽 + _BUREAUCRATIC 后缀 HR 口吻)"
+    adr_coverage: [adr-0010]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-loc-002
+    system: loc
+    gdd: design/gdd/localization-hooks.md
+    requirement: "locale_changed reflow ≤ 30 帧 + broadcast_translation_changed_once 单次广播"
+    adr_coverage: [adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-loc-003
+    system: loc
+    gdd: design/gdd/localization-hooks.md
+    requirement: "字体 fallback 链 4 档(11/13/15/17px) + Compact variant + AUTO_FIT_FLOOR_PX = 11"
+    adr_coverage: [adr-0004, adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-loc-004
+    system: loc
+    gdd: design/gdd/localization-hooks.md
+    requirement: "locale_lock_watchdog_ms = 30000(R-LOC-3 watchdog escalation)"
+    adr_coverage: [adr-0002, adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-loc-005
+    system: loc
+    gdd: design/gdd/localization-hooks.md
+    requirement: "CSV 5 列 schema + plural form 4.6 + context column 4.6"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-loc-006
+    system: loc
+    gdd: design/gdd/localization-hooks.md
+    requirement: "PAUSE 中 locale 切换挂起 + resume 后单次 emit"
+    adr_coverage: [adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #4 Audio Manager (7 TR)
+  - id: TR-audio-001
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "4 Bus 架构(Master / Music / Ambient / SFX)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-audio-002
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "LOADING/READY 状态机 + _mark_ready signal + 8 sub-mode ambient schema"
+    adr_coverage: [adr-0001, adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-audio-003
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "audio_preload_budget_ms = 200ms / audio_loading_watchdog_ms = 10000ms"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-audio-004
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "bgm_loop_length_max_sec = 120s + audio_bank_total_size_mb = 30MB"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-audio-005
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "月末 KPI Review 三轨 800ms cross-fade out + stinger 同帧 + KPI_REVIEW BGM cross-fade in"
+    adr_coverage: [adr-0007]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-audio-006
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "farewell event 禁切 BGM(FAREWELL_EVENT_IDS numeric_only AC-FAREWELL-01 守门)"
+    adr_coverage: [adr-0001, adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-audio-007
+    system: audio
+    gdd: design/gdd/audio-manager.md
+    requirement: "act_pause + WM_FOCUS_OUT fade 公版统一(Music→-∞ 200ms / Ambient→-24 300ms)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #5 Lighting & Visual State (13 TR)
+  - id: TR-lighting-001
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "8 sub-mode CanvasModulate 色值表"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-002
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "LOADING/READY 状态机 + lighting_loading_watchdog_ms = 10000ms"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-003
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "累积 4 维度 schema(yellowing_level / sticky_note_count / steam_density / npc_empty_chairs)"
+    adr_coverage: [adr-0005]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-004
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "accumulation_event signal 单 owner = #5(B-DEP-3 仲裁,#6/#13 仅订阅)"
+    adr_coverage: [adr-0001, adr-0005]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-005
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "KPI_REVIEW 紫色 palette 800ms swap(CanvasModulate Tween EASE_IN_OUT)"
+    adr_coverage: [adr-0007]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-006
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "GAMEOVER 灰度 1500ms palette(linear easing=NONE)"
+    adr_coverage: [adr-0006, adr-0008]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-007
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "Pillar 4 5 类禁视觉(金光/sparkle/烟花/彩虹/鸡汤)+ 4 例外白名单"
+    adr_coverage: [adr-0008]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-008
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "Hero card brightness lift +0.05 0.5s(mute_visual_parity 守门)"
+    adr_coverage: [adr-0008]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-009
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "notice_board_max_entries = 24 累积 cap(2 年月数 FIFO 驱逐)"
+    adr_coverage: [adr-0005]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-010
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "Tonemapper Filmic 锁(4.6 AgX 不启用)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-011
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "palette swap shader + dither overlay shader(canvas_item shader_type)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-012
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "farewell event 禁特殊 palette swap(AC-FAREWELL-01 守门)"
+    adr_coverage: [adr-0001, adr-0008]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-lighting-013
+    system: lighting
+    gdd: design/gdd/lighting-visual-state.md
+    requirement: "色盲 CanvasLayer post-process Shader 整屏适配(Control + Node2D 同时)"
+    adr_coverage: [adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # ── Core Layer ───────────────────────────────────────────────────────────
+
+  # #6 Scene & Day Flow Controller (10 TR)
+  - id: TR-sceneflow-001
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "Autoload 单例 /root/SceneDayFlowController PROCESS_MODE_ALWAYS(末位 autoload)"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-002
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "8 sub-mode 状态机 + scene_state_changed 单 owner(15 subs)"
+    adr_coverage: [adr-0001, adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-003
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "request_transition() 唯一合法入口 + 主语翻转 dispatch 强制(Rule 14)"
+    adr_coverage: [adr-0001, adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-004
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "启动序列 P5 5000ms 总预算(720ms 必要 + 4280ms 缓冲)+ bool ready 检查"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-005
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "settings 防抖单 timer 共享 + 6 信号合流(per-signal-key debounce 禁)"
+    adr_coverage: [adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-006
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "pause game-time vs wall-clock 边界(PAUSE_INHERIT vs PROCESS_MODE_ALWAYS 二分)"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-007
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "change_scene_to_packed() 预加载守门(ResourceLoader.load_threaded_request,禁同步 change_scene_to_file)"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-008
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "@abstract BaseSubModeState 4.5+ 基类(8 sub-mode 子类强制 override)"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-009
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "NOTIFICATION_WM_WINDOW_FOCUS_OUT 三方语义(act_pause 公版统一)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-sceneflow-010
+    system: sceneflow
+    gdd: design/gdd/scene-day-flow-controller.md
+    requirement: "6 项 cross-system BLOCKING 仲裁责任(ADR-0001..0008 全 cover)"
+    adr_coverage: [adr-0001, adr-0002, adr-0003, adr-0004, adr-0005, adr-0006, adr-0007, adr-0008]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #7 AP Economy System (8 TR)
+  - id: TR-ap-001
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "AP 4 态状态机(NORMAL / OVERTIME_AVAILABLE / OVERTIME_ACTIVE / DEPLETED)"
+    adr_coverage: [adr-0015]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-002
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "AP cost 1/2/3 分布 lint(40/40/20 比例)"
+    adr_coverage: [adr-0015]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-003
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "Hero card effort 三维度权重 0.45/0.20/0.30(KPI research deviation,#9 仲裁后已锁)"
+    adr_coverage: [adr-0015]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-004
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "monthly_effort_summary signal owner = #7(F1 输入)"
+    adr_coverage: [adr-0001]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-005
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "meta.run_ended 优先持久化 R-AP-2 守门"
+    adr_coverage: [adr-0003, adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-006
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "weekend_rest_day → energy +30(game-time 驱动)"
+    adr_coverage: [adr-0001]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-007
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "F1-F5 公式定义(AP 经济计算)"
+    adr_coverage: [adr-0015]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-ap-008
+    system: ap
+    gdd: design/gdd/ap-economy-system.md
+    requirement: "capacity_factor / capacity_floor 单调红线(Anti-P1 守门)"
+    adr_coverage: [adr-0015]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #8 NPC Relationship System (5 TR)
+  - id: TR-npc-001
+    system: npc
+    gdd: design/gdd/npc-relationship-system.md
+    requirement: "8 NPC relationship_score [-100, +100] + per-NPC flags Dict + 4 lifecycle 态(ACTIVE/LEAVING_ANNOUNCED/LEFT/RETURNED)"
+    adr_coverage: [adr-0017]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-npc-002
+    system: npc
+    gdd: design/gdd/npc-relationship-system.md
+    requirement: "F3 leave_probability per-NPC 8 套参数"
+    adr_coverage: [adr-0017]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-npc-003
+    system: npc
+    gdd: design/gdd/npc-relationship-system.md
+    requirement: "relationship_changed / npc_lifecycle_changed / npc_left_company signal owner = #8"
+    adr_coverage: [adr-0001]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-npc-004
+    system: npc
+    gdd: design/gdd/npc-relationship-system.md
+    requirement: "LEFT 视觉屏蔽 R-NPC-2(HUD_EMPTY_CHAIR variant + accumulation_event npc_empty_chairs +1)"
+    adr_coverage: [adr-0005, adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-npc-005
+    system: npc
+    gdd: design/gdd/npc-relationship-system.md
+    requirement: "LEAVING_ANNOUNCED 期间道别卡 numeric_only 强制(farewell_event flag)"
+    adr_coverage: [adr-0001, adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #9 KPI System (10 TR)
+  - id: TR-kpi-001
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "monthly_threshold 单调递增 + month_index(Anti-P1 红线)"
+    adr_coverage: [adr-0016]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-002
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "F1-F4 公式(乘性复合 + capacity_factor 衰减模型,α=0.04 / β=0.18 / γ=0.012)"
+    adr_coverage: [adr-0016]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-003
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "GAME OVER 检测协议(threshold > capacity_now)"
+    adr_coverage: [adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-004
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "kpi_review_started signal owner = #9(三轨同步锚)"
+    adr_coverage: [adr-0001, adr-0007]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-005
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "game_over_triggered 唯一 emit 源 = #9(双 emit 消除,forbidden_pattern dual_emit_game_over)"
+    adr_coverage: [adr-0001, adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-006
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "dismissal_triggered → #10 EVENT.KPI.FIRED_DISMISSAL → dismissal_finalized → game_over_triggered Path B 唯一"
+    adr_coverage: [adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-007
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "settlement_locked R-KPI-2 守门(月末重入屏蔽)"
+    adr_coverage: [adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-008
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "KPI Review 三轨 800ms 同步锚(kpi_review_intro_duration_ms)"
+    adr_coverage: [adr-0007]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-009
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "kpi_prediction_hint 4 档(老 NPC 预言,月末 -2 天触发)"
+    adr_coverage: [adr-0001]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpi-010
+    system: kpi
+    gdd: design/gdd/kpi-reverse-threshold-system.md
+    requirement: "deterministic RNG seed 可控(public seed + 月末复算)"
+    adr_coverage: [adr-0016]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # ── Feature Layer ────────────────────────────────────────────────────────
+
+  # #10 Event Script Engine (12 TR)
+  - id: TR-event-001
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "Schema A 扁平 event 库(.tres single file per event)"
+    adr_coverage: [adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-002
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "@abstract EventEffect 4.5+ 基类 + 5 子类(SetFlag/RelationshipDelta/SpawnNotice/GiveUnlock/EmitGameOver)"
+    adr_coverage: [adr-0002, adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-003
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "三档密度(brief 1-2 / standard 2-4 / verbose 4-8)effects + dialogue_keys"
+    adr_coverage: [adr-0009, adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-004
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "FAREWELL_EVENT_IDS enum + 5 离别事件 numeric_only 强制(farewell_event flag)"
+    adr_coverage: [adr-0001, adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-005
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "cooldown + once_per_run + morning_blacklist 7 天滑动窗"
+    adr_coverage: [adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-006
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "Dictionary 三层索引(by_trigger / by_chapter / by_npc)"
+    adr_coverage: [adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-007
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "EditorPlugin EventLinter(实时反馈)+ Python CI lint(强制门)"
+    adr_coverage: [adr-0009, adr-0010]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-008
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "subject_inversion_lint.py 8 master domain(EVENT/NPC/AP/KPI/EFFORT/TENURE/RECAP/TUTORIAL)"
+    adr_coverage: [adr-0010]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-009
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "narrative_density_changed 订阅契约(EVENT_ACTIVE 切档延后到下个 event_started)"
+    adr_coverage: [adr-0001, adr-0004, adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-010
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "EVENT.KPI.FIRED_DISMISSAL 剧本 GAMEOVER 中转(Path B 唯一路径)"
+    adr_coverage: [adr-0006, adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-011
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "dismissal_finalized signal owner = #10(剧本演完后回调 #9)"
+    adr_coverage: [adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-event-012
+    system: event
+    gdd: design/gdd/event-script-engine.md
+    requirement: "Lisa 跳槽线必发(Beta playtest 实测)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #11 Action Card System (5 TR)
+  - id: TR-card-001
+    system: card
+    gdd: design/gdd/action-card-system.md
+    requirement: "Card schema(派生 #10 EventResource schema 子集)"
+    adr_coverage: [adr-0009]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-card-002
+    system: card
+    gdd: design/gdd/action-card-system.md
+    requirement: "AP cost 40/40/20 分布 lint"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-card-003
+    system: card
+    gdd: design/gdd/action-card-system.md
+    requirement: "Hero is_hero flag + 互斥分组 + 4 态状态机(IDLE/PLAYABLE/DISABLED/PLAYED)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-card-004
+    system: card
+    gdd: design/gdd/action-card-system.md
+    requirement: "card_played + kpi_contribution_reported + report_overage 信号"
+    adr_coverage: [adr-0001]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-card-005
+    system: card
+    gdd: design/gdd/action-card-system.md
+    requirement: "hero_card_played 三 element 反馈(咖啡蒸汽 + 文件翻页 + NPC raised eyebrow)"
+    adr_coverage: [adr-0008, adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #12 Run Meta System (5 TR)
+  - id: TR-run-meta-001
+    system: run-meta
+    gdd: design/gdd/run-meta-system.md
+    requirement: "RunSummary schema(7 字段)"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-run-meta-002
+    system: run-meta
+    gdd: design/gdd/run-meta-system.md
+    requirement: "archive_index 200 cap FIFO + content-only unlocks 5 类白名单"
+    adr_coverage: [adr-0003, adr-0013]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-run-meta-003
+    system: run-meta
+    gdd: design/gdd/run-meta-system.md
+    requirement: "HR 评语词条收集词库(30 条 MVP)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-run-meta-004
+    system: run-meta
+    gdd: design/gdd/run-meta-system.md
+    requirement: "demo end 3 月 gate(DEMO_END_MONTH = 3)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-run-meta-005
+    system: run-meta
+    gdd: design/gdd/run-meta-system.md
+    requirement: "run_meta_unlock 5 类白名单(Anti-P1 红线 forbidden_pattern)"
+    adr_coverage: [adr-0001, adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # ── Presentation Layer ───────────────────────────────────────────────────
+
+  # #13 HUD Diegetic (6 TR)
+  - id: TR-hud-001
+    system: hud
+    gdd: design/gdd/hud-diegetic.md
+    requirement: "8 diegetic 元素 mapping(便利贴/咖啡杯/显示屏/考勤表/日历/NPC 表情/NPC 站位/空椅)"
+    adr_coverage: [adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-hud-002
+    system: hud
+    gdd: design/gdd/hud-diegetic.md
+    requirement: "sub-mode 视觉布局状态机 + 帧预算 ≤ 2ms / 屏"
+    adr_coverage: [adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-hud-003
+    system: hud
+    gdd: design/gdd/hud-diegetic.md
+    requirement: "8 信号订阅(scene_state_changed + accumulation_event + relationship_changed + ap_changed + kpi_threshold_changed + npc_lifecycle_changed + event_completed + hero_card_played)"
+    adr_coverage: [adr-0001, adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-hud-004
+    system: hud
+    gdd: design/gdd/hud-diegetic.md
+    requirement: "art-bible §7.1 no overlay 锁(CanvasLayer 仅 sub-mode 切换屏 PAUSE/SETTINGS/KPI_REVIEW/GAMEOVER)"
+    adr_coverage: [adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-hud-005
+    system: hud
+    gdd: design/gdd/hud-diegetic.md
+    requirement: "farewell event 禁渲染 flash overlay(AC-FAREWELL-01 守门)"
+    adr_coverage: [adr-0001, adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-hud-006
+    system: hud
+    gdd: design/gdd/hud-diegetic.md
+    requirement: "总 draw call ≤ 70 / 100 budget(8 静态 + 12 sticky + 24 notice + ~10 dust)"
+    adr_coverage: [adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #14 Card Play & Dialogue UI (4 TR)
+  - id: TR-cardui-001
+    system: cardui
+    gdd: design/gdd/card-play-dialogue-ui.md
+    requirement: "三档密度差异化渲染主消费 layer(flash overlay / long 立绘+对白+选项 / numeric_only HUD-only)"
+    adr_coverage: [adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-cardui-002
+    system: cardui
+    gdd: design/gdd/card-play-dialogue-ui.md
+    requirement: "玩家手牌 UI + NPC 立绘 + 选项交互"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-cardui-003
+    system: cardui
+    gdd: design/gdd/card-play-dialogue-ui.md
+    requirement: "I-8 narrative_density_changed 订阅(主消费 layer)"
+    adr_coverage: [adr-0001, adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-cardui-004
+    system: cardui
+    gdd: design/gdd/card-play-dialogue-ui.md
+    requirement: "三档 fallback 链(brief→standard→verbose,standard 必填)"
+    adr_coverage: [adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #15 Daily/Weekly Recap UI (5 TR)
+  - id: TR-recap-001
+    system: recap
+    gdd: design/gdd/daily-weekly-recap-ui.md
+    requirement: "Daily Recap (<90s) + Weekly Recap (周五)双屏"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-recap-002
+    system: recap
+    gdd: design/gdd/daily-weekly-recap-ui.md
+    requirement: "effort 三维度展示 + numeric_only 事件列表"
+    adr_coverage: [adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-recap-003
+    system: recap
+    gdd: design/gdd/daily-weekly-recap-ui.md
+    requirement: "HR 周报口吻 lint(扩展 RECAP.* keys)"
+    adr_coverage: [adr-0010]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-recap-004
+    system: recap
+    gdd: design/gdd/daily-weekly-recap-ui.md
+    requirement: "I-9 narrative_density_changed 订阅"
+    adr_coverage: [adr-0001, adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-recap-005
+    system: recap
+    gdd: design/gdd/daily-weekly-recap-ui.md
+    requirement: "AC-FAREWELL-01 + AC-DENSITY-01 守门(numeric_only farewell + 密度切档)"
+    adr_coverage: [adr-0001]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #16 KPI Review & Game Over UI (6 TR)
+  - id: TR-kpiui-001
+    system: kpiui
+    gdd: design/gdd/kpi-review-game-over-ui.md
+    requirement: "三屏 own 节点树:月末结算屏 + GAMEOVER 离职证明屏 + Archive 列表屏"
+    adr_coverage: [adr-0006, adr-0007, adr-0013]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpiui-002
+    system: kpiui
+    gdd: design/gdd/kpi-review-game-over-ui.md
+    requirement: "GAMEOVER.CERTIFICATE.[reason] Localization key 渲染(EVENT.KPI.FIRED_DISMISSAL 文本嵌入)"
+    adr_coverage: [adr-0009, adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpiui-003
+    system: kpiui
+    gdd: design/gdd/kpi-review-game-over-ui.md
+    requirement: "KPI Review 三轨 800ms intro fade-in EASE_IN_OUT + breakdown 三行渲染"
+    adr_coverage: [adr-0007]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpiui-004
+    system: kpiui
+    gdd: design/gdd/kpi-review-game-over-ui.md
+    requirement: "GAMEOVER 1500ms linear easing=NONE 守门(skippable 但禁推翻 transition tone)"
+    adr_coverage: [adr-0006]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpiui-005
+    system: kpiui
+    gdd: design/gdd/kpi-review-game-over-ui.md
+    requirement: "Archive 200 元素 ScrollContainer 自动 culling + 懒加载详情 LRU 20 cap"
+    adr_coverage: [adr-0013]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-kpiui-006
+    system: kpiui
+    gdd: design/gdd/kpi-review-game-over-ui.md
+    requirement: "breakdown 三行 HR 戏谑口吻(KPI research §8.1 三行格式)"
+    adr_coverage: [adr-0010]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #17 Main Menu / Pause / Settings UI (5 TR)
+  - id: TR-mainmenu-001
+    system: mainmenu
+    gdd: design/gdd/main-menu-pause-settings-ui.md
+    requirement: "主菜单 4 入口 + Pause 子屏(摸鱼中)+ Settings 子屏(音量 4 旋钮 / 语言 / 键位 remap / 叙事密度)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-mainmenu-002
+    system: mainmenu
+    gdd: design/gdd/main-menu-pause-settings-ui.md
+    requirement: "Settings 信号合流 6 类(bus_volume × 4 / locale / keymap / font_size / colorblind / narrative_density)"
+    adr_coverage: [adr-0001, adr-0004, adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-mainmenu-003
+    system: mainmenu
+    gdd: design/gdd/main-menu-pause-settings-ui.md
+    requirement: "narrative_density 选项 + 三档心理模型提示(brief/standard/verbose)"
+    adr_coverage: [adr-0012]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-mainmenu-004
+    system: mainmenu
+    gdd: design/gdd/main-menu-pause-settings-ui.md
+    requirement: "Archive 入口(MAIN_MENU → ARCHIVE sub-mode 切换)"
+    adr_coverage: [adr-0013]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-mainmenu-005
+    system: mainmenu
+    gdd: design/gdd/main-menu-pause-settings-ui.md
+    requirement: "4 类 settings 信号合流至 #6 单 timer 500ms debounce"
+    adr_coverage: [adr-0004]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #19 Notification & Warning System (3 TR, VS tier)
+  - id: TR-notification-001
+    system: notification
+    gdd: design/gdd/notification-warning-system.md
+    requirement: "4 类预警 schema(capacity_floor / effort 极值 / NPC 离职预兆 / 月末倒计时)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-notification-002
+    system: notification
+    gdd: design/gdd/notification-warning-system.md
+    requirement: "通过 #13 HUD diegetic 元素 visual variant 显示(无 popup)"
+    adr_coverage: [adr-0011]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-notification-003
+    system: notification
+    gdd: design/gdd/notification-warning-system.md
+    requirement: "HR 口吻预警语义(扩展 NPC.NOTICE.* keys)"
+    adr_coverage: [adr-0010]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # ── VS / Alpha Tier ──────────────────────────────────────────────────────
+
+  # #18 Tutorial / Onboarding System (4 TR, VS tier)
+  - id: TR-tutorial-001
+    system: tutorial
+    gdd: design/gdd/tutorial-onboarding-system.md
+    requirement: "TutorialState autoload 子节点(末位 autoload,在 SceneDayFlow 之后)"
+    adr_coverage: [adr-0002]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-tutorial-002
+    system: tutorial
+    gdd: design/gdd/tutorial-onboarding-system.md
+    requirement: "Day 1-3 fixed_hand_override + ONBOARDING tier 5 NPC hint"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-tutorial-003
+    system: tutorial
+    gdd: design/gdd/tutorial-onboarding-system.md
+    requirement: "M1 KPI 评语 + tutorial_completed flag(γ_effective=0)"
+    adr_coverage: [adr-0003]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-tutorial-004
+    system: tutorial
+    gdd: design/gdd/tutorial-onboarding-system.md
+    requirement: "inject_onboarding_hint() API"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  # #20 Accessibility Options (8 TR, Alpha tier)
+  - id: TR-a11y-001
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "AccessibilitySettings autoload + 字体 4 档(11/13/15/17px) + 色盲 3 档(Protanopia/Deuteranopia/Tritanopia) + 高对比度 + 输入辅助"
+    adr_coverage: [adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-002
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "注入 7+ 系统的渲染循环(Anti-P1 红线 PR-blocking,不修改任何数值规则)"
+    adr_coverage: [adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-003
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "AccessKit 4.5+ 屏幕阅读器适配(Window.use_accessibility = true)"
+    adr_coverage: [adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-004
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "dual-focus mode 4.6(input/dual_focus_mode = true)"
+    adr_coverage: [adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-005
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "mute_visual_parity(全 mute 模式 Hero card 三 element 视觉反馈独立传达)"
+    adr_coverage: [adr-0008]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-006
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "字体 fallback 链 + AUTO_FIT_FLOOR_PX = 11(R-A11Y-2 二次 reflow fallback)"
+    adr_coverage: [adr-0004, adr-0014]
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-007
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "reduce_motion(VS 起,MVP 不实施)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active
+
+  - id: TR-a11y-008
+    system: a11y
+    gdd: design/gdd/accessibility-options.md
+    requirement: "TTS 文字转语音(野心版,超 Alpha tier scope)"
+    adr_coverage: []
+    created: 2026-04-28
+    revised: ""
+    status: active

@@ -1,0 +1,106 @@
+# Sprite cut configuration.
+# Each entry describes how to slice one source sheet (in assets/sprites/test_outputs/)
+# into individual sprites under assets/sprites/<category>/.
+#
+# Modes:
+#   single        — copy whole image, no slicing
+#   grid          — uniform rows × cols grid
+#   rows_unequal  — different col count per row (e.g. character sheet: 6/4/3)
+#
+# crop_top/bottom/left/right strip the title banner / footer before slicing.
+# label_band shaves N px off the bottom of each cell to drop the per-cell label
+# (set 0 to keep label inside the sprite).
+
+- source: player_idle_test_001.png
+  mode: single
+  output: character/player_idle_anchor.png
+
+- source: character_sheet_player_v01.png
+  mode: rows_unequal
+  output_dir: character/
+  crop_top: 80
+  crop_bottom: 120     # bonus "角色细节" row at bottom — drop it
+  rows:
+    - cols: 6
+      names: [drowsy, fake_smile, smug, exhausted, numb, pretend_busy]
+      row_top_skip: 35    # "表情 / EXPRESSIONS" sub-banner above this row
+      label_band: 75      # next row's sub-banner sits right below — chop it
+    - cols: 4
+      names: [pose_idle, pose_typing, pose_smoke_break, pose_meeting]
+      row_top_skip: 35
+      label_band: 75
+    - cols: 3
+      names: [state_slacking, state_overtime, state_fired]
+      row_top_skip: 35
+      label_band: 35      # last row — footer already cropped, less band needed
+
+- source: A_npc_archetypes_v01.png
+  mode: grid
+  output_dir: npc/
+  cols: 3
+  rows: 3
+  crop_top: 110           # title banner
+  crop_bottom: 10
+  label_band: 40          # per-cell "1. 卷王 / Tryhard" label
+  names:
+    - [tryhard, slacker, toady]
+    - [rookie, veteran_coworker, cleaning_auntie]
+    - [boss, hr, other_dept_rep]
+
+- source: B_three_view_v01.png
+  mode: rows_unequal
+  output_dir: character/turnaround/
+  crop_top: 70
+  crop_bottom: 30
+  rows:
+    - cols: 3
+      names: [side, front, back]
+      label_band: 60      # leave space before "细节 / DETAILS" sub-banner
+    - cols: 5
+      names: [detail_thermos, detail_badge, detail_tie, detail_shoe, detail_watch]
+      row_top_skip: 35    # skip "细节 / DETAILS" sub-banner
+      label_band: 30
+
+- source: C_world_map_v01.png
+  mode: single
+  output: maps/office_floor_map.png
+
+- source: D_character_detail_page_v01.png
+  mode: single
+  output: ui/character_detail_page.png
+
+- source: E_monthly_review_v01.png
+  mode: single
+  output: scenes/monthly_review.png
+
+- source: F_overtime_scene_v01.png
+  mode: single
+  output: scenes/overtime_night.png
+
+- source: G_game_over_v01.png
+  mode: single
+  output: scenes/game_over_split.png
+
+- source: H_action_cards_defense_v01.png
+  mode: grid
+  output_dir: cards/defense/
+  cols: 3
+  rows: 3
+  crop_top: 70
+  label_band: 0
+  names:
+    - [call_in_sick, pretend_sleep, look_busy]
+    - [slack_off, stall_meeting, dodge_meeting]
+    - [sneak_out_early, caffeine_iv, blame_system]
+
+- source: I_action_cards_offense_v01.png
+  mode: grid
+  output_dir: cards/offense/
+  cols: 3
+  rows: 3
+  crop_top: 70
+  label_band: 0
+  names:
+    - [volunteer_report, take_credit, counter_pua]
+    - [suck_up, cling_to_power, schmooze]
+    - [cc_csuite, fake_mentor, fake_team_spirit]

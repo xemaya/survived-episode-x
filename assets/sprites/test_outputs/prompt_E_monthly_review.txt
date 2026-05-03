@@ -1,0 +1,33 @@
+A pixel art game scene illustration — the climactic monthly KPI review meeting in a Chinese office life game. Style: SFC/16-bit pixel art, consistent with prior reference sheets (Office Worker character + world map of the same game).
+
+SETTING — A long rectangular meeting room ("会议室 / The Inquisition Hall"). Long conference table dominates center. Fluorescent ceiling lights overhead. Frosted glass walls behind. Wall behind the boss has a giant projector screen displaying the KPI 三轨 (3-track KPI bars: 业绩 Performance / 关系 Relationships / 健康 Health) — the bars look like pixel art RPG HP bars, in green-yellow-red gradient.
+
+CHARACTERS AROUND THE TABLE (consistent with NPC archetype reference sheet):
+- HEAD OF TABLE (back to camera or facing camera at far end): Boss — middle-aged Chinese male, silhouette top +8px taller, hands clasped on table, widest tie among everyone, expression of cold judgment
+- LEFT SIDE (visible to camera):
+  - HR — Chinese woman with empty-frame glasses, folder open in front of her, professional smile that doesn't reach eyes
+  - 谄媚族 Toady — leaning toward boss, hands clasped, "agreeing intensely" mouth shape, oblivious to anyone else
+- RIGHT SIDE:
+  - PLAYER — middle-aged Chinese male in navy suit, weary, holding stainless steel thermos cup, sitting slightly hunched, expression: trying to look attentive but eyes glazed (装忙)
+  - 卷王 Tryhard — sitting bolt upright, eye bags 3px, taking aggressive notes
+  - 摆烂族 Slacker — chair pushed back slightly, looking at hidden phone in lap, expression vacant
+
+LIGHTING / ATMOSPHERE:
+- Cold fluorescent overhead light (#E8E0CC washed white)
+- Strong blue glow from the KPI projector screen casting onto everyone's face (#2C4A6E)
+- Subtle dramatic shadow under the boss's chair to emphasize "throne" feel
+- The mood is funereal corporate ceremony — like a ritual sentencing rather than a meeting
+
+VISUAL JOKES (subtle pixel details):
+- Boss's water glass is full and untouched
+- Player's thermos has visible 1px steam wisp — the only "warmth" in the room
+- Toady is the only one whose tie is perfectly straight, everyone else's is slightly off
+- A single fly drawn as 2 pixels near the projector light (decay metaphor)
+
+TITLE BANNER at top: "月末 KPI 考核 / Monthly KPI Review · 第 X 集" in pixel font
+
+PALETTE: same world palette as character sheets — 打工人黄 #C8A85A skin, 灰蓝 #5A7080 walls, 棕 #7A5838 wood table, 白 #E8E0CC ceiling/light, 屏幕蓝 #2C4A6E screen glow, gold accent #E0B050 only on Boss's tie clip and the trophy/award icon if any.
+
+STYLE NOTE: Same SFC 16-bit pixel art aesthetic as prior reference sheets. NOT modern smooth illustration. Visible pixel grid. Limited color count. The ritualistic dread of the scene should read like a JRPG boss fight cutscene, but the "boss" is just a guy in a tie.
+
+Output: PNG, 1024x1024, single composite scene illustration suitable for use as a story event splash screen or cutscene background in the game.

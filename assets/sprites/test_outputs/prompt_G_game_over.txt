@@ -1,0 +1,36 @@
+A pixel art game over screen split-panel composition for a Chinese office life game. Two failure-end illustrations side by side, comparing the two ways you can lose. Style: SFC/16-bit pixel art, consistent with prior reference sheets, dark humor / 喜丧美学 (funeral-as-festival aesthetic).
+
+LAYOUT — A vertical center divider splits the canvas into LEFT panel and RIGHT panel. Top of the canvas: a horizontal banner spanning the full width with the title "GAME OVER · 第 X 集终结 / End of Episode X". Bottom of canvas: a small footer with restart hint "[Start] 再来一集 Try Again · [B] 退出 Quit".
+
+LEFT PANEL — "被开除 / Fired" ending:
+- The player character — middle-aged Chinese male in navy suit, slightly more rumpled than usual, tie loosened
+- Standing OUTSIDE the company building's main entrance, facing away from the building, looking down
+- Arms wrapped around a cardboard box of personal items: stainless steel thermos cup (his signature) sticking out, a small green plant, a framed family photo (small pixel detail), the "人才/Talent" mug from HR's desk
+- The company building behind him is rendered cold and oppressive (gray-blue #5A7080), the entrance security guard's silhouette visible inside not even watching
+- Sky overhead: dark gray-blue overcast, light rain (1-2px diagonal lines)
+- A single autumn leaf falling (1px detail)
+- His body language: defeated but also subtly relieved — head down but shoulders no longer hunched (the game's hidden joke: getting fired might be the better ending)
+- Caption below in pixel font: "你被开除了 / You have been fired" + smaller subtitle: "（其实可能是好事）/ (might actually be good for you)"
+
+RIGHT PANEL — "太优秀被涨 KPI / Too Good — KPI Raised" ending:
+- The player character at his cubicle desk, but the scene is hellishly bright and "celebratory"
+- Above his head: a giant pixel banner reads "恭喜!业绩超额完成! / CONGRATULATIONS! Performance Exceeded!" in gold (#E0B050) and red, festively decorated with pixel confetti and tiny pixel firework sparks
+- Multiple KPI 三轨 progress bars projected above his desk are RECALCULATING, the bars dropping back to empty as the targets jump UP — small text near the bars: "KPI 已上调 +30% / KPI raised +30%"
+- A pixel trophy on his desk (golden #E0B050) but his thermos is empty next to it
+- His face: forced corporate fake-smile (假笑) but eye bags are even deeper than usual, and his thermos hand is shaking 1px
+- Boss in the background giving an approving thumbs-up while looking at his watch
+- HR in the corner already preparing next month's performance review folder
+- Confetti littering the floor (no one will clean it)
+- Caption below in pixel font: "恭喜!你太优秀了 / Congratulations! You're too good" + smaller subtitle: "（明月还要再努力 30%）/ (now do 30% more next month)"
+
+CENTER DIVIDER:
+- Vertical thin pixel divider with text running down it: "VS" in pixel font, with smaller text "两种结局,同一种地狱 / Two endings, same hell"
+
+PALETTE:
+- LEFT panel: cold tones — 灰蓝 #5A7080 dominant, muted #C8A85A skin, gray rain, very limited color
+- RIGHT panel: warm tones gone WRONG — 老板金 #E0B050 used aggressively (4-5% pixels, breaking the usual rule on purpose for irony), red-orange accents, harsh #E8E0CC overhead light
+- Both panels share the same character (player), same SFC pixel rendering style
+
+VISUAL IDENTITY: art-bible 喜丧美学 to its purest expression. The "celebration" panel is more hellish than the "fired" panel. The visual irony does the storytelling.
+
+Output: PNG, 1024x1024, split-panel game over screen, complete and ready to be used in-game.
