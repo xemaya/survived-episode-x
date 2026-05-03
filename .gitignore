@@ -43,3 +43,6 @@ coverage/
 
 # === GdUnit4 addon, never committed (per tests/README.md, contributors install locally) ===
 addons/gdunit4/
+
+# === Opening video pipeline (tools/video) ===
+/output/
