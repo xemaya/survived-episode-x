@@ -4,6 +4,10 @@
 
 ---
 
+> **2026-05-03 (post-engine-switch):** Godot tree (`src/`, `tests/`, `addons/`, `project.godot`, `.godot/`, `assets/data/`, `assets/shaders/`, `design/research/`, sprite `.import|.uid` metadata) physically deleted from working tree. New TS+PixiJS+Tauri stack lives in `game/` per `docs/superpowers/specs/2026-05-03-engine-switch-design.md`.
+
+---
+
 ## 这是什么项目
 
 **《活过第 X 集》(Survived Episode X)** — 像素风反向 KPI 中国职场生存模拟。
