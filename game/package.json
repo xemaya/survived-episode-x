@@ -1,0 +1,13 @@
+{
+  "name": "survived-episode-x",
+  "version": "0.1.0",
+  "description": "反向 KPI 办公室生存模拟（像素风、回合制） — TS+PixiJS+Tauri",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "tsc": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3"
+  }
+}

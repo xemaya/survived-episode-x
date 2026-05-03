@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+src-tauri/target/
+src-tauri/gen/
+public/sprites/
+src/generated/
+.env
+.env.local
+.env.*.local
+coverage/
