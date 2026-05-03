@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  commands:
+    typecheck:
+      glob: '*.{ts,tsx}'
+      run: pnpm --dir game tsc
+    biome:
+      glob: '*.{ts,tsx,js,mjs,cjs,json}'
+      run: pnpm --dir game exec biome check --staged --no-errors-on-unmatched
+    vitest:
+      glob: 'game/{src,scripts,tests}/**/*.{ts,mjs}'
+      run: pnpm --dir game exec vitest run --changed --passWithNoTests

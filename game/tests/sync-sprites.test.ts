@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -21,7 +21,10 @@ describe('syncSprites', () => {
     await mkdir(join(src, 'character'), { recursive: true });
     await mkdir(join(src, 'cards', 'defense'), { recursive: true });
     await writeFile(join(src, 'character', 'idle.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
-    await writeFile(join(src, 'cards', 'defense', 'dodge.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    await writeFile(
+      join(src, 'cards', 'defense', 'dodge.png'),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+    );
 
     const count = await syncSprites({
       src,
@@ -54,9 +57,9 @@ describe('syncSprites', () => {
   it('throws if src directory does not exist', async () => {
     const src = join(workDir, 'missing');
     const dest = join(workDir, 'dest');
-    await expect(
-      syncSprites({ src, dest, categories: ['character'] }),
-    ).rejects.toThrow(/sprite source not found/i);
+    await expect(syncSprites({ src, dest, categories: ['character'] })).rejects.toThrow(
+      /sprite source not found/i,
+    );
   });
 
   it('auto-discovers all top-level subdirs except test_outputs when categories is omitted', async () => {
@@ -69,7 +72,10 @@ describe('syncSprites', () => {
     await writeFile(join(src, 'character', 'a.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     await writeFile(join(src, 'environment', 'b.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     await writeFile(join(src, 'hud', 'c.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
-    await writeFile(join(src, 'test_outputs', 'reference.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    await writeFile(
+      join(src, 'test_outputs', 'reference.png'),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+    );
 
     const count = await syncSprites({ src, dest });
 

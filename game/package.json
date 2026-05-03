@@ -13,9 +13,13 @@
     "prebuild": "pnpm assets:sync",
     "dev": "vite",
     "build": "vite build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "verify": "pnpm assets:sync && pnpm tsc && pnpm lint && pnpm test"
   },
   "devDependencies": {
+    "@biomejs/biome": "~1.9.4",
     "@tauri-apps/api": "~2.1.1",
     "@tauri-apps/cli": "~2.1.0",
     "@types/howler": "~2.2.12",

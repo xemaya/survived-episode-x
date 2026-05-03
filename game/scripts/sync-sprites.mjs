@@ -5,8 +5,8 @@
 // This auto-discovery means new sprite categories (added by parallel art-gen sessions)
 // flow through without code changes.
 
-import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const __dirname = new URL('.', import.meta.url).pathname;
