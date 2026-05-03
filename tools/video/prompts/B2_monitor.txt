@@ -1,0 +1,15 @@
+Animate this pixel art workstation POV with a tense, escalating screen-state shift.
+
+CAMERA: Very slow push-in toward the monitor over 6 seconds. Total push under 10% zoom.
+
+MOTION:
+- The monitor screen begins glowing 屏幕蓝 #2C4A6E.
+- At around frame 50, the monitor flickers and shifts to a red warning state.
+- A single typing-finger taps a key once during the clip.
+- Otherwise the workstation is still.
+
+STYLE LOCK:
+- SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines
+- Limited 16-color palette: keep all surfaces in 格子间灰蓝 #5A7080 / 档案室棕 #7A5838 / monitor 屏幕蓝→red shift
+- Do NOT smooth, vectorize, or modernize the source image
+- Do NOT add new characters, props, or text

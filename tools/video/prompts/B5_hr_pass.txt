@@ -1,0 +1,13 @@
+Animate this pixel art scene where an HR figure walks past the player's workstation.
+
+CAMERA: Static.
+
+MOTION:
+- The HR character (right side) walks slowly leftward across the frame over 5 seconds, stopping briefly at center around frame 60 to glance at the player, then resuming her walk and exiting frame at left.
+- The player (left side, in pretend-busy posture) does not move at all — a single subtle key-press finger micro-twitch is acceptable.
+
+STYLE LOCK:
+- SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines
+- HR's empty-frame glasses (no lenses) silhouette must remain visible
+- Do NOT smooth, vectorize, or modernize the source image
+- Do NOT add new characters, props, or text

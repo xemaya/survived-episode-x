@@ -1,0 +1,14 @@
+Animate this pixel art horizontal strip of three office NPCs with a steady left-to-right camera pan.
+
+CAMERA: Slow horizontal pan from left to right across the strip over 6 seconds. End centered on the third NPC (rightmost).
+
+PER-NPC MICRO-MOTION as the camera passes each one:
+- NPC 1 (leftmost, the tryhard with eye bags): types furiously, single mouth-tight grimace
+- NPC 2 (middle, slacker leaning back with phone): the phone screen reflection on his face flickers once
+- NPC 3 (rightmost, toady with hands clasped at chest): head nods agreeably twice
+
+STYLE LOCK:
+- SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines
+- Limited 16-color palette
+- Do NOT smooth, vectorize, or modernize the source image
+- Do NOT add new characters, props, or text

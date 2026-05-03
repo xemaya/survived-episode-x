@@ -1,0 +1,15 @@
+Animate this drowsy pixel art office worker with very restrained motion.
+
+CAMERA: Static. No camera movement.
+
+CHARACTER MOTION:
+- The character slowly rubs his eye with one hand once during the 6 seconds.
+- His head tilts down by 1-2 pixels then settles back.
+- A thin column of steam rises 2 pixels from a thermos cup if visible.
+
+LIGHTING: Cold morning light, dim 格子间灰蓝 #5A7080 ambience. A single dim overhead fluorescent flickers once around frame 50.
+
+STYLE LOCK:
+- SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines
+- Do NOT smooth, vectorize, or modernize the source image
+- Do NOT add new characters, props, alarm clocks, or text not present in the source
