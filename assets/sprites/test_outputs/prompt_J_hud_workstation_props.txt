@@ -1,0 +1,58 @@
+A pixel art workstation prop sheet for a Chinese office life game — 16 diegetic HUD elements arranged in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Visual identity goal: "first glance recognition, second glance indictment" — a familiar Chinese office aesthetic that quietly broadcasts dread. Mood: dark humor / 喜丧美学 (funeral-as-festival). Consistent with prior reference sheets like character_sheet_player_v01.png and A_npc_archetypes_v01.png.
+
+LAYOUT — 4x4 grid of individual prop sprites on a clean cream/beige background (#E8E0CC light fill). Each cell shows ONE prop, centered, with subtle 1px drop shadow on the desk-plane below. Each cell has a small Chinese + English label below the prop in pixel font (small but readable). Top of sheet has a title banner.
+
+THE 16 PROPS (top-left to bottom-right):
+
+ROW 1 — STICKY NOTES (便利贴 4 状态, 玩家工位墙上的 AP 计数显示):
+1. 空白便利贴 / Blank Sticky — square yellow Post-it (#E0B050 muted), no writing, gentle paper grain
+2. 划线便利贴 / Crossed-Out — same yellow square but with a single firm diagonal pencil stroke through it (graphite gray), suggesting "AP spent"
+3. 加班灰格 / Overtime Grey — desaturated grey-yellow Post-it with two faint horizontal grid lines (overtime AP slot, beyond normal cap)
+4. 折角便利贴 / Folded Corner — yellow Post-it with the bottom-right corner curled up showing the desk underneath (early-leave variant)
+
+ROW 2 — COFFEE CUP LEVELS (咖啡杯液位 4 帧, 玩家能量计, 桌面常驻):
+5. 满杯 / Full — white ceramic mug with handle on right, dark brown coffee filled to brim, single 1px steam wisp rising
+6. 多半杯 / Three-Quarter — same mug, coffee at 3/4 level, no steam
+7. 半杯 / Half — same mug, coffee at half, edge of liquid slightly off-level (cooling)
+8. 见底带渍 / Empty With Stain — same mug, only a thin brown ring at bottom + circular brown stain ring on the desk surface beneath the mug (#7A5838)
+
+ROW 3 — MONITOR SCREENS (显示器 4 状态, 玩家工位电脑屏, 显示当前 KPI 状态):
+9. 待机蓝屏 / Idle — dark blue (#2C4A6E) monitor screen with faint grey HR portal logo in center (corporate logo style), screen has 1px bezel highlight
+10. 工作中 / Working — same monitor showing a generic spreadsheet grid (white cells, dark blue header row, indistinct text), focused-work state
+11. 黄色预警 / Warning — same monitor showing a centered yellow rectangle with a Chinese exclamation "!" inside, "KPI 偏低" label below in tiny pixel text
+12. 红色严重 / Critical — same monitor showing a red (#C83428) rectangle with a downward arrow shape filled with 1px diagonal hatching (red-green colorblind support), "考核未达标" tiny label
+
+ROW 4 — STATIONERY MISC (杂项小物, 工位常驻 + 月末锚点):
+13. 桌面平面 / Desk Surface — a 1-cell sample of the brown wood desk surface tile (#7A5838), with subtle grain texture, used as base layer beneath all other props
+14. 显示器外框 / Monitor Bezel — empty grey-blue plastic monitor bezel (front view, no screen content), used as background frame for monitor states
+15. 在岗椅子 / Active Chair — black office swivel chair viewed from behind, pushed in to the desk (3px gap), the player or NPC is sitting (just chairback visible)
+16. 空椅子 / Empty Chair — same chair pulled out 8px from the desk, slightly rotated, no occupant — Pillar 4 anchor for departed NPC ("LEFT lifecycle")
+
+PALETTE — strict, world-canonical:
+- 打工人黄 #C8A85A (Post-it warm yellow, skin highlight if any)
+- 格子间灰蓝 #5A7080 (monitor bezel, chair plastic, dominant cool tone)
+- 档案室棕 #7A5838 (wood desk, coffee, stain accent)
+- 白炽灯白 #E8E0CC (paper, mug body, sheet background)
+- 屏幕蓝 #2C4A6E (monitor screen base, idle state)
+- 老板金 #E0B050 (gold accent — STRICT max 3% pixel coverage, only on Post-it base, NOT monitor or chair)
+- 警告红 #C83428 (only on the critical-KPI monitor screen, single rectangle)
+- 警告黄 (use 老板金 #E0B050) for warning monitor
+
+VISUAL JOKES / 喜丧 details (1-3 px each, subtle):
+- The "blank" Post-it has one ghost imprint of pencil pressure from a previous note above it
+- Coffee cup full has 1 single steam wisp; half/empty have NO steam (cold)
+- Empty-with-stain coffee cup: the desk stain ring is slightly larger than the mug base, showing how many times this happened before
+- Working monitor spreadsheet has one cell highlighted yellow (the cell the player is currently on, slightly off-grid alignment for that "I've been staring at this for 6 hours" feel)
+- Critical monitor: the downward arrow has a tiny "↓" pixel pattern
+- Empty chair: a single 1-pixel paper scrap on the seat (someone packed in a hurry)
+
+CRITICAL CONSTRAINTS:
+- All props must be silhouette-distinct at thumbnail scale — player should recognize coffee_cup_full vs coffee_cup_empty by silhouette, not just color
+- NO triumphant / celebratory styling — these are bureaucratic objects, not RPG loot
+- Sticky notes are matte paper, not glossy
+- Monitor critical state uses the dual-encoding (color + shape + 1px hatching) per art-bible §accessibility
+- Each cell should be visually framed but borderless (just the prop on cream background, label below)
+
+TOP TITLE BANNER: "工位道具 · HUD Diegetic / Workstation Props" in pixel font, centered, dark cubicle blue text on cream background, no decorative borders.
+
+Output: PNG, 1024x1024, single composite 4x4 sprite sheet, ready to be cropped into individual prop sprites for the in-game diegetic HUD layer (sticky notes on cubicle wall, coffee cup on desk, monitor on workstation, chair beside desk).

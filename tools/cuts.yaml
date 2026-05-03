@@ -104,3 +104,17 @@
     - [volunteer_report, take_credit, counter_pua]
     - [suck_up, cling_to_power, schmooze]
     - [cc_csuite, fake_mentor, fake_team_spirit]
+
+- source: J_hud_workstation_props_v01.png
+  mode: grid
+  output_dir: hud/
+  cols: 4
+  rows: 4
+  crop_top: 60         # title banner "工位道具 · HUD Diegetic"
+  crop_bottom: 0
+  label_band: 80       # per-cell Chinese + English label below each prop
+  names:
+    - [sticky_blank, sticky_crossed, sticky_overtime, sticky_folded]
+    - [coffee_full, coffee_three_quarter, coffee_half, coffee_empty]
+    - [monitor_idle, monitor_working, monitor_warning, monitor_critical]
+    - [desk_surface, monitor_bezel, chair_active, chair_empty]
