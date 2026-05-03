@@ -600,7 +600,7 @@ import { join } from 'node:path';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-const DEFAULT_CATEGORIES = ['character', 'npc', 'cards', 'maps', 'ui', 'scenes'];
+const DEFAULT_CATEGORIES = ['character', 'npc', 'cards', 'hud', 'maps', 'ui', 'scenes'];
 
 // Recursively walk srcDir, copying every *.png into destDir, preserving subpath.
 // Returns the number of files copied.
@@ -680,9 +680,9 @@ pnpm assets:sync
 ```
 
 Expected output (one line):
-`[sync-sprites] copied 65 PNG file(s) from /Users/huanghaibin/Workspace/games/survived-episode-x/assets/sprites to /Users/huanghaibin/Workspace/games/survived-episode-x/game/public/sprites`
+`[sync-sprites] copied 70 PNG file(s) from /Users/huanghaibin/Workspace/games/survived-episode-x/assets/sprites to /Users/huanghaibin/Workspace/games/survived-episode-x/game/public/sprites`
 
-(Number is 65 because Task 1 deleted Godot `.import` files; the 11 `test_outputs/` PNGs are in `assets/sprites/` but `test_outputs` is not in `DEFAULT_CATEGORIES` — those are AI-gen reference sheets, not in-game art. Confirm with `find game/public/sprites -name '*.png' | wc -l` → 65.)
+Breakdown of the 70: 22 `character/` + 18 `cards/` (defense + offense) + 16 `hud/` (mug/sticky/monitor/chair/desk states) + 9 `npc/` + 3 `scenes/` + 1 `ui/` + 1 `maps/`. The 12 `test_outputs/` PNGs are AI-gen reference sheets (not in-game art) and are intentionally excluded from `DEFAULT_CATEGORIES`. Confirm with `find game/public/sprites -name '*.png' | wc -l` → 70.
 
 - [ ] **Step 4.8: Update `src/main.ts` to display the player idle sprite**
 
