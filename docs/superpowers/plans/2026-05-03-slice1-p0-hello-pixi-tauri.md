@@ -593,6 +593,10 @@ Write `game/scripts/sync-sprites.mjs`:
 ```js
 // Copy PNG sprites from `assets/sprites/<category>/` into `game/public/sprites/<category>/`.
 // Run automatically before `pnpm dev` and `pnpm build` via package.json `predev` / `prebuild`.
+//
+// By default, every top-level subdir of `src` is copied EXCEPT those in EXCLUDE_CATEGORIES.
+// This auto-discovery means new sprite categories (added by parallel art-gen sessions)
+// flow through without code changes.
 
 import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -600,7 +604,8 @@ import { join } from 'node:path';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-const DEFAULT_CATEGORIES = ['character', 'npc', 'cards', 'hud', 'maps', 'ui', 'scenes'];
+// AI-generated reference sheets, not in-game art. Excluded from runtime bundle.
+const EXCLUDE_CATEGORIES = new Set(['test_outputs']);
 
 // Recursively walk srcDir, copying every *.png into destDir, preserving subpath.
 // Returns the number of files copied.
@@ -621,14 +626,23 @@ async function copyPngTree(srcDir, destDir) {
   return count;
 }
 
-export async function syncSprites({ src, dest, categories = DEFAULT_CATEGORIES } = {}) {
+async function discoverCategories(src) {
+  const entries = await readdir(src, { withFileTypes: true });
+  return entries
+    .filter((e) => e.isDirectory() && !EXCLUDE_CATEGORIES.has(e.name))
+    .map((e) => e.name)
+    .sort();
+}
+
+export async function syncSprites({ src, dest, categories } = {}) {
   if (!src) throw new Error('syncSprites: `src` is required');
   if (!dest) throw new Error('syncSprites: `dest` is required');
   if (!existsSync(src)) {
     throw new Error(`syncSprites: sprite source not found at ${src}`);
   }
+  const cats = categories ?? (await discoverCategories(src));
   let total = 0;
-  for (const category of categories) {
+  for (const category of cats) {
     const srcCat = join(src, category);
     if (!existsSync(srcCat)) continue;
     const destCat = join(dest, category);
@@ -647,6 +661,32 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const count = await syncSprites({ src, dest });
   console.log(`[sync-sprites] copied ${count} PNG file(s) from ${src} to ${dest}`);
 }
+```
+
+The 4th vitest case (auto-discovery test) should also be added to `game/tests/sync-sprites.test.ts`:
+
+```ts
+it('auto-discovers all top-level subdirs except test_outputs when categories is omitted', async () => {
+  const src = join(workDir, 'src');
+  const dest = join(workDir, 'dest');
+  await mkdir(join(src, 'character'), { recursive: true });
+  await mkdir(join(src, 'environment'), { recursive: true });
+  await mkdir(join(src, 'hud'), { recursive: true });
+  await mkdir(join(src, 'test_outputs'), { recursive: true });
+  await writeFile(join(src, 'character', 'a.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  await writeFile(join(src, 'environment', 'b.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  await writeFile(join(src, 'hud', 'c.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  await writeFile(join(src, 'test_outputs', 'reference.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+
+  const count = await syncSprites({ src, dest });
+
+  expect(count).toBe(3);
+  const dirs = (await readdir(dest, { withFileTypes: true }))
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort();
+  expect(dirs).toEqual(['character', 'environment', 'hud']);
+});
 ```
 
 - [ ] **Step 4.5: Run the test — expect PASS**
@@ -680,9 +720,9 @@ pnpm assets:sync
 ```
 
 Expected output (one line):
-`[sync-sprites] copied 70 PNG file(s) from /Users/huanghaibin/Workspace/games/survived-episode-x/assets/sprites to /Users/huanghaibin/Workspace/games/survived-episode-x/game/public/sprites`
+`[sync-sprites] copied <N> PNG file(s) from /Users/huanghaibin/Workspace/games/survived-episode-x/assets/sprites to /Users/huanghaibin/Workspace/games/survived-episode-x/game/public/sprites`
 
-Breakdown of the 70: 22 `character/` + 18 `cards/` (defense + offense) + 16 `hud/` (mug/sticky/monitor/chair/desk states) + 9 `npc/` + 3 `scenes/` + 1 `ui/` + 1 `maps/`. The 12 `test_outputs/` PNGs are AI-gen reference sheets (not in-game art) and are intentionally excluded from `DEFAULT_CATEGORIES`. Confirm with `find game/public/sprites -name '*.png' | wc -l` → 70.
+`<N>` is data-dependent because a parallel art-gen session keeps adding sprites to `assets/sprites/`. As of 2026-05-03 21:13 the count is **266** (npc=113, ui=61, hud=32, character=22, cards=18, environment=16, scenes=3, maps=1). The `test_outputs/` directory holds AI-gen reference sheets and is intentionally excluded by the script's `EXCLUDE_CATEGORIES` blocklist. The script auto-discovers all other top-level subdirs of `assets/sprites/`, so new categories (e.g. `environment/` added after the spec was written) flow through without code changes. If the count drops to 0, investigate — likely `EXCLUDE_CATEGORIES` swallowed everything or the source path is wrong.
 
 - [ ] **Step 4.8: Update `src/main.ts` to display the player idle sprite**
 

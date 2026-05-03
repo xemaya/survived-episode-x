@@ -1,5 +1,9 @@
 // Copy PNG sprites from `assets/sprites/<category>/` into `game/public/sprites/<category>/`.
 // Run automatically before `pnpm dev` and `pnpm build` via package.json `predev` / `prebuild`.
+//
+// By default, every top-level subdir of `src` is copied EXCEPT those in EXCLUDE_CATEGORIES.
+// This auto-discovery means new sprite categories (added by parallel art-gen sessions)
+// flow through without code changes.
 
 import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -7,7 +11,8 @@ import { join } from 'node:path';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-const DEFAULT_CATEGORIES = ['character', 'npc', 'cards', 'hud', 'maps', 'ui', 'scenes'];
+// AI-generated reference sheets, not in-game art. Excluded from runtime bundle.
+const EXCLUDE_CATEGORIES = new Set(['test_outputs']);
 
 // Recursively walk srcDir, copying every *.png into destDir, preserving subpath.
 // Returns the number of files copied.
@@ -28,14 +33,23 @@ async function copyPngTree(srcDir, destDir) {
   return count;
 }
 
-export async function syncSprites({ src, dest, categories = DEFAULT_CATEGORIES } = {}) {
+async function discoverCategories(src) {
+  const entries = await readdir(src, { withFileTypes: true });
+  return entries
+    .filter((e) => e.isDirectory() && !EXCLUDE_CATEGORIES.has(e.name))
+    .map((e) => e.name)
+    .sort();
+}
+
+export async function syncSprites({ src, dest, categories } = {}) {
   if (!src) throw new Error('syncSprites: `src` is required');
   if (!dest) throw new Error('syncSprites: `dest` is required');
   if (!existsSync(src)) {
     throw new Error(`syncSprites: sprite source not found at ${src}`);
   }
+  const cats = categories ?? (await discoverCategories(src));
   let total = 0;
-  for (const category of categories) {
+  for (const category of cats) {
     const srcCat = join(src, category);
     if (!existsSync(srcCat)) continue;
     const destCat = join(dest, category);
