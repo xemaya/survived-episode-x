@@ -2,8 +2,10 @@ import { flow } from '@/flow/dispatcher';
 import type { SceneState } from '@/flow/scene-state';
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { DailyRecap } from './menu/daily-recap';
 import { MainMenu } from './menu/main-menu';
 import { PauseMenu } from './menu/pause-menu';
+import { WeeklyRecap } from './menu/weekly-recap';
 import { assertOverlayAllowed } from './stage';
 
 interface RouterProps {
@@ -13,18 +15,17 @@ interface RouterProps {
 function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
   const [state, setState] = useState<SceneState>(flow.state);
   useEffect(() => {
-    const unsub = flow.subscribe((next) => {
-      setState(next);
-    });
+    const unsub = flow.subscribe((next) => setState(next));
     return unsub;
   }, []);
 
-  // Toggle host visibility and pointer-events based on whether the current
-  // state has overlay UI. Otherwise the empty Preact tree leaves the
-  // host div sitting on top with its rgba backdrop dimming the canvas
-  // and pointer-events:auto blocking clicks from reaching Pixi.
   useEffect(() => {
-    const hasOverlay = state.kind === 'main_menu' || state.kind === 'pause';
+    const hasOverlay =
+      state.kind === 'main_menu' ||
+      state.kind === 'pause' ||
+      state.kind === 'recap' ||
+      state.kind === 'kpi_review' ||
+      state.kind === 'gameover';
     host.style.display = hasOverlay ? 'flex' : 'none';
     host.style.pointerEvents = hasOverlay ? 'auto' : 'none';
   }, [state.kind, host]);
@@ -36,18 +37,24 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     case 'pause':
       assertOverlayAllowed(state);
       return <PauseMenu state={state} />;
-    case 'action_day':
     case 'recap':
-    case 'kpi_review':
-    case 'gameover':
-      // Diegetic-only states; no overlay in P3
+      assertOverlayAllowed(state);
+      return state.recapKind === 'weekly' ? (
+        <WeeklyRecap day={state.day} />
+      ) : (
+        <DailyRecap day={state.day} />
+      );
+    case 'action_day':
       return null;
+    case 'kpi_review':
+      assertOverlayAllowed(state);
+      return <div class="menu-root">KPI Review (Task 4 wires this)</div>;
+    case 'gameover':
+      assertOverlayAllowed(state);
+      return <div class="menu-root">Game Over (Task 5 wires this)</div>;
   }
 }
 
 export function mountOverlay(host: HTMLElement): void {
-  // Initial display/pointer-events are set by OverlayRouter's useEffect
-  // on first render (state-driven). Default CSS keeps the host hidden
-  // until Preact mounts the first state.
   render(<OverlayRouter host={host} />, host);
 }

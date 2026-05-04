@@ -1,3 +1,4 @@
+import { dayCycle } from '@/flow/day-cycle';
 import { installKeyboardHandler } from '@/input/keyboard';
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
@@ -16,11 +17,15 @@ async function main(): Promise<void> {
   worldLayer.label = 'world';
   app.stage.addChild(worldLayer);
 
+  // Day-cycle controller subscribes to AP depletion, drives recap/review
+  // transitions. Must be attached BEFORE the player can spend cards.
+  dayCycle.attach();
+
   bindStageToFlow({ app, worldLayer });
   mountOverlay(overlayRoot);
   installKeyboardHandler();
 
-  console.info('[boot] flow bound; overlay mounted; initial state:', 'main_menu');
+  console.info('[boot] flow + dayCycle + overlay + keyboard ready');
 }
 
 void main();

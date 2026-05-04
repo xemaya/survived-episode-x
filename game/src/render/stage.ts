@@ -8,7 +8,10 @@ import { mountWorkstation } from './scene/workstation';
 const OVERLAY_ALLOWED: ReadonlySet<SceneState['kind']> = new Set([
   'main_menu',
   'pause',
-  // future: 'kpi_review', 'gameover', 'settings'
+  'recap',
+  'kpi_review',
+  'gameover',
+  // future: 'settings'
 ]);
 
 export function assertOverlayAllowed(state: SceneState): void {
