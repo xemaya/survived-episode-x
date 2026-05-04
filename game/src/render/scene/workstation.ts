@@ -1,6 +1,7 @@
 import { ap } from '@/economy/ap';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
+import { dayCycle } from '@/flow/day-cycle';
 import type { SceneState } from '@/flow/scene-state';
 import { mountCardHand } from '@/render/cards/hand';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
@@ -215,6 +216,47 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   // ── Card hand (code-drawn UI; loads its own face sprites) ───────────────
   const handHandles = await mountCardHand(ctx.worldLayer, ctx.app);
   teardowns.push(() => handHandles.destroy());
+
+  // ── Early-leave 「下班」 button (top-right corner, above AP row) ─────────
+  // GDD: day ends when AP=0 OR player chooses to leave early. With only 4
+  // P2 placeholder cards (sum 7 AP), the AP=0 path is unreachable —
+  // player would otherwise be stuck. P3 surfaces early-leave so the
+  // loop always closes.
+  const earlyLeaveBtn = new Container();
+  earlyLeaveBtn.label = 'early-leave';
+  earlyLeaveBtn.x = 590;
+  earlyLeaveBtn.y = 16;
+  earlyLeaveBtn.eventMode = 'static';
+  earlyLeaveBtn.cursor = 'pointer';
+  ctx.worldLayer.addChild(earlyLeaveBtn);
+
+  const earlyLeaveBg = new Graphics();
+  earlyLeaveBtn.addChild(earlyLeaveBg);
+  const earlyLeaveText = new Text({
+    text: '下班',
+    style: {
+      fontFamily: 'PingFang SC, -apple-system, sans-serif',
+      fontSize: 11,
+      fill: 0xe8e0cc,
+      letterSpacing: 2,
+    },
+  });
+  earlyLeaveText.anchor.set(0.5);
+  earlyLeaveBtn.addChild(earlyLeaveText);
+
+  const drawEarlyLeave = (hovering: boolean) => {
+    earlyLeaveBg.clear();
+    earlyLeaveBg.rect(-22, -10, 44, 20);
+    earlyLeaveBg.fill(hovering ? 0x3a5a82 : 0x2c4a6e);
+    earlyLeaveBg.stroke({ color: 0x5a7080, width: 1 });
+  };
+  drawEarlyLeave(false);
+  earlyLeaveBtn.on('pointerover', () => drawEarlyLeave(true));
+  earlyLeaveBtn.on('pointerout', () => drawEarlyLeave(false));
+  earlyLeaveBtn.on('pointertap', () => {
+    dayCycle.endDayEarly();
+  });
+  teardowns.push(() => earlyLeaveBtn.destroy({ children: true }));
 
   return () => {
     for (const t of teardowns) t();

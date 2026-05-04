@@ -48,6 +48,15 @@ export class DayCycleController {
     this.attached = false;
   }
 
+  // Public early-leave path (GDD: day ends when AP=0 OR player chooses to
+  // leave early). Workstation 「下班」 button calls this. No-op if not in
+  // action_day (e.g. user double-clicked during transition).
+  endDayEarly(): void {
+    if (this.deps.flow.state.kind === 'action_day') {
+      this.handleDayEnd();
+    }
+  }
+
   private handleDayEnd(): void {
     const { calendar, flow } = this.deps;
     if (calendar.isMonthEnd()) {
