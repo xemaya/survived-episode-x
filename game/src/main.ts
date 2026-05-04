@@ -1,3 +1,4 @@
+import { installKeyboardHandler } from '@/input/keyboard';
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
 import { mountOverlay } from '@/render/ui-overlay';
@@ -17,6 +18,7 @@ async function main(): Promise<void> {
 
   bindStageToFlow({ app, worldLayer });
   mountOverlay(overlayRoot);
+  installKeyboardHandler();
 
   console.info('[boot] flow bound; overlay mounted; initial state:', 'main_menu');
 }
