@@ -1,6 +1,7 @@
 import { flow } from '@/flow/dispatcher';
 import type { SceneState } from '@/flow/scene-state';
 import type { Application, Container } from 'pixi.js';
+import { mountWorkstation } from './scene/workstation';
 
 // Scene names where overlay (Preact menu) is allowed to be visible.
 // Red Line 3: anywhere else, overlayLayer.visible MUST be false.
@@ -55,7 +56,24 @@ const SCENE_MOUNTERS: Partial<Record<SceneState['kind'], SceneMounter>> = {
     ctx.worldLayer.removeChildren();
     return () => {};
   },
-  // action_day mounter wired in Task 4 (workstation scene)
+  action_day: (state, ctx) => {
+    // The mountWorkstation is async (loads sprites). Fire-and-forget; the
+    // teardown returned synchronously is a closure that awaits the mount
+    // promise then disposes. This keeps mountSceneFor synchronous.
+    let disposed = false;
+    let asyncTeardown: (() => void) | null = null;
+    void mountWorkstation(state, ctx).then((teardown) => {
+      if (disposed) {
+        teardown();
+      } else {
+        asyncTeardown = teardown;
+      }
+    });
+    return () => {
+      disposed = true;
+      if (asyncTeardown) asyncTeardown();
+    };
+  },
   // pause mounter is implicit (overlay only, no Pixi changes)
 };
 
