@@ -39,3 +39,9 @@ export const POTENTIAL_CLAMP_MAX = 1.0;
 
 // Severe underperformance dismissal threshold (raw potential < this).
 export const POTENTIAL_DISMISSAL = -0.15;
+
+// ─── Day cycle ────────────────────────────────────────────────────────────
+// design/gdd/scene-day-flow-controller.md uses 30 days/month. For P3 we
+// shorten to 7 to make the loop playtestable in a single sitting; P4+
+// re-tunes to the design value once core loop is verified.
+export const MONTH_DAYS = 7;
