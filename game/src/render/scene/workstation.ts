@@ -1,4 +1,5 @@
 import { ap } from '@/economy/ap';
+import { BASE_AP_PER_DAY, OVERTIME_BONUS_AP } from '@/economy/constants';
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
@@ -7,6 +8,9 @@ import type { SceneState } from '@/flow/scene-state';
 import { mountCardHand } from '@/render/cards/hand';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
+
+// Maximum AP slots to render — covers base (8) + overtime bonus (2) = 10.
+const AP_SLOT_COUNT = BASE_AP_PER_DAY + OVERTIME_BONUS_AP;
 
 // Layout constants (640×360 logical canvas).
 const STICKY_X = 480;
@@ -197,8 +201,12 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   apLabel.y = STICKY_SIZE / 2;
   apRow.addChild(apLabel);
 
+  // Always render AP_SLOT_COUNT (10) slots so the row doesn't resize when
+  // overtime grants push ap.current above the base 8. Slots beyond ap.current
+  // draw as empty/spent; slots beyond BASE_AP_PER_DAY only light up during
+  // action_overtime when ap.current can legitimately exceed 8.
   const slots: Graphics[] = [];
-  for (let i = 0; i < ap.max; i++) {
+  for (let i = 0; i < AP_SLOT_COUNT; i++) {
     const g = new Graphics();
     g.x = i * (STICKY_SIZE + STICKY_GAP);
     apRow.addChild(g);

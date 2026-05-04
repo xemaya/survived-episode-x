@@ -82,6 +82,25 @@ const SCENE_MOUNTERS: Partial<Record<SceneState['kind'], SceneMounter>> = {
       if (asyncTeardown) asyncTeardown();
     };
   },
+  action_overtime: (state, ctx) => {
+    // Same workstation scene as action_day — the difference is only at the UI
+    // layer (no overlay; AP can reach up to 10 via overtime grant). The
+    // workstation renderer subscribes to ap.onChanged so the AP row updates
+    // automatically when the overtime bonus arrives.
+    let disposed = false;
+    let asyncTeardown: (() => void) | null = null;
+    void mountWorkstation(state, ctx).then((teardown) => {
+      if (disposed) {
+        teardown();
+      } else {
+        asyncTeardown = teardown;
+      }
+    });
+    return () => {
+      disposed = true;
+      if (asyncTeardown) asyncTeardown();
+    };
+  },
   // pause mounter is implicit (overlay only, no Pixi changes)
 };
 

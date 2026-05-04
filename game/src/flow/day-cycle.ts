@@ -134,11 +134,16 @@ export class DayCycleController {
   // Transitions to morning_briefing for the next day (instead of action_day
   // directly) so the full GDD sub-mode chain is preserved.
   confirmRecap(): void {
-    const { ap, calendar, flow, playedThisDay } = this.deps;
+    const { ap, energy, calendar, flow, playedThisDay } = this.deps;
     if (flow.state.kind !== 'recap') {
       throw new Error(`confirmRecap called from non-recap state: ${flow.state.kind}`);
     }
     calendar.advanceDay();
+    // GDD weekend regen: entering a weekend day (Sat=6 or Sun=7) restores
+    // +30 energy. advanceDay() has already updated currentWeekday.
+    if (calendar.currentWeekday >= 6) {
+      energy.regenForRestDay();
+    }
     ap.resetForNewDay();
     playedThisDay.clear();
     flow.request({ kind: 'morning_briefing', day: calendar.currentDay });

@@ -2,11 +2,13 @@ import { flow } from '@/flow/dispatcher';
 import type { SceneState } from '@/flow/scene-state';
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { AfterWork } from './menu/after-work';
 import { ArchiveList } from './menu/archive-list';
 import { DailyRecap } from './menu/daily-recap';
 import { GameOver } from './menu/gameover';
 import { KpiReview } from './menu/kpi-review';
 import { MainMenu } from './menu/main-menu';
+import { MorningBriefing } from './menu/morning-briefing';
 import { PauseMenu } from './menu/pause-menu';
 import { WeeklyRecap } from './menu/weekly-recap';
 import { assertOverlayAllowed } from './stage';
@@ -45,12 +47,10 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
       return <PauseMenu state={state} />;
     case 'morning_briefing':
       assertOverlayAllowed(state);
-      // Task 6 wires the real MorningBriefing component.
-      return <div class="menu-root">Morning Briefing — Day {state.day} (Task 6 wires this)</div>;
+      return <MorningBriefing day={state.day} />;
     case 'after_work':
       assertOverlayAllowed(state);
-      // Task 6 wires the real AfterWork component (加班 / 按时下班 buttons).
-      return <div class="menu-root">After Work — Day {state.day} (Task 6 wires this)</div>;
+      return <AfterWork day={state.day} />;
     case 'action_overtime':
       // Diegetic — workstation scene remains visible; no overlay.
       return null;
