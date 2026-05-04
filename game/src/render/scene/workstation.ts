@@ -1,4 +1,5 @@
 import { ap } from '@/economy/ap';
+import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
 import { dayCycle } from '@/flow/day-cycle';
@@ -24,9 +25,7 @@ interface PropSpec {
 const STATIC_PROPS: ReadonlyArray<PropSpec> = [
   // Sticky note — to the right of monitor (decorative; AP slot row drawn separately)
   { url: 'sprites/hud/sticky_blank.png', x: 470, y: 200, scale: 0.1, label: 'sticky' },
-  // Mug — bottom-left of desk. Static in P2 (energy not implemented; still
-  // shows coffee_full.png placeholder per P1).
-  { url: 'sprites/hud/coffee_full.png', x: 130, y: 260, scale: 0.1, label: 'mug' },
+  // Mug removed from STATIC_PROPS — now a dynamic 5-frame energy binding below.
 ];
 
 // Monitor KPI states. The 5th (gameover grey) is achieved via tint on
@@ -133,6 +132,49 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   teardowns.push(() => {
     unsubCalendar();
     calendarContainer.destroy({ children: true });
+  });
+
+  // ── Mug (energy binding, swappable sprite) ──────────────────────────────
+  // 5 tiers per energy level. tier = floor(energy / 20), clamped 0..4.
+  // tier 4 = full (80-100), tier 0 = empty (0-19) + stain ring (P5).
+  const mugContainer = new Container();
+  mugContainer.label = 'mug';
+  mugContainer.x = 130;
+  mugContainer.y = 260;
+  ctx.worldLayer.addChild(mugContainer);
+
+  const MUG_FRAMES = [
+    'sprites/hud/coffee_empty.png', // tier 0 [0-19]
+    'sprites/hud/coffee_empty.png', // tier 1 [20-39] — placeholder; ideal coffee_quarter.png if present
+    'sprites/hud/coffee_half.png', // tier 2 [40-59]
+    'sprites/hud/coffee_three_quarter.png', // tier 3 [60-79]
+    'sprites/hud/coffee_full.png', // tier 4 [80-100]
+  ] as const;
+
+  function pickMugFrame(value: number): string {
+    const tier = Math.max(0, Math.min(4, Math.floor(value / 20)));
+    return MUG_FRAMES[tier] ?? MUG_FRAMES[0];
+  }
+
+  let currentMugSprite: Sprite | null = null;
+  const swapMugTo = async (url: string) => {
+    const tex = await Assets.load(url);
+    tex.source.scaleMode = 'linear';
+    if (currentMugSprite) currentMugSprite.destroy();
+    const s = new Sprite(tex);
+    s.anchor.set(0.5);
+    s.scale.set(0.1);
+    mugContainer.addChild(s);
+    currentMugSprite = s;
+  };
+  await swapMugTo(pickMugFrame(energy.current));
+
+  const unsubEnergy = energy.onChanged((value) => {
+    void swapMugTo(pickMugFrame(value));
+  });
+  teardowns.push(() => {
+    unsubEnergy();
+    mugContainer.destroy({ children: true });
   });
 
   // ── Sticky-note AP row (code-drawn, 8 slots) ────────────────────────────

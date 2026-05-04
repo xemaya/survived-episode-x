@@ -45,3 +45,13 @@ export const POTENTIAL_DISMISSAL = -0.15;
 // shorten to 7 to make the loop playtestable in a single sitting; P4+
 // re-tunes to the design value once core loop is verified.
 export const MONTH_DAYS = 7;
+
+// ─── Energy ───────────────────────────────────────────────────────────────
+// design/gdd/ap-economy-system.md energy section. Cross-day [0,100].
+// Drained by overtime, restored by early-leave + weekend rest.
+export const ENERGY_MAX = 100;
+export const ENERGY_INITIAL = 80;
+export const ENERGY_OT_BASE = 15; // overtime declaration cost
+export const ENERGY_EL_BASE = 8; // early-leave per AP saved
+export const ENERGY_REGEN_PER_DAY = 30; // weekend rest day regen
+export const ENERGY_OVERTIME_GUARD = 15; // can't go overtime if below this
