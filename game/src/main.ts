@@ -1,20 +1,24 @@
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
+import { mountOverlay } from '@/render/ui-overlay';
 import { Container } from 'pixi.js';
 
 async function main(): Promise<void> {
-  const root = document.getElementById('pixi-root');
-  if (!root) throw new Error('#pixi-root not found in index.html');
-  const { app } = await createPixiApp(root);
+  const pixiRoot = document.getElementById('pixi-root');
+  const overlayRoot = document.getElementById('ui-overlay');
+  if (!pixiRoot || !overlayRoot) {
+    throw new Error('Required DOM nodes (#pixi-root, #ui-overlay) not found in index.html');
+  }
+  const { app } = await createPixiApp(pixiRoot);
 
-  // Single world-layer container. Scene mounters add/remove children here.
   const worldLayer = new Container();
   worldLayer.label = 'world';
   app.stage.addChild(worldLayer);
 
   bindStageToFlow({ app, worldLayer });
+  mountOverlay(overlayRoot);
 
-  console.info('[boot] flow bound to stage; initial state:', 'main_menu');
+  console.info('[boot] flow bound; overlay mounted; initial state:', 'main_menu');
 }
 
 void main();
