@@ -46,3 +46,7 @@ addons/gdunit4/
 
 # === Opening video pipeline (tools/video) ===
 /output/
+
+# === Python ===
+__pycache__/
+*.pyc
