@@ -637,7 +637,7 @@ Semver：0.1.0 起步，0.2.0 第一公开 demo，1.0.0 正式。`game/package.j
 
 | 阶段 | 工作日 | 出口（可见结果） |
 |---|---|---|
-| **P0 Hello Pixi in Tauri** | 1d | `game/` 骨架；`pnpm tauri dev` 看到一个 sprite；`pnpm tauri build` 产出能双击的 .app |
+| **P0 Hello Pixi in Tauri** | ✅ 完成 2026-05-04（tag `v0.1.0-p0`） | `game/` 骨架 + 13 个 commits；`pnpm tauri build` 产出 `.app` + 27MB `.dmg`，安装后 1280×720 窗口居中显示主角精灵。完整执行记录见 `docs/superpowers/plans/2026-05-03-slice1-p0-hello-pixi-tauri.md`。 |
 | **P1 FSM + 主菜单 + 进 day 1** | 2d | "开始"按钮 → 工位场景（4 道具 sprite 静态）；Esc 进 stub 暂停 |
 | **P2 AP / KPI / 卡牌循环** | 2d | 4 张卡显示底部；点卡 → AP 减 + KPI 变 + 咖啡杯/显示器视觉变化 |
 | **P3 结束今日 → KPI Review → GameOver/下一天** | 2d | "结束今日"或 AP=0 自动 → KPI Review → 任一超阈值 GameOver；否则 day += 1 |
