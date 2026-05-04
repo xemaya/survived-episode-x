@@ -1,7 +1,11 @@
-import { Assets, Sprite } from 'pixi.js';
 import { createPixiApp } from '@/render/pixi-app';
+import { Assets, Sprite } from 'pixi.js';
 
-const PLAYER_IDLE_URL = '/sprites/character/player_idle_anchor.png';
+// Relative path (no leading slash) so it resolves correctly against both
+// http://localhost:1420/ in dev and Tauri's tauri:// scheme in release.
+// A leading-slash absolute path becomes "tauri://sprites/..." with host=
+// "sprites" under Tauri 2's URL resolution, which 404s.
+const PLAYER_IDLE_URL = 'sprites/character/player_idle_anchor.png';
 
 async function main(): Promise<void> {
   const root = document.getElementById('pixi-root');
