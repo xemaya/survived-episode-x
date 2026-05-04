@@ -61,4 +61,16 @@ describe('archive helpers', () => {
     const after = appendToArchive(meta, buildRunSummary(7, 'dismissal_severe', defaultRunState()));
     expect(after.nextRunId).toBe(8);
   });
+
+  it('hrWordLibrary accumulates DIFFERENT keys across runs', () => {
+    let meta = defaultMetaState();
+    // Build runs that would produce different HR keys
+    const r1 = { ...defaultRunState(), kpiActual: 30, monthlyThreshold: 100 }; // → DRAMATIC_COLLAPSE
+    const r2 = { ...defaultRunState(), effortHero: 5 }; // → HERO_SYNDROME
+    meta = appendToArchive(meta, buildRunSummary(1, 'dismissal_severe', r1));
+    meta = appendToArchive(meta, buildRunSummary(2, 'kpi_exceeds_capacity', r2));
+    expect(meta.hrWordLibrary.length).toBe(2);
+    expect(meta.hrWordLibrary).toContain('HR_EVAL_DRAMATIC_COLLAPSE');
+    expect(meta.hrWordLibrary).toContain('HR_EVAL_HERO_SYNDROME');
+  });
 });

@@ -46,6 +46,13 @@ export class FlowDispatcher {
       this.inDispatch = false;
     }
   }
+
+  // One-time boot-state override. Bypasses the legality matrix because
+  // the initial state is set programmatically (e.g. resumed from save,
+  // or save_corrupt dialog). Must be called BEFORE any subscriber.
+  setInitialState(state: SceneState): void {
+    this.current = state;
+  }
 }
 
 // Singleton — every production import goes through this instance.

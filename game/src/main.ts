@@ -22,14 +22,15 @@ async function main(): Promise<void> {
 
   // P4: try to load existing save on boot. If found, restore state and
   // resume from saved sceneState. If not, leave FSM at initial main_menu.
+  // If load fails (corrupt JSON / schema mismatch), show save_corrupt dialog.
   const restored = await save.loadCurrentRun();
   if (restored) {
     applyRunState(restored);
-    flow.request(restored.sceneState);
+    flow.setInitialState(restored.sceneState);
     console.info('[boot] restored save:', restored.sceneState.kind);
   } else if (save.lastLoadError) {
+    flow.setInitialState({ kind: 'save_corrupt', errorMessage: save.lastLoadError });
     console.warn('[boot] save load failed:', save.lastLoadError);
-    // Save-corrupt dialog wired in Task 8
   }
 
   dayCycle.attach();

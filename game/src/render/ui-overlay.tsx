@@ -10,6 +10,7 @@ import { KpiReview } from './menu/kpi-review';
 import { MainMenu } from './menu/main-menu';
 import { MorningBriefing } from './menu/morning-briefing';
 import { PauseMenu } from './menu/pause-menu';
+import { SaveCorruptDialog } from './menu/save-corrupt-dialog';
 import { WeeklyRecap } from './menu/weekly-recap';
 import { assertOverlayAllowed } from './stage';
 
@@ -33,7 +34,8 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
       state.kind === 'recap' ||
       state.kind === 'kpi_review' ||
       state.kind === 'gameover' ||
-      state.kind === 'archive_list';
+      state.kind === 'archive_list' ||
+      state.kind === 'save_corrupt';
     host.style.display = hasOverlay ? 'flex' : 'none';
     host.style.pointerEvents = hasOverlay ? 'auto' : 'none';
   }, [state.kind, host]);
@@ -72,6 +74,9 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     case 'archive_list':
       assertOverlayAllowed(state);
       return <ArchiveList />;
+    case 'save_corrupt':
+      assertOverlayAllowed(state);
+      return <SaveCorruptDialog errorMessage={state.errorMessage} />;
   }
 }
 

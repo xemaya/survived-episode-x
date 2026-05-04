@@ -16,7 +16,8 @@ export type SceneState =
   | { kind: 'kpi_review'; monthIndex: number }
   | { kind: 'gameover'; reason: GameOverReason; monthIndex: number }
   | { kind: 'pause'; resumeTo: SceneState }
-  | { kind: 'archive_list' };
+  | { kind: 'archive_list' }
+  | { kind: 'save_corrupt'; errorMessage: string };
 
 export function describe(s: SceneState): string {
   switch (s.kind) {
@@ -40,5 +41,7 @@ export function describe(s: SceneState): string {
       return `pause(resumeTo=${describe(s.resumeTo)})`;
     case 'archive_list':
       return 'archive_list';
+    case 'save_corrupt':
+      return 'save_corrupt';
   }
 }

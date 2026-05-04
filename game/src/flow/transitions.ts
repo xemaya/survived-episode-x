@@ -29,14 +29,22 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
     return from.kind === 'main_menu' || from.kind === 'gameover';
   }
 
+  // save_corrupt: unreachable via request (only set programmatically at boot
+  // via setInitialState). Exits to main_menu only.
+  if (to.kind === 'save_corrupt') {
+    return false;
+  }
+
   // main_menu: enterable from action_day (quit), pause (quit-from-pause),
-  // gameover (player click after death), or archive_list (back button).
+  // gameover (player click after death), archive_list (back button), or
+  // save_corrupt (player dismisses corrupt-save dialog).
   if (to.kind === 'main_menu') {
     return (
       from.kind === 'action_day' ||
       from.kind === 'pause' ||
       from.kind === 'gameover' ||
-      from.kind === 'archive_list'
+      from.kind === 'archive_list' ||
+      from.kind === 'save_corrupt'
     );
   }
 

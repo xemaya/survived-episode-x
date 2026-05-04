@@ -19,6 +19,7 @@ const kpiReview: SceneState = { kind: 'kpi_review', monthIndex: 1 };
 const gameOverCap: SceneState = { kind: 'gameover', reason: 'kpi_exceeds_capacity', monthIndex: 1 };
 const gameOverDis: SceneState = { kind: 'gameover', reason: 'dismissal_severe', monthIndex: 1 };
 const archiveList: SceneState = { kind: 'archive_list' };
+const saveCorrupt: SceneState = { kind: 'save_corrupt', errorMessage: 'test error' };
 
 describe('isLegalTransition (P1 subset)', () => {
   it('action_day → pause is legal (Esc pressed)', () => {
@@ -191,5 +192,15 @@ describe('isLegalTransition (P4 Task 5: morning_briefing, after_work, action_ove
 
   it('main_menu → action_overtime is illegal', () => {
     expect(isLegalTransition(mainMenu, actionOvertime1)).toBe(false);
+  });
+});
+
+describe('isLegalTransition (P4 Task 7: save_corrupt)', () => {
+  it('save_corrupt is unreachable via request (set only via setInitialState)', () => {
+    expect(isLegalTransition(mainMenu, saveCorrupt)).toBe(false);
+  });
+
+  it('save_corrupt → main_menu is legal (player dismisses)', () => {
+    expect(isLegalTransition(saveCorrupt, mainMenu)).toBe(true);
   });
 });
