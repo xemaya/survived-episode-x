@@ -1,13 +1,6 @@
 import type { CardId } from '@/card/card';
 import type { ApSystem } from '@/economy/ap';
-import {
-  BASE_CAPACITY,
-  CAPACITY_FLOOR,
-  DECAY_RATE,
-  POTENTIAL_CLAMP_MAX,
-  POTENTIAL_CLAMP_MIN,
-  POTENTIAL_DISMISSAL,
-} from '@/economy/constants';
+import { POTENTIAL_DISMISSAL } from '@/economy/constants';
 import type { KpiSystem } from '@/economy/kpi';
 import type { CalendarSystem } from './calendar';
 import type { FlowDispatcher } from './dispatcher';
@@ -89,19 +82,14 @@ export class DayCycleController {
       throw new Error(`confirmKpiReview called from non-kpi_review state: ${flow.state.kind}`);
     }
 
-    // Compute potential and clamp to the Formula B range before any check.
-    // Clamping mirrors what applyMonthlyRecalc does internally, so both
-    // the dismissal gate and the recalc use the same effective value.
+    // Step 1: severe dismissal check uses RAW (unclamped) potential per
+    // design/gdd/kpi-reverse-threshold-system.md. POTENTIAL_DISMISSAL
+    // (-0.15) is the same as POTENTIAL_CLAMP_MIN, so dismissal triggers
+    // when actualKpi falls below ~85% of monthlyThreshold — a hard
+    // "fired for severe underperformance" gate. Using clamped here would
+    // make this gate unreachable.
     const rawPotential = (kpi.actualKpi - kpi.monthlyThreshold) / kpi.monthlyThreshold;
-    const clampedPotential = Math.max(
-      POTENTIAL_CLAMP_MIN,
-      Math.min(POTENTIAL_CLAMP_MAX, rawPotential),
-    );
-
-    // Step 1: severe dismissal check (clamped potential).
-    // POTENTIAL_DISMISSAL === POTENTIAL_CLAMP_MIN (-0.15), so the boundary
-    // case (clamped = -0.15) is NOT dismissed (strict less-than).
-    if (clampedPotential < POTENTIAL_DISMISSAL) {
+    if (rawPotential < POTENTIAL_DISMISSAL) {
       flow.request({
         kind: 'gameover',
         reason: 'dismissal_severe',
@@ -110,16 +98,16 @@ export class DayCycleController {
       return;
     }
 
-    // Step 2: apply Formula B recalc (effort_norm = 0 in P3).
+    // Step 2: apply Formula B recalc (effort_norm = 0 in P3). The recalc
+    // internally clamps potential to [POTENTIAL_CLAMP_MIN, POTENTIAL_CLAMP_MAX].
     kpi.applyMonthlyRecalc(0);
 
-    // Step 3: capacity-exceeded check (post-recalc).
-    // Capacity is computed from calendar.monthIndex so it stays in sync
-    // even when the calendar was advanced independently (e.g. forced test
-    // scenarios that skip many months without going through confirmKpiReview).
-    const capacityNow =
-      Math.max(CAPACITY_FLOOR, BASE_CAPACITY - DECAY_RATE * (calendar.monthIndex - 1)) * 100;
-    if (kpi.monthlyThreshold > capacityNow) {
+    // Step 3: capacity-exceeded check (post-recalc). Use kpi.capacityNow
+    // — the KpiSystem owns its own month counter and computes capacity
+    // from it. Callers (production: this controller; tests: explicit
+    // setup) must keep kpi.month in sync with calendar.monthIndex via
+    // the kpi.advanceMonth() call in Step 4.
+    if (kpi.monthlyThreshold > kpi.capacityNow) {
       flow.request({
         kind: 'gameover',
         reason: 'kpi_exceeds_capacity',

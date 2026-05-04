@@ -62,36 +62,54 @@ describe('DayCycleController', () => {
     expect(flow.state.kind).toBe('action_day');
   });
 
-  it('confirmKpiReview() with KPI well below threshold → advance month + return to action_day', () => {
+  it('confirmKpiReview() with KPI severely below threshold → gameover (dismissal_severe)', () => {
+    // Per GDD: raw potential = (50-100)/100 = -0.5 < POTENTIAL_DISMISSAL (-0.15)
+    // → severe underperformance → fired immediately.
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
-    kpi.applyContribution(50); // raw potential = (50-100)/100 = -0.5, clamped to -0.15
+    kpi.applyContribution(50);
     ap.spend(8); // → kpi_review
+    controller.confirmKpiReview();
+    expect(flow.state.kind).toBe('gameover');
+    expect((flow.state as { reason: string }).reason).toBe('dismissal_severe');
+  });
+
+  it('confirmKpiReview() with KPI exactly at -0.15 boundary → passes (strict less-than)', () => {
+    // raw potential = (85-100)/100 = -0.15 exactly; NOT < -0.15 so no dismissal.
+    for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    kpi.applyContribution(85);
+    ap.spend(8);
+    controller.confirmKpiReview();
+    expect(flow.state.kind).toBe('action_day');
+  });
+
+  it('confirmKpiReview() with KPI exactly at threshold → passes + advances month', () => {
+    // potential = 0; threshold unchanged after recalc; capacity 300 > 100 → pass.
+    for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    kpi.applyContribution(100);
+    ap.spend(8);
     controller.confirmKpiReview();
     expect(flow.state.kind).toBe('action_day');
     expect(calendar.currentDay).toBe(1);
     expect(calendar.monthIndex).toBe(2);
   });
 
-  it('confirmKpiReview() with KPI exactly at -0.15 boundary → still passes (not severe dismissal)', () => {
-    for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
-    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
-    kpi.applyContribution(85); // potential = -0.15 (boundary)
-    ap.spend(8);
-    controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('action_day');
-  });
-
-  it('confirmKpiReview() with KPI > capacity (after recalc) → flow.request(gameover, kpi_exceeds_capacity)', () => {
-    // monthlyThreshold starts 100, capacity month 1 = 300. To trigger
-    // capacity-exceeded we'd need threshold > 300. Formula B max is
-    // ×1.18/month. 100 → 118 → 139 → ... → 300 takes ~6 months. That's
-    // too long for a single test. We force the scenario by advancing
-    // calendar to a month with low capacity AND priming a high threshold.
-    for (let i = 0; i < 50; i++) calendar.advanceMonth();
-    // Now monthIndex=51; capacity_now floors at 40. Any threshold > 40
-    // triggers the game over.
-    // monthlyThreshold is still 100 (initial); 100 > 40 → game over.
+  it('confirmKpiReview() with threshold > capacity (after recalc) → gameover (kpi_exceeds_capacity)', () => {
+    // Force scenario: advance both calendar AND kpi to month 51 so capacity
+    // floors at 40. Initial threshold 100 > 40 → capacity exceeded after recalc.
+    // Note kpi.advanceMonth() must mirror calendar.advanceMonth() so kpi.capacityNow
+    // reflects the true game month — they're separate counters that callers keep in sync.
+    for (let i = 0; i < 50; i++) {
+      calendar.advanceMonth();
+      kpi.advanceMonth();
+    }
+    // Both now at month 51. capacityNow = max(40, (3.0 - 0.05*50)*100) = 40.
+    // threshold still 100 > 40 → game over.
+    // KPI contribution must keep raw potential ≥ -0.15 to skip the dismissal gate
+    // (otherwise we hit dismissal_severe instead). actualKpi=85 → raw=-0.15 (boundary, passes).
+    kpi.applyContribution(85);
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     ap.spend(8);
