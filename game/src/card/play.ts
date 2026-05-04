@@ -41,6 +41,18 @@ export function playCard(
     );
   }
 
+  // Commit the play to playedThisDay BEFORE side-effect emitters fire.
+  // GDD lists "history" as Step 7 (last), but our `playedThisDay` set
+  // doubles as the UI's "is this card now PLAYED" guard — and ap.spend
+  // synchronously triggers hand.redraw which calls evaluateCardState.
+  // If we waited until Step 7, the hand would re-render seeing the card
+  // still NOT in playedThisDay → would render as IDLE/DISABLED instead
+  // of PLAYED → user sees no visual feedback until the NEXT click.
+  // Committing up-front fixes that without breaking the existing tests
+  // (none of the 7 step bodies read playedThisDay; the pre-check above
+  // already enforces the "already played" invariant).
+  ctx.playedThisDay.add(card.id);
+
   // Step 0 (pre-emit): spend AP. GDD rule 6 says AP is consumed before the
   // 7-step sequence starts; we keep that ordering so the AP indicator
   // updates immediately when the click registers.
@@ -64,9 +76,7 @@ export function playCard(
   }
 
   // Steps 4 (NPC), 5 (mutex), 6 (cooldown) deferred to P3+.
-
-  // Step 7: history.
-  ctx.playedThisDay.add(card.id);
+  // Step 7 (history) was committed up-front above for UI-render correctness.
 }
 
 // Test/UI helper: shared mutable set of cards played this day. Reset

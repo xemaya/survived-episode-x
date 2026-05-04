@@ -81,7 +81,7 @@ async function createCardView(card: Card): Promise<CardView> {
   c.addChild(bg);
 
   const tex = await Assets.load(card.faceUrl);
-  tex.source.scaleMode = 'nearest';
+  tex.source.scaleMode = 'linear';
   const face = new Sprite(tex);
   face.anchor.set(0.5);
   face.x = 0;

@@ -21,8 +21,10 @@ interface PropSpec {
 }
 
 const STATIC_PROPS: ReadonlyArray<PropSpec> = [
-  // Calendar — top-left wall mount
-  { url: 'sprites/hud/calendar_month_day_1.png', x: 50, y: 50, scale: 0.12, label: 'calendar' },
+  // Calendar — top-left wall mount. Source is 256×138; at scale 0.25
+  // displays ~64×35 logical → ~190×100 actual on a 3× window. Was 0.12
+  // (~31×17) which read as illegible at any window size.
+  { url: 'sprites/hud/calendar_month_day_1.png', x: 70, y: 60, scale: 0.25, label: 'calendar' },
   // Sticky note — to the right of monitor (decorative; AP slot row drawn separately)
   { url: 'sprites/hud/sticky_blank.png', x: 470, y: 200, scale: 0.1, label: 'sticky' },
   // Mug — bottom-left of desk. Static in P2 (energy not implemented; still
@@ -53,7 +55,7 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   // ── Static props ────────────────────────────────────────────────────────
   for (const spec of STATIC_PROPS) {
     const tex = await Assets.load(spec.url);
-    tex.source.scaleMode = 'nearest';
+    tex.source.scaleMode = 'linear';
     const sprite = new Sprite(tex);
     sprite.label = spec.label;
     sprite.anchor.set(0.5);
@@ -74,7 +76,7 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   let currentMonitorSprite: Sprite | null = null;
   const swapMonitorTo = async (key: keyof typeof MONITOR_FRAMES) => {
     const tex = await Assets.load(MONITOR_FRAMES[key]);
-    tex.source.scaleMode = 'nearest';
+    tex.source.scaleMode = 'linear';
     if (currentMonitorSprite) currentMonitorSprite.destroy();
     const s = new Sprite(tex);
     s.anchor.set(0.5);

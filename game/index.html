@@ -8,7 +8,7 @@
       html, body {
         margin: 0;
         padding: 0;
-        background: #000;
+        background: #111418; /* matches PixiJS canvas backgroundColor — invisible letterbox on fractional scale */
         overflow: hidden;
         height: 100%;
         font-family: -apple-system, "PingFang SC", sans-serif;
@@ -22,8 +22,8 @@
         justify-content: center;
       }
       #pixi-root canvas {
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
+        /* No image-rendering override — GPU smooth scaling matches the
+           texture.scaleMode=linear path for "modern indie pixel art" look. */
       }
       #ui-overlay {
         position: fixed;
