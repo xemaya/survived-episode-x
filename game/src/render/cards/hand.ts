@@ -36,6 +36,32 @@ export async function mountCardHand(parent: Container, _app: Application): Promi
   container.label = 'card-hand';
   parent.addChild(container);
 
+  // Empty-hand placeholder. After the 2026-05-04 design pivot, cards are
+  // authored alongside events (see design/vertical-slice/). Until then,
+  // the action_day hand is intentionally empty — player uses 「下班」 to
+  // close the day. This text signals "feature deliberately blank, not
+  // broken" so future readers don't think a load failed.
+  if (DEFENSE_CARDS_P2.length === 0) {
+    const placeholder = new Text({
+      text: '（事件触发中… 按「下班」继续）',
+      style: {
+        fontFamily: 'PingFang SC, -apple-system, sans-serif',
+        fontSize: 12,
+        fill: 0x7a8088,
+        letterSpacing: 1,
+      },
+    });
+    placeholder.anchor.set(0.5);
+    placeholder.x = 320;
+    placeholder.y = CARD_Y;
+    container.addChild(placeholder);
+    return {
+      container,
+      destroy: () => container.destroy({ children: true }),
+      redraw: () => {},
+    };
+  }
+
   const totalWidth = DEFENSE_CARDS_P2.length * CARD_W + (DEFENSE_CARDS_P2.length - 1) * CARD_GAP;
   const startX = (640 - totalWidth) / 2 + CARD_W / 2;
 

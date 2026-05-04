@@ -41,10 +41,14 @@ export const POTENTIAL_CLAMP_MAX = 1.0;
 export const POTENTIAL_DISMISSAL = -0.15;
 
 // ─── Day cycle ────────────────────────────────────────────────────────────
-// design/gdd/scene-day-flow-controller.md uses 30 days/month. For P3 we
-// shorten to 7 to make the loop playtestable in a single sitting; P4+
-// re-tunes to the design value once core loop is verified.
-export const MONTH_DAYS = 7;
+// design/gdd/scene-day-flow-controller.md GDD value. P3 used 7 for fast
+// playtesting; P4 retunes to the design value now that the full loop
+// (energy/effort/Formula B α/Archive) is wired and the cadence matters
+// for proper balance:
+// - 4 weekends × 2 days = 8 rest days/month → ~240 energy regen/month
+// - MAX_MONTH_OVERTIME=20 cap is reachable but not trivial
+// - capacity decay (5/month) calibrated for ~30-day cycle
+export const MONTH_DAYS = 30;
 
 // ─── Effort normalisation (Formula B α term) ──────────────────────────────
 // design/gdd/ap-economy-system.md §effort-accumulators. Monthly caps used

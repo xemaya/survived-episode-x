@@ -10,9 +10,10 @@ export function MainMenu(): preact.JSX.Element {
   }, []);
 
   const startGame = (): void => {
-    // Task 4 will check if save exists and prompt "discard previous run?"
-    // P4 Task 1 placeholder: always start fresh from action_day day=1.
-    flow.request({ kind: 'action_day', day: 1, phase: 'morning' });
+    // P4 Task 5 transition matrix: main_menu → action_day is no longer
+    // legal; every day starts at morning_briefing. Player clicks
+    // 「开始今日」 in the briefing to advance to action_day.
+    flow.request({ kind: 'morning_briefing', day: 1 });
   };
 
   const continueGame = (): void => {
