@@ -37,7 +37,10 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
       assertOverlayAllowed(state);
       return <PauseMenu state={state} />;
     case 'action_day':
-      // Diegetic-only state; no overlay
+    case 'recap':
+    case 'kpi_review':
+    case 'gameover':
+      // Diegetic-only states; no overlay in P3
       return null;
   }
 }
