@@ -3,6 +3,7 @@ import type { SceneState } from '@/flow/scene-state';
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { DailyRecap } from './menu/daily-recap';
+import { GameOver } from './menu/gameover';
 import { KpiReview } from './menu/kpi-review';
 import { MainMenu } from './menu/main-menu';
 import { PauseMenu } from './menu/pause-menu';
@@ -52,7 +53,7 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
       return <KpiReview monthIndex={state.monthIndex} />;
     case 'gameover':
       assertOverlayAllowed(state);
-      return <div class="menu-root">Game Over (Task 5 wires this)</div>;
+      return <GameOver reason={state.reason} monthIndex={state.monthIndex} />;
   }
 }
 
