@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { Card } from '../../src/card/card';
 import { playCard } from '../../src/card/play';
 import { ApSystem } from '../../src/economy/ap';
-import { MONTH_DAYS } from '../../src/economy/constants';
+import { MONTH_DAYS, OVERTIME_BONUS_AP } from '../../src/economy/constants';
+import { EnergySystem } from '../../src/economy/energy';
 import { KpiSystem } from '../../src/economy/kpi';
 import { CalendarSystem } from '../../src/flow/calendar';
 import { DayCycleController } from '../../src/flow/day-cycle';
@@ -39,6 +40,7 @@ class MemoryFs implements SaveFs {
 describe('DayCycleController', () => {
   let ap: ApSystem;
   let kpi: KpiSystem;
+  let energy: EnergySystem;
   let calendar: CalendarSystem;
   let flow: FlowDispatcher;
   let controller: DayCycleController;
@@ -48,79 +50,177 @@ describe('DayCycleController', () => {
   beforeEach(() => {
     ap = new ApSystem();
     kpi = new KpiSystem();
+    energy = new EnergySystem();
     calendar = new CalendarSystem();
     flow = new FlowDispatcher();
     playedThisDay = new Set(['placeholder_card']);
     mockSave = new SaveSystem(new MemoryFs());
-    controller = new DayCycleController({ ap, kpi, calendar, flow, playedThisDay, save: mockSave });
+    controller = new DayCycleController({
+      ap,
+      kpi,
+      energy,
+      calendar,
+      flow,
+      playedThisDay,
+      save: mockSave,
+    });
     controller.attach();
-    // Boot into action_day for these tests
+    // Boot into action_day for most tests: main_menu → morning_briefing → action_day
+    flow.request({ kind: 'morning_briefing', day: 1 });
     flow.request(day1);
   });
 
-  it('AP=0 on non-month-end day → flow.request(daily recap)', () => {
+  // ─── AP=0 → after_work (new intermediate step) ────────────────────────────
+
+  it('AP=0 on non-month-end day → after_work (player decides next)', () => {
     expect(calendar.isMonthEnd()).toBe(false);
     ap.spend(8);
+    expect(flow.state.kind).toBe('after_work');
+  });
+
+  it('AP=0 on non-month-end day → after_work → confirmAfterWork(end_day) → daily recap', async () => {
+    expect(calendar.isMonthEnd()).toBe(false);
+    ap.spend(8);
+    expect(flow.state.kind).toBe('after_work');
+    await controller.confirmAfterWork('end_day');
     expect(flow.state.kind).toBe('recap');
     expect((flow.state as { recapKind: 'daily' | 'weekly' }).recapKind).toBe('daily');
   });
 
-  it('AP=0 on Friday → flow.request(weekly recap)', () => {
+  it('AP=0 on Friday → after_work → confirmAfterWork(end_day) → weekly recap', async () => {
     for (let i = 0; i < 4; i++) calendar.advanceDay(); // Fri
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     ap.spend(8);
+    expect(flow.state.kind).toBe('after_work');
+    await controller.confirmAfterWork('end_day');
     expect(flow.state.kind).toBe('recap');
     expect((flow.state as { recapKind: 'daily' | 'weekly' }).recapKind).toBe('weekly');
   });
 
-  it('AP=0 on month-end day → flow.request(kpi_review), skipping recap', () => {
+  it('AP=0 on month-end day → after_work → confirmAfterWork(end_day) → kpi_review', async () => {
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     expect(calendar.isMonthEnd()).toBe(true);
     ap.spend(8);
+    expect(flow.state.kind).toBe('after_work');
+    await controller.confirmAfterWork('end_day');
     expect(flow.state.kind).toBe('kpi_review');
   });
 
-  it('confirmRecap() advances day, refills AP, clears playedThisDay, returns to action_day', () => {
-    ap.spend(8); // → recap
+  // ─── Overtime branch ───────────────────────────────────────────────────────
+
+  it('after_work → confirmAfterWork(overtime) → action_overtime + AP=10 + energy drained', async () => {
+    ap.spend(8); // → after_work
+    expect(flow.state.kind).toBe('after_work');
+    const energyBefore = energy.current;
+    await controller.confirmAfterWork('overtime');
+    expect(flow.state.kind).toBe('action_overtime');
+    expect(ap.current).toBe(OVERTIME_BONUS_AP); // granted exactly +2
+    expect(energy.current).toBe(energyBefore - 15); // ENERGY_OT_BASE
+    expect(ap.effortOvertime).toBe(1); // counter incremented
+  });
+
+  it('after_work → confirmAfterWork(overtime) with energy too low → throws', async () => {
+    // Drain energy below the overtime guard (15)
+    energy.change(-70); // 80 - 70 = 10 < ENERGY_OVERTIME_GUARD (15)
+    expect(energy.canOvertime()).toBe(false);
+    ap.spend(8); // → after_work
+    await expect(controller.confirmAfterWork('overtime')).rejects.toThrow(
+      'Cannot overtime: energy too low or burnout',
+    );
+    expect(flow.state.kind).toBe('after_work'); // state unchanged
+  });
+
+  it('action_overtime AP=0 → after_work again (loop-back)', async () => {
+    ap.spend(8); // → after_work
+    await controller.confirmAfterWork('overtime'); // → action_overtime (+2 AP)
+    expect(flow.state.kind).toBe('action_overtime');
+    // Spend the 2 overtime AP
+    ap.spend(2);
+    expect(flow.state.kind).toBe('after_work'); // looped back
+  });
+
+  it('confirmAfterWork throws if not in after_work state', async () => {
+    // We're in action_day, not after_work
+    await expect(controller.confirmAfterWork('end_day')).rejects.toThrow(
+      'confirmAfterWork called from non-after_work state: action_day',
+    );
+  });
+
+  // ─── Morning briefing ──────────────────────────────────────────────────────
+
+  it('confirmMorningBriefing → action_day (morning phase)', async () => {
+    // Use a fresh flow so we can go main_menu → morning_briefing legally.
+    const freshFlow = new FlowDispatcher();
+    const freshController = new DayCycleController({
+      ap,
+      kpi,
+      energy,
+      calendar,
+      flow: freshFlow,
+      playedThisDay,
+      save: mockSave,
+    });
+    freshFlow.request({ kind: 'morning_briefing', day: 1 }); // main_menu → morning_briefing
+    await freshController.confirmMorningBriefing();
+    expect(freshFlow.state.kind).toBe('action_day');
+    expect((freshFlow.state as { phase: string }).phase).toBe('morning');
+  });
+
+  it('confirmMorningBriefing throws if not in morning_briefing state', async () => {
+    // We're in action_day
+    await expect(controller.confirmMorningBriefing()).rejects.toThrow(
+      'confirmMorningBriefing called from non-morning_briefing state: action_day',
+    );
+  });
+
+  // ─── confirmRecap now → morning_briefing (not action_day) ─────────────────
+
+  it('confirmRecap() advances day, refills AP, clears playedThisDay, → morning_briefing', async () => {
+    ap.spend(8); // → after_work
+    await controller.confirmAfterWork('end_day'); // → recap
     expect(flow.state.kind).toBe('recap');
     controller.confirmRecap();
     expect(calendar.currentDay).toBe(2);
     expect(ap.current).toBe(8);
     expect(playedThisDay.size).toBe(0);
-    expect(flow.state.kind).toBe('action_day');
+    expect(flow.state.kind).toBe('morning_briefing');
   });
 
+  // ─── confirmKpiReview → morning_briefing (pass) / gameover (fail) ──────────
+
   it('confirmKpiReview() with KPI severely below threshold → gameover (dismissal_severe)', async () => {
-    // Per GDD: raw potential = (50-100)/100 = -0.5 < POTENTIAL_DISMISSAL (-0.15)
-    // → severe underperformance → fired immediately.
+    // raw potential = (50-100)/100 = -0.5 < POTENTIAL_DISMISSAL (-0.15)
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     kpi.applyContribution(50);
-    ap.spend(8); // → kpi_review
+    ap.spend(8); // → after_work
+    await controller.confirmAfterWork('end_day'); // → kpi_review
     await controller.confirmKpiReview();
     expect(flow.state.kind).toBe('gameover');
     expect((flow.state as { reason: string }).reason).toBe('dismissal_severe');
   });
 
-  it('confirmKpiReview() with KPI exactly at -0.15 boundary → passes (strict less-than)', async () => {
+  it('confirmKpiReview() with KPI exactly at -0.15 boundary → passes → morning_briefing', async () => {
     // raw potential = (85-100)/100 = -0.15 exactly; NOT < -0.15 so no dismissal.
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     kpi.applyContribution(85);
     ap.spend(8);
+    await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('action_day');
+    expect(flow.state.kind).toBe('morning_briefing');
   });
 
-  it('confirmKpiReview() with KPI exactly at threshold → passes + advances month', async () => {
+  it('confirmKpiReview() with KPI exactly at threshold → passes → morning_briefing + month advance', async () => {
     // potential = 0; threshold unchanged after recalc; capacity 300 > 100 → pass.
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     kpi.applyContribution(100);
     ap.spend(8);
+    await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('action_day');
+    expect(flow.state.kind).toBe('morning_briefing');
     expect(calendar.currentDay).toBe(1);
     expect(calendar.monthIndex).toBe(2);
   });
@@ -128,20 +228,17 @@ describe('DayCycleController', () => {
   it('confirmKpiReview() with threshold > capacity (after recalc) → gameover (kpi_exceeds_capacity)', async () => {
     // Force scenario: advance both calendar AND kpi to month 51 so capacity
     // floors at 40. Initial threshold 100 > 40 → capacity exceeded after recalc.
-    // Note kpi.advanceMonth() must mirror calendar.advanceMonth() so kpi.capacityNow
-    // reflects the true game month — they're separate counters that callers keep in sync.
     for (let i = 0; i < 50; i++) {
       calendar.advanceMonth();
       kpi.advanceMonth();
     }
     // Both now at month 51. capacityNow = max(40, (3.0 - 0.05*50)*100) = 40.
-    // threshold still 100 > 40 → game over.
-    // KPI contribution must keep raw potential ≥ -0.15 to skip the dismissal gate
-    // (otherwise we hit dismissal_severe instead). actualKpi=85 → raw=-0.15 (boundary, passes).
+    // KPI contribution must keep raw potential ≥ -0.15 to skip the dismissal gate.
     kpi.applyContribution(85);
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     ap.spend(8);
+    await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
     expect(flow.state.kind).toBe('gameover');
     expect((flow.state as { reason: string }).reason).toBe('kpi_exceeds_capacity');
@@ -158,6 +255,7 @@ describe('DayCycleController', () => {
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     kpi.applyContribution(50); // below threshold → dismissal_severe
     ap.spend(8);
+    await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
     expect(flow.state.kind).toBe('gameover');
     const meta = await mockSave.loadMeta();
@@ -180,8 +278,9 @@ describe('DayCycleController', () => {
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     kpi.applyContribution(100); // at threshold → pass
     ap.spend(8);
+    await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('action_day');
+    expect(flow.state.kind).toBe('morning_briefing');
 
     // All effort counters must be zeroed in the pass branch.
     expect(ap.effortOvertime).toBe(0);
@@ -198,6 +297,7 @@ describe('DayCycleController', () => {
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     kpi.applyContribution(50); // below threshold → dismissal_severe
     ap.spend(8);
+    await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
     expect(flow.state.kind).toBe('gameover');
 
@@ -208,7 +308,6 @@ describe('DayCycleController', () => {
 
   it('isHero card play increments ap.effortHero via playCard', () => {
     // Sanity cross-module: playCard with an isHero card increments the counter.
-    // We use a minimal hero card and an explicit ctx to avoid touching singletons.
     const heroCard: Card = {
       id: 'test_hero_card',
       apCost: 1,
@@ -225,5 +324,13 @@ describe('DayCycleController', () => {
       playedThisDay: localPlayedThisDay,
     });
     expect(ap.effortHero).toBe(1);
+  });
+
+  it('endDayEarly() works from action_overtime state too', async () => {
+    ap.spend(8); // → after_work
+    await controller.confirmAfterWork('overtime'); // → action_overtime
+    expect(flow.state.kind).toBe('action_overtime');
+    controller.endDayEarly(); // manual leave from overtime
+    expect(flow.state.kind).toBe('after_work');
   });
 });

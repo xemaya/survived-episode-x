@@ -26,6 +26,8 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     const hasOverlay =
       state.kind === 'main_menu' ||
       state.kind === 'pause' ||
+      state.kind === 'morning_briefing' ||
+      state.kind === 'after_work' ||
       state.kind === 'recap' ||
       state.kind === 'kpi_review' ||
       state.kind === 'gameover' ||
@@ -41,6 +43,17 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     case 'pause':
       assertOverlayAllowed(state);
       return <PauseMenu state={state} />;
+    case 'morning_briefing':
+      assertOverlayAllowed(state);
+      // Task 6 wires the real MorningBriefing component.
+      return <div class="menu-root">Morning Briefing — Day {state.day} (Task 6 wires this)</div>;
+    case 'after_work':
+      assertOverlayAllowed(state);
+      // Task 6 wires the real AfterWork component (加班 / 按时下班 buttons).
+      return <div class="menu-root">After Work — Day {state.day} (Task 6 wires this)</div>;
+    case 'action_overtime':
+      // Diegetic — workstation scene remains visible; no overlay.
+      return null;
     case 'recap':
       assertOverlayAllowed(state);
       return state.recapKind === 'weekly' ? (

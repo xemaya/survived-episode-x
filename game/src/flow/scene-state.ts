@@ -8,7 +8,10 @@ export type RecapKind = 'daily' | 'weekly';
 
 export type SceneState =
   | { kind: 'main_menu' }
+  | { kind: 'morning_briefing'; day: number }
   | { kind: 'action_day'; day: number; phase: DayPhase }
+  | { kind: 'action_overtime'; day: number }
+  | { kind: 'after_work'; day: number }
   | { kind: 'recap'; recapKind: RecapKind; day: number }
   | { kind: 'kpi_review'; monthIndex: number }
   | { kind: 'gameover'; reason: GameOverReason; monthIndex: number }
@@ -19,8 +22,14 @@ export function describe(s: SceneState): string {
   switch (s.kind) {
     case 'main_menu':
       return 'main_menu';
+    case 'morning_briefing':
+      return `morning_briefing(day=${s.day})`;
     case 'action_day':
       return `action_day(day=${s.day}, phase=${s.phase})`;
+    case 'action_overtime':
+      return `action_overtime(day=${s.day})`;
+    case 'after_work':
+      return `after_work(day=${s.day})`;
     case 'recap':
       return `recap(${s.recapKind}, day=${s.day})`;
     case 'kpi_review':

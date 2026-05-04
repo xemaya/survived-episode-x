@@ -5,9 +5,13 @@ import { mountWorkstation } from './scene/workstation';
 
 // Scene names where overlay (Preact menu) is allowed to be visible.
 // Red Line 3: anywhere else, overlayLayer.visible MUST be false.
+// action_overtime is diegetic (same workstation view as action_day) — NOT in
+// this set. morning_briefing and after_work have overlay stubs in ui-overlay.tsx.
 const OVERLAY_ALLOWED: ReadonlySet<SceneState['kind']> = new Set([
   'main_menu',
   'pause',
+  'morning_briefing',
+  'after_work',
   'recap',
   'kpi_review',
   'gameover',

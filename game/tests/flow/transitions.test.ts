@@ -3,10 +3,16 @@ import type { SceneState } from '../../src/flow/scene-state';
 import { isLegalTransition } from '../../src/flow/transitions';
 
 const mainMenu: SceneState = { kind: 'main_menu' };
+const morningBriefing1: SceneState = { kind: 'morning_briefing', day: 1 };
+const morningBriefing2: SceneState = { kind: 'morning_briefing', day: 2 };
 const day1: SceneState = { kind: 'action_day', day: 1, phase: 'morning' };
 const day7: SceneState = { kind: 'action_day', day: 7, phase: 'morning' };
 const day1Pause: SceneState = { kind: 'pause', resumeTo: day1 };
 const mainMenuPause: SceneState = { kind: 'pause', resumeTo: mainMenu };
+const afterWork1: SceneState = { kind: 'after_work', day: 1 };
+const afterWork7: SceneState = { kind: 'after_work', day: 7 };
+const actionOvertime1: SceneState = { kind: 'action_overtime', day: 1 };
+const overtimePause: SceneState = { kind: 'pause', resumeTo: actionOvertime1 };
 const dailyRecap: SceneState = { kind: 'recap', recapKind: 'daily', day: 1 };
 const weeklyRecap: SceneState = { kind: 'recap', recapKind: 'weekly', day: 5 };
 const kpiReview: SceneState = { kind: 'kpi_review', monthIndex: 1 };
@@ -15,10 +21,6 @@ const gameOverDis: SceneState = { kind: 'gameover', reason: 'dismissal_severe', 
 const archiveList: SceneState = { kind: 'archive_list' };
 
 describe('isLegalTransition (P1 subset)', () => {
-  it('main_menu → action_day is legal (game start)', () => {
-    expect(isLegalTransition(mainMenu, day1)).toBe(true);
-  });
-
   it('action_day → pause is legal (Esc pressed)', () => {
     expect(isLegalTransition(day1, day1Pause)).toBe(true);
   });
@@ -50,30 +52,34 @@ describe('isLegalTransition (P1 subset)', () => {
 });
 
 describe('isLegalTransition (P3: day-cycle, kpi_review, gameover)', () => {
-  it('action_day → recap (daily) is legal (day-end on non-month-end day)', () => {
-    expect(isLegalTransition(day1, dailyRecap)).toBe(true);
+  // NOTE: action_day → recap is NOW ILLEGAL (must go via after_work).
+  it('action_day → recap (daily) is NO LONGER LEGAL (must route via after_work)', () => {
+    expect(isLegalTransition(day1, dailyRecap)).toBe(false);
   });
 
-  it('action_day → recap (weekly) is legal (Friday day-end)', () => {
+  it('action_day → recap (weekly) is NO LONGER LEGAL (must route via after_work)', () => {
     expect(isLegalTransition({ kind: 'action_day', day: 5, phase: 'morning' }, weeklyRecap)).toBe(
-      true,
+      false,
     );
   });
 
-  it('recap → action_day is legal (next day after recap dismissed)', () => {
-    expect(isLegalTransition(dailyRecap, day1)).toBe(true);
+  // NOTE: recap → action_day is NOW ILLEGAL (must go via morning_briefing).
+  it('recap → action_day is NO LONGER LEGAL (must route via morning_briefing)', () => {
+    expect(isLegalTransition(dailyRecap, day1)).toBe(false);
   });
 
   it('recap → recap is illegal (no nested recap)', () => {
     expect(isLegalTransition(dailyRecap, dailyRecap)).toBe(false);
   });
 
-  it('action_day → kpi_review is legal (month-end day)', () => {
-    expect(isLegalTransition(day7, kpiReview)).toBe(true);
+  // NOTE: action_day → kpi_review is NOW ILLEGAL (must go via after_work).
+  it('action_day → kpi_review is NO LONGER LEGAL (must route via after_work)', () => {
+    expect(isLegalTransition(day7, kpiReview)).toBe(false);
   });
 
-  it('kpi_review → action_day is legal (next month after confirm)', () => {
-    expect(isLegalTransition(kpiReview, day1)).toBe(true);
+  // NOTE: kpi_review → action_day is NOW ILLEGAL (must go via morning_briefing).
+  it('kpi_review → action_day is NO LONGER LEGAL (must route via morning_briefing)', () => {
+    expect(isLegalTransition(kpiReview, day1)).toBe(false);
   });
 
   it('kpi_review → gameover (capacity) is legal', () => {
@@ -113,7 +119,7 @@ describe('isLegalTransition (P3: day-cycle, kpi_review, gameover)', () => {
     expect(isLegalTransition(mainMenu, gameOverCap)).toBe(false);
   });
 
-  it('pause is unchanged: P1 invariant still holds (pause only from action_day with matching resumeTo)', () => {
+  it('pause still only allowed from action_day or action_overtime with matching resumeTo', () => {
     expect(isLegalTransition(day1, day1Pause)).toBe(true);
     expect(isLegalTransition(mainMenu, mainMenuPause)).toBe(false);
   });
@@ -135,5 +141,55 @@ describe('isLegalTransition (P4: archive_list)', () => {
 
   it('action_day → archive_list is illegal (no mid-game archive access)', () => {
     expect(isLegalTransition(day1, archiveList)).toBe(false);
+  });
+});
+
+describe('isLegalTransition (P4 Task 5: morning_briefing, after_work, action_overtime)', () => {
+  it('main_menu → morning_briefing is legal (game start goes to briefing)', () => {
+    expect(isLegalTransition(mainMenu, morningBriefing1)).toBe(true);
+  });
+
+  it('recap → morning_briefing is legal (next day after recap dismissed)', () => {
+    expect(isLegalTransition(dailyRecap, morningBriefing2)).toBe(true);
+  });
+
+  it('kpi_review → morning_briefing is legal (next month after pass)', () => {
+    expect(isLegalTransition(kpiReview, morningBriefing1)).toBe(true);
+  });
+
+  it('morning_briefing → action_day is legal (player confirms briefing)', () => {
+    expect(isLegalTransition(morningBriefing1, day1)).toBe(true);
+  });
+
+  it('action_day → after_work is legal (AP=0 or early-leave)', () => {
+    expect(isLegalTransition(day1, afterWork1)).toBe(true);
+  });
+
+  it('action_overtime → after_work is legal (overtime AP=0 or overtime early-leave)', () => {
+    expect(isLegalTransition(actionOvertime1, afterWork1)).toBe(true);
+  });
+
+  it('after_work → action_overtime is legal (player chose 加班)', () => {
+    expect(isLegalTransition(afterWork1, actionOvertime1)).toBe(true);
+  });
+
+  it('after_work → recap is legal (normal day end, non-month-end)', () => {
+    expect(isLegalTransition(afterWork1, dailyRecap)).toBe(true);
+  });
+
+  it('after_work → kpi_review is legal (month-end day)', () => {
+    expect(isLegalTransition(afterWork7, kpiReview)).toBe(true);
+  });
+
+  it('pause from action_overtime is legal (with matching resumeTo)', () => {
+    expect(isLegalTransition(actionOvertime1, overtimePause)).toBe(true);
+  });
+
+  it('main_menu → after_work is illegal', () => {
+    expect(isLegalTransition(mainMenu, afterWork1)).toBe(false);
+  });
+
+  it('main_menu → action_overtime is illegal', () => {
+    expect(isLegalTransition(mainMenu, actionOvertime1)).toBe(false);
   });
 });

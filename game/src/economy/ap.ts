@@ -1,4 +1,4 @@
-import { BASE_AP_PER_DAY } from './constants';
+import { BASE_AP_PER_DAY, OVERTIME_BONUS_AP } from './constants';
 
 export type ApListener = (current: number, delta: number) => void;
 
@@ -84,6 +84,16 @@ export class ApSystem {
     }
     this.value -= n;
     for (const l of this.listeners) l(this.value, -n);
+  }
+
+  // GDD ap-economy-system Rule 4: overtime is the ONE exception to the
+  // spend-only invariant within a day. Grants up to OVERTIME_BONUS_AP extra
+  // AP on top of the base, capped at BASE_AP_PER_DAY + OVERTIME_BONUS_AP = 10.
+  // This must NEVER be called outside the overtime grant path (confirmAfterWork).
+  grantOvertime(extraAp: number): void {
+    if (extraAp <= 0) return;
+    this.value = Math.min(BASE_AP_PER_DAY + OVERTIME_BONUS_AP, this.value + extraAp);
+    for (const l of this.listeners) l(this.value, extraAp);
   }
 
   resetForNewDay(): void {

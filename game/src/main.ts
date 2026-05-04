@@ -1,6 +1,5 @@
 import { dayCycle } from '@/flow/day-cycle';
 import { flow } from '@/flow/dispatcher';
-import type { SceneState } from '@/flow/scene-state';
 import { installKeyboardHandler } from '@/input/keyboard';
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
@@ -26,11 +25,7 @@ async function main(): Promise<void> {
   const restored = await save.loadCurrentRun();
   if (restored) {
     applyRunState(restored);
-    // P4 Task 1: sceneState schema includes future states (morning_briefing,
-    // after_work, action_overtime) added in Tasks 2-7. Cast is safe: any
-    // save written before those tasks existed will be action_day/main_menu/recap.
-    // Once scene-state.ts gains those variants (Task 5), the cast can be removed.
-    flow.request(restored.sceneState as SceneState);
+    flow.request(restored.sceneState);
     console.info('[boot] restored save:', restored.sceneState.kind);
   } else if (save.lastLoadError) {
     console.warn('[boot] save load failed:', save.lastLoadError);

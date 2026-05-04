@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FlowDispatcher } from '../../src/flow/dispatcher';
 import type { SceneState } from '../../src/flow/scene-state';
 
+const morningBriefing1: SceneState = { kind: 'morning_briefing', day: 1 };
 const day1: SceneState = { kind: 'action_day', day: 1, phase: 'morning' };
-const day1Pause: SceneState = { kind: 'pause', resumeTo: day1 };
 
 describe('FlowDispatcher', () => {
   let flow: FlowDispatcher;
@@ -19,14 +19,16 @@ describe('FlowDispatcher', () => {
   it('emits to subscribers on legal transition', () => {
     const listener = vi.fn();
     flow.subscribe(listener);
-    flow.request(day1);
+    // main_menu → morning_briefing is the new legal first step
+    flow.request(morningBriefing1);
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener).toHaveBeenCalledWith(day1, { kind: 'main_menu' });
-    expect(flow.state).toEqual(day1);
+    expect(listener).toHaveBeenCalledWith(morningBriefing1, { kind: 'main_menu' });
+    expect(flow.state).toEqual(morningBriefing1);
   });
 
   it('throws on illegal transition without changing state', () => {
-    flow.request(day1);
+    flow.request(morningBriefing1);
+    flow.request(day1); // morning_briefing → action_day is legal
     expect(() => flow.request({ kind: 'pause', resumeTo: { kind: 'main_menu' } })).toThrow(
       /Illegal transition/,
     );
@@ -37,15 +39,16 @@ describe('FlowDispatcher', () => {
     flow.subscribe(() => {
       flow.request({ kind: 'main_menu' });
     });
-    expect(() => flow.request(day1)).toThrow(/Re-entrant dispatch/);
+    // morning_briefing fires the listener which re-entrantly tries main_menu
+    expect(() => flow.request(morningBriefing1)).toThrow(/Re-entrant dispatch/);
   });
 
   it('unsubscribe stops emissions to that listener', () => {
     const listener = vi.fn();
     const unsub = flow.subscribe(listener);
-    flow.request(day1);
+    flow.request(morningBriefing1); // +1
     unsub();
-    flow.request(day1Pause);
+    flow.request(day1); // should NOT fire listener
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -61,6 +64,6 @@ describe('FlowDispatcher', () => {
   it('re-entrancy guard releases on illegal-transition throw (no permanent lock)', () => {
     expect(() => flow.request({ kind: 'pause', resumeTo: { kind: 'main_menu' } })).toThrow();
     // Recovery: a legal transition still works
-    expect(() => flow.request(day1)).not.toThrow();
+    expect(() => flow.request(morningBriefing1)).not.toThrow();
   });
 });

@@ -1,6 +1,7 @@
 import type { CardId } from '@/card/card';
 import type { ApSystem } from '@/economy/ap';
-import { POTENTIAL_DISMISSAL } from '@/economy/constants';
+import { OVERTIME_BONUS_AP, POTENTIAL_DISMISSAL } from '@/economy/constants';
+import type { EnergySystem } from '@/economy/energy';
 import { type KpiSystem, computeEffortNorm } from '@/economy/kpi';
 import { appendToArchive, buildRunSummary } from '@/run-meta/archive';
 import { autosave } from '@/save/autosave';
@@ -14,6 +15,7 @@ import type { GameOverReason } from './scene-state';
 export interface DayCycleDeps {
   ap: ApSystem;
   kpi: KpiSystem;
+  energy: EnergySystem; // needed by confirmAfterWork to gate overtime on canOvertime()
   calendar: CalendarSystem;
   flow: FlowDispatcher;
   playedThisDay: Set<CardId>;
@@ -22,8 +24,14 @@ export interface DayCycleDeps {
 }
 
 // Orchestrates day/month transitions. Subscribes to ap (depletion = day end)
-// and exposes confirmRecap()/confirmKpiReview() for UI to call when player
-// dismisses those screens.
+// and exposes confirmMorningBriefing() / confirmAfterWork() / confirmRecap() /
+// confirmKpiReview() for UI to call as the player advances through each screen.
+//
+// Full day chain (GDD scene-day-flow-controller.md Section A):
+//   morning_briefing → action_day → after_work →
+//     action_overtime → after_work (loop)
+//     recap (non-month-end) → morning_briefing (next day)
+//     kpi_review (month-end) → morning_briefing (next month) | gameover
 //
 // Per spec §6.5 (domain emitters): this controller is the single owner of
 // the "day ends now" decision. The workstation scene used to do this in
@@ -43,7 +51,12 @@ export class DayCycleController {
     this.attached = true;
     this.unsubscribers.push(
       this.deps.ap.onChanged((current) => {
-        if (current === 0 && this.deps.flow.state.kind === 'action_day') {
+        // AP=0 in action_day OR action_overtime both trigger day end (→ after_work).
+        if (
+          current === 0 &&
+          (this.deps.flow.state.kind === 'action_day' ||
+            this.deps.flow.state.kind === 'action_overtime')
+        ) {
           this.handleDayEnd();
         }
       }),
@@ -58,27 +71,68 @@ export class DayCycleController {
 
   // Public early-leave path (GDD: day ends when AP=0 OR player chooses to
   // leave early). Workstation 「下班」 button calls this. No-op if not in
-  // action_day (e.g. user double-clicked during transition).
+  // action_day or action_overtime (e.g. user double-clicked during transition).
   endDayEarly(): void {
-    if (this.deps.flow.state.kind === 'action_day') {
+    if (
+      this.deps.flow.state.kind === 'action_day' ||
+      this.deps.flow.state.kind === 'action_overtime'
+    ) {
       this.handleDayEnd();
     }
   }
 
+  // Routes to after_work regardless of month-end or weekly-recap day.
+  // The player makes the 加班 vs 按时下班 decision in after_work.
   private handleDayEnd(): void {
     const { calendar, flow } = this.deps;
-    if (calendar.isMonthEnd()) {
-      flow.request({ kind: 'kpi_review', monthIndex: calendar.monthIndex });
+    flow.request({ kind: 'after_work', day: calendar.currentDay });
+  }
+
+  // Called by morning_briefing UI when the player acknowledges the briefing.
+  // Transitions to action_day (morning phase) for the current day.
+  async confirmMorningBriefing(): Promise<void> {
+    const { calendar, flow } = this.deps;
+    if (flow.state.kind !== 'morning_briefing') {
+      throw new Error(
+        `confirmMorningBriefing called from non-morning_briefing state: ${flow.state.kind}`,
+      );
+    }
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+  }
+
+  // Called by the after_work overlay. The player decides:
+  //   'overtime'  → 加班: spend energy, grant +2 AP, transition to action_overtime.
+  //   'end_day'   → 按时下班: route to recap (non-month-end) or kpi_review (month-end).
+  async confirmAfterWork(decision: 'overtime' | 'end_day'): Promise<void> {
+    const { ap, energy, calendar, flow } = this.deps;
+    if (flow.state.kind !== 'after_work') {
+      throw new Error(`confirmAfterWork called from non-after_work state: ${flow.state.kind}`);
+    }
+    if (decision === 'overtime') {
+      if (!energy.canOvertime()) {
+        throw new Error('Cannot overtime: energy too low or burnout');
+      }
+      energy.reportOvertime();
+      ap.grantOvertime(OVERTIME_BONUS_AP); // +2 AP, capped at 10; see GDD Rule 4 comment in ap.ts
+      ap.reportOvertime(); // increment monthly effort counter
+      flow.request({ kind: 'action_overtime', day: calendar.currentDay });
     } else {
-      flow.request({
-        kind: 'recap',
-        recapKind: calendar.isWeeklyRecapDay() ? 'weekly' : 'daily',
-        day: calendar.currentDay,
-      });
+      // end_day: route to recap or kpi_review depending on month-end.
+      if (calendar.isMonthEnd()) {
+        flow.request({ kind: 'kpi_review', monthIndex: calendar.monthIndex });
+      } else {
+        flow.request({
+          kind: 'recap',
+          recapKind: calendar.isWeeklyRecapDay() ? 'weekly' : 'daily',
+          day: calendar.currentDay,
+        });
+      }
     }
   }
 
   // Called by the recap UI when the player dismisses the recap screen.
+  // Transitions to morning_briefing for the next day (instead of action_day
+  // directly) so the full GDD sub-mode chain is preserved.
   confirmRecap(): void {
     const { ap, calendar, flow, playedThisDay } = this.deps;
     if (flow.state.kind !== 'recap') {
@@ -87,7 +141,7 @@ export class DayCycleController {
     calendar.advanceDay();
     ap.resetForNewDay();
     playedThisDay.clear();
-    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    flow.request({ kind: 'morning_briefing', day: calendar.currentDay });
     void autosave();
   }
 
@@ -107,7 +161,7 @@ export class DayCycleController {
 
   // Called by the kpi_review UI when the player confirms. Runs the monthly
   // recalc, evaluates game-over conditions, then either advances to the
-  // next month or transitions to gameover.
+  // next month (→ morning_briefing) or transitions to gameover.
   // async because gameover path writes archive before transitioning.
   async confirmKpiReview(): Promise<void> {
     const { ap, kpi, calendar, flow, playedThisDay } = this.deps;
@@ -153,20 +207,21 @@ export class DayCycleController {
       return;
     }
 
-    // Step 4: pass — advance month, reset day-state, return to action_day.
+    // Step 4: pass — advance month, reset day-state, go to morning_briefing.
     // Effort counters reset AFTER recalc + game-over checks (per GDD order).
     calendar.advanceMonth();
     kpi.advanceMonth();
     ap.resetForNewDay();
     ap.resetEffortCounters();
     playedThisDay.clear();
-    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    flow.request({ kind: 'morning_briefing', day: calendar.currentDay });
     void autosave();
   }
 }
 
 import { playedThisDay as defaultPlayedThisDay } from '@/card/play';
 import { ap as defaultAp } from '@/economy/ap';
+import { energy as defaultEnergy } from '@/economy/energy';
 import { kpi as defaultKpi } from '@/economy/kpi';
 import { calendar as defaultCalendar } from './calendar';
 import { flow as defaultFlow } from './dispatcher';
@@ -176,6 +231,7 @@ import { flow as defaultFlow } from './dispatcher';
 export const dayCycle = new DayCycleController({
   ap: defaultAp,
   kpi: defaultKpi,
+  energy: defaultEnergy,
   calendar: defaultCalendar,
   flow: defaultFlow,
   playedThisDay: defaultPlayedThisDay,

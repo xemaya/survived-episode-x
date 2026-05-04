@@ -5,14 +5,22 @@ import type { SceneState } from './scene-state';
 // file and see the full universe of allowed moves.
 //
 // P3 adds: recap (daily/weekly), kpi_review (month-end), gameover (terminal).
-// AFTER_WORK and MORNING_BRIEFING from the GDD are collapsed into transient
-// transitions handled by day-cycle.ts (no visible state in P3).
+// P4 Task 5 adds: morning_briefing, after_work, action_overtime.
+// The canonical day chain is now:
+//   morning_briefing → action_day → after_work →
+//     action_overtime → after_work (loop)
+//     recap (non-month-end)
+//     kpi_review (month-end) → morning_briefing (next month) | gameover
+//   recap → morning_briefing (next day)
 
 export function isLegalTransition(from: SceneState, to: SceneState): boolean {
-  // pause: enterable only from action_day (P1 invariant);
-  // resumeTo must deep-equal the current state.
+  // pause: enterable from action_day OR action_overtime (can pause during
+  // overtime); resumeTo must deep-equal the current state.
   if (to.kind === 'pause') {
-    return from.kind === 'action_day' && JSON.stringify(to.resumeTo) === JSON.stringify(from);
+    return (
+      (from.kind === 'action_day' || from.kind === 'action_overtime') &&
+      JSON.stringify(to.resumeTo) === JSON.stringify(from)
+    );
   }
 
   // archive_list: enterable from main_menu (player clicks 档案 button)
@@ -32,34 +40,51 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
     );
   }
 
-  // action_day: enterable from main_menu (game start), pause (resume),
-  // recap (next day after recap dismissed), kpi_review (next month after
-  // confirm), or another action_day (rare day-skip; allowed for tests).
+  // morning_briefing: entry point for every new day. Reachable from:
+  //   main_menu (game start), recap (next day), kpi_review (next month pass).
+  if (to.kind === 'morning_briefing') {
+    return from.kind === 'main_menu' || from.kind === 'recap' || from.kind === 'kpi_review';
+  }
+
+  // action_day: enterable from morning_briefing (normal start), pause (resume),
+  // after_work (overtime declined OR returned from overtime), or another
+  // action_day (rare day-skip; allowed for tests).
+  // NOTE: recap → action_day and kpi_review → action_day are NO LONGER LEGAL.
+  //       Both now go via morning_briefing first.
   if (to.kind === 'action_day') {
     return (
-      from.kind === 'main_menu' ||
+      from.kind === 'morning_briefing' ||
       from.kind === 'pause' ||
-      from.kind === 'recap' ||
-      from.kind === 'kpi_review' ||
+      from.kind === 'after_work' ||
       from.kind === 'action_day'
     );
   }
 
-  // recap: enterable only from action_day (AP=0 day-end on a non-month-end day).
+  // after_work: enterable from action_day (AP=0 or early-leave) or
+  // action_overtime (overtime AP=0 or overtime early-leave).
+  if (to.kind === 'after_work') {
+    return from.kind === 'action_day' || from.kind === 'action_overtime';
+  }
+
+  // action_overtime: enterable from after_work (player chose 加班).
+  if (to.kind === 'action_overtime') {
+    return from.kind === 'after_work';
+  }
+
+  // recap: enterable from after_work (normal day end, non-month-end day).
+  // Previously reachable from action_day directly — that path is now illegal.
   if (to.kind === 'recap') {
-    return from.kind === 'action_day';
+    return from.kind === 'after_work';
   }
 
-  // kpi_review: enterable only from action_day (AP=0 day-end on a month-end day).
+  // kpi_review: enterable from after_work on a month-end day.
+  // Previously reachable from action_day directly — that path is now illegal.
   if (to.kind === 'kpi_review') {
-    return from.kind === 'action_day';
+    return from.kind === 'after_work';
   }
 
-  // gameover: enterable only from kpi_review (after Formula B recalc + game-over
-  // condition triggered). DISMISSAL_SEVERE could theoretically fire from action_day
-  // mid-month, but P3 only checks at month-end via kpi_review, so action_day →
-  // gameover is NOT in the legal set yet (deferred to P4+ when mid-month dismissal
-  // path lands).
+  // gameover: enterable only from kpi_review (after Formula B recalc +
+  // game-over condition triggered). Mid-month dismissal path deferred to P4+.
   if (to.kind === 'gameover') {
     return from.kind === 'kpi_review';
   }
