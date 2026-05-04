@@ -1,3 +1,4 @@
+import { resetPlayedThisDay } from '@/card/play';
 import { ap } from '@/economy/ap';
 import { kpi } from '@/economy/kpi';
 import type { SceneState } from '@/flow/scene-state';
@@ -172,6 +173,53 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   // ── Card hand (code-drawn UI; loads its own face sprites) ───────────────
   const handHandles = await mountCardHand(ctx.worldLayer, ctx.app);
   teardowns.push(() => handHandles.destroy());
+
+  // ── Day-end auto-advance ────────────────────────────────────────────────
+  // When AP drops to 0, surface a 「结束今日」 prompt (drawn as a Text node
+  // above the cards). Click anywhere on the canvas (or the prompt) to
+  // advance: AP refills, playedThisDay clears, day increments. P3 inserts
+  // a KPI Review screen between these steps; P2 keeps it instant.
+  const endDayPrompt = new Text({
+    text: '点击屏幕进入下一天',
+    style: {
+      fontFamily: 'PingFang SC, -apple-system, sans-serif',
+      fontSize: 14,
+      fill: 0xc8a85a,
+      fontWeight: '700',
+    },
+  });
+  endDayPrompt.anchor.set(0.5);
+  endDayPrompt.x = 320;
+  endDayPrompt.y = 230;
+  endDayPrompt.visible = false;
+  ctx.worldLayer.addChild(endDayPrompt);
+
+  const advanceDay = (): void => {
+    resetPlayedThisDay();
+    ap.resetForNewDay();
+    endDayPrompt.visible = false;
+    // P3+: increment day in flow state via flow.request(action_day, day+1).
+    // For P2 we leave the FSM at day=1 — visual loop still closes because
+    // AP refills + cards re-enable.
+  };
+
+  // Only react to background clicks AFTER AP=0; cards still take priority
+  // because their eventMode is 'static' and they bubble first.
+  ctx.app.stage.eventMode = 'static';
+  const onStageClick = () => {
+    if (ap.current === 0) advanceDay();
+  };
+  ctx.app.stage.on('pointertap', onStageClick);
+
+  const unsubApForPrompt = ap.onChanged((current) => {
+    endDayPrompt.visible = current === 0;
+  });
+
+  teardowns.push(() => {
+    ctx.app.stage.off('pointertap', onStageClick);
+    unsubApForPrompt();
+    endDayPrompt.destroy();
+  });
 
   return () => {
     for (const t of teardowns) t();
