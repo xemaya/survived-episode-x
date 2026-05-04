@@ -1,5 +1,6 @@
 import { ap } from '@/economy/ap';
 import { kpi } from '@/economy/kpi';
+import { calendar } from '@/flow/calendar';
 import type { SceneState } from '@/flow/scene-state';
 import { mountCardHand } from '@/render/cards/hand';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
@@ -20,10 +21,6 @@ interface PropSpec {
 }
 
 const STATIC_PROPS: ReadonlyArray<PropSpec> = [
-  // Calendar — top-left wall mount. Source is 256×138; at scale 0.25
-  // displays ~64×35 logical → ~190×100 actual on a 3× window. Was 0.12
-  // (~31×17) which read as illegible at any window size.
-  { url: 'sprites/hud/calendar_month_day_1.png', x: 70, y: 60, scale: 0.25, label: 'calendar' },
   // Sticky note — to the right of monitor (decorative; AP slot row drawn separately)
   { url: 'sprites/hud/sticky_blank.png', x: 470, y: 200, scale: 0.1, label: 'sticky' },
   // Mug — bottom-left of desk. Static in P2 (energy not implemented; still
@@ -91,6 +88,50 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   teardowns.push(() => {
     unsubKpi();
     monitorContainer.destroy({ children: true });
+  });
+
+  // ── Calendar (date binding, swappable sprite) ───────────────────────────
+  // Subscribes to calendar.onDateChanged. P3 has 4 calendar sprites
+  // available; map currentDay → nearest available frame.
+  const calendarContainer = new Container();
+  calendarContainer.label = 'calendar';
+  calendarContainer.x = 70;
+  calendarContainer.y = 60;
+  ctx.worldLayer.addChild(calendarContainer);
+
+  const CALENDAR_FRAMES = {
+    start: 'sprites/hud/calendar_month_day_1.png',
+    mid: 'sprites/hud/calendar_mid_week.png',
+    weekend: 'sprites/hud/calendar_weekend_marked.png',
+    end: 'sprites/hud/calendar_month_end.png',
+  } as const;
+
+  function pickCalendarFrame(day: number): string {
+    if (day <= 1) return CALENDAR_FRAMES.start;
+    if (day <= 4) return CALENDAR_FRAMES.mid;
+    if (day <= 6) return CALENDAR_FRAMES.weekend;
+    return CALENDAR_FRAMES.end; // day 7 = month end
+  }
+
+  let currentCalendarSprite: Sprite | null = null;
+  const swapCalendarTo = async (url: string) => {
+    const tex = await Assets.load(url);
+    tex.source.scaleMode = 'linear';
+    if (currentCalendarSprite) currentCalendarSprite.destroy();
+    const s = new Sprite(tex);
+    s.anchor.set(0.5);
+    s.scale.set(0.25);
+    calendarContainer.addChild(s);
+    currentCalendarSprite = s;
+  };
+  await swapCalendarTo(pickCalendarFrame(calendar.currentDay));
+
+  const unsubCalendar = calendar.onDateChanged(() => {
+    void swapCalendarTo(pickCalendarFrame(calendar.currentDay));
+  });
+  teardowns.push(() => {
+    unsubCalendar();
+    calendarContainer.destroy({ children: true });
   });
 
   // ── Sticky-note AP row (code-drawn, 8 slots) ────────────────────────────
