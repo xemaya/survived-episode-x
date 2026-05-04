@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { Card } from '../../src/card/card';
+import { playCard } from '../../src/card/play';
 import { ApSystem } from '../../src/economy/ap';
 import { MONTH_DAYS } from '../../src/economy/constants';
 import { KpiSystem } from '../../src/economy/kpi';
@@ -162,5 +164,66 @@ describe('DayCycleController', () => {
     expect(meta.archive.length).toBe(1);
     expect(meta.archive[0]?.reason).toBe('dismissal_severe');
     expect(meta.nextRunId).toBe(2);
+  });
+
+  it('confirmKpiReview pass branch resets effort counters', async () => {
+    // Build up some effort counters before month-end.
+    ap.reportOvertime();
+    ap.reportHeroCardPlayed();
+    ap.reportOverage();
+    expect(ap.effortOvertime).toBe(1);
+    expect(ap.effortHero).toBe(1);
+    expect(ap.effortOverage).toBe(1);
+
+    // Advance to month-end and pass the review.
+    for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    kpi.applyContribution(100); // at threshold → pass
+    ap.spend(8);
+    await controller.confirmKpiReview();
+    expect(flow.state.kind).toBe('action_day');
+
+    // All effort counters must be zeroed in the pass branch.
+    expect(ap.effortOvertime).toBe(0);
+    expect(ap.effortHero).toBe(0);
+    expect(ap.effortOverage).toBe(0);
+  });
+
+  it('confirmKpiReview gameover branch does NOT reset effort counters', async () => {
+    // Effort counters should be preserved so the archive snapshot captures them.
+    ap.reportOvertime();
+    ap.reportHeroCardPlayed();
+
+    for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    kpi.applyContribution(50); // below threshold → dismissal_severe
+    ap.spend(8);
+    await controller.confirmKpiReview();
+    expect(flow.state.kind).toBe('gameover');
+
+    // Counters are NOT reset in the gameover path — they were captured in the snapshot.
+    expect(ap.effortOvertime).toBe(1);
+    expect(ap.effortHero).toBe(1);
+  });
+
+  it('isHero card play increments ap.effortHero via playCard', () => {
+    // Sanity cross-module: playCard with an isHero card increments the counter.
+    // We use a minimal hero card and an explicit ctx to avoid touching singletons.
+    const heroCard: Card = {
+      id: 'test_hero_card',
+      apCost: 1,
+      isHero: true,
+      faceUrl: 'test.png',
+      title: 'Test Hero',
+      effects: [],
+    };
+    const localPlayedThisDay = new Set<string>();
+    playCard(heroCard, {
+      ap,
+      kpi,
+      onCardPlayed: () => {},
+      playedThisDay: localPlayedThisDay,
+    });
+    expect(ap.effortHero).toBe(1);
   });
 });

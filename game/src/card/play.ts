@@ -1,5 +1,6 @@
 import { type ApSystem, ap as defaultAp } from '@/economy/ap';
 import { type KpiSystem, kpi as defaultKpi } from '@/economy/kpi';
+import { autosave } from '@/save/autosave';
 import type { Card, CardId } from './card';
 
 // Context for playCard. Tests pass their own instances; production calls
@@ -61,10 +62,12 @@ export function playCard(
   // Step 1: emit card_played for trigger lookup.
   ctx.onCardPlayed(card.id);
 
-  // Step 2 (P2 stub): if isHero, GDD says
-  // "APEconomy.report_hero_card_played()". P3 wires this into effort_norm.
-  // For P2 we just record the flag implicitly via the played card's data.
-  // No state change here.
+  // Step 2: hero card report — per GDD action-card-system 7-step sequence.
+  // reportHeroCardPlayed() increments the monthly hero counter used by
+  // Formula B's α term (computeEffortNorm in kpi.ts).
+  if (card.isHero) {
+    ctx.ap.reportHeroCardPlayed();
+  }
 
   // Step 3: apply kpi_contribution from each effect.
   for (const effect of card.effects) {
@@ -77,6 +80,9 @@ export function playCard(
 
   // Steps 4 (NPC), 5 (mutex), 6 (cooldown) deferred to P3+.
   // Step 7 (history) was committed up-front above for UI-render correctness.
+
+  // Autosave: fire-and-forget after every card play so progress survives crashes.
+  void autosave();
 }
 
 // Test/UI helper: shared mutable set of cards played this day. Reset

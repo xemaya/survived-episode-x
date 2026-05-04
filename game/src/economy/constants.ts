@@ -46,6 +46,14 @@ export const POTENTIAL_DISMISSAL = -0.15;
 // re-tunes to the design value once core loop is verified.
 export const MONTH_DAYS = 7;
 
+// ─── Effort normalisation (Formula B α term) ──────────────────────────────
+// design/gdd/ap-economy-system.md §effort-accumulators. Monthly caps used
+// to clamp each raw counter to [0, 1] before weighting. Weights sum to 0.95
+// (not 1.0) so zero-effort players always have a non-zero α floor.
+export const MAX_MONTH_OVERTIME = 20;
+export const MAX_MONTH_HERO = 10;
+export const MAX_MONTH_OVERAGE = 10;
+
 // ─── Energy ───────────────────────────────────────────────────────────────
 // design/gdd/ap-economy-system.md energy section. Cross-day [0,100].
 // Drained by overtime, restored by early-leave + weekend rest.

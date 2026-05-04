@@ -1,8 +1,9 @@
 import type { CardId } from '@/card/card';
 import type { ApSystem } from '@/economy/ap';
 import { POTENTIAL_DISMISSAL } from '@/economy/constants';
-import type { KpiSystem } from '@/economy/kpi';
+import { type KpiSystem, computeEffortNorm } from '@/economy/kpi';
 import { appendToArchive, buildRunSummary } from '@/run-meta/archive';
+import { autosave } from '@/save/autosave';
 import { snapshotCurrentRunState } from '@/save/snapshot';
 import { save as defaultSave } from '@/save/system';
 import type { SaveSystem } from '@/save/system';
@@ -87,6 +88,7 @@ export class DayCycleController {
     ap.resetForNewDay();
     playedThisDay.clear();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    void autosave();
   }
 
   // Writes the run archive atomically at GameOver time.
@@ -130,9 +132,11 @@ export class DayCycleController {
       return;
     }
 
-    // Step 2: apply Formula B recalc (effort_norm = 0 in P3). The recalc
-    // internally clamps potential to [POTENTIAL_CLAMP_MIN, POTENTIAL_CLAMP_MAX].
-    kpi.applyMonthlyRecalc(0);
+    // Step 2: apply Formula B recalc with real effort_norm from ap counters.
+    // Counters are reset AFTER game-over checks so that the gameover snapshot
+    // path (commitGameOverArchive → snapshotCurrentRunState) captures them.
+    const effortNorm = computeEffortNorm(ap.effortOvertime, ap.effortHero, ap.effortOverage);
+    kpi.applyMonthlyRecalc(effortNorm);
 
     // Step 3: capacity-exceeded check (post-recalc). Use kpi.capacityNow
     // — the KpiSystem owns its own month counter and computes capacity
@@ -150,11 +154,14 @@ export class DayCycleController {
     }
 
     // Step 4: pass — advance month, reset day-state, return to action_day.
+    // Effort counters reset AFTER recalc + game-over checks (per GDD order).
     calendar.advanceMonth();
     kpi.advanceMonth();
     ap.resetForNewDay();
+    ap.resetEffortCounters();
     playedThisDay.clear();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    void autosave();
   }
 }
 

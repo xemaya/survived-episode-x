@@ -14,10 +14,14 @@ export class ApSystem {
   private value: number = BASE_AP_PER_DAY;
   private listeners = new Set<ApListener>();
 
-  // Stub fields for snapshot/restore plumbing; real wiring lands in Task 4.
+  // Effort accumulators — per GDD ap-economy-system.md §effort-tracking.
+  // Reset monthly at month-end AFTER applyMonthlyRecalc (so the gameover
+  // snapshot path captures them). Counters do NOT emit apChanged; they are
+  // a separate reporting channel.
   private _effortOvertime = 0;
   private _effortHero = 0;
   private _effortOverage = 0;
+
   get effortOvertime(): number {
     return this._effortOvertime;
   }
@@ -26,6 +30,37 @@ export class ApSystem {
   }
   get effortOverage(): number {
     return this._effortOverage;
+  }
+
+  // Called when player declares overtime for the day.
+  reportOvertime(): void {
+    this._effortOvertime += 1;
+  }
+
+  // Called when a card with isHero=true is played.
+  reportHeroCardPlayed(): void {
+    this._effortHero += 1;
+  }
+
+  // Called when a card causes a KPI overage (Task 6+).
+  // Exposed now for API completeness; no callers yet.
+  reportOverage(): void {
+    this._effortOverage += 1;
+  }
+
+  // Resets all three counters to 0. Called at month-end AFTER recalc + game-
+  // over checks (pass branch only — gameover branch must snapshot them first).
+  resetEffortCounters(): void {
+    this._effortOvertime = 0;
+    this._effortHero = 0;
+    this._effortOverage = 0;
+  }
+
+  // Used by restore.ts to reinstate saved effort state on boot.
+  setEffortForRestore(overtime: number, hero: number, overage: number): void {
+    this._effortOvertime = overtime;
+    this._effortHero = hero;
+    this._effortOverage = overage;
   }
 
   get current(): number {

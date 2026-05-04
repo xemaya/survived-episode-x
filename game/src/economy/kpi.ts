@@ -5,12 +5,26 @@ import {
   KPI_EFFORT_WEIGHT,
   KPI_POTENTIAL_WEIGHT,
   KPI_TENURE_WEIGHT,
+  MAX_MONTH_HERO,
+  MAX_MONTH_OVERAGE,
+  MAX_MONTH_OVERTIME,
   MONTHLY_THRESHOLD_INITIAL,
   POTENTIAL_CLAMP_MAX,
   POTENTIAL_CLAMP_MIN,
 } from './constants';
 
 export type KpiListener = (actualKpi: number, delta: number) => void;
+
+// Computes the effort normalisation scalar fed into Formula B's α term.
+// Each raw counter is clamped to its monthly cap then weighted. Weights
+// 0.45 / 0.20 / 0.30 sum to 0.95 (cap) — per GDD kpi-reverse-threshold
+// §effort-contribution.
+export function computeEffortNorm(overtime: number, hero: number, overage: number): number {
+  const otNorm = Math.min(overtime / MAX_MONTH_OVERTIME, 1.0);
+  const heroNorm = Math.min(hero / MAX_MONTH_HERO, 1.0);
+  const ovNorm = Math.min(overage / MAX_MONTH_OVERAGE, 1.0);
+  return Math.min(0.95, 0.45 * otNorm + 0.2 * heroNorm + 0.3 * ovNorm);
+}
 
 // design/gdd/kpi-reverse-threshold-system.md Formula B:
 // next_threshold = current × (1 + α·effort_norm)

@@ -54,7 +54,7 @@ export const DEFENSE_CARDS_P2: ReadonlyArray<Card> = [
   {
     id: 'card_call_in_sick',
     apCost: 3,
-    isHero: false,
+    isHero: true,
     faceUrl: 'sprites/cards/defense/call_in_sick.png',
     title: '请病假',
     effects: [{ kind: 'kpi_contribution', amount: 18 }],

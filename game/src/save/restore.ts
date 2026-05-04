@@ -8,14 +8,14 @@ import type { RunState } from './schema';
 // save exists. The reverse direction (snapshot singletons → RunState)
 // is in snapshot.ts (used for autosave).
 export function applyRunState(state: RunState): void {
-  // AP: directly set internal value via spend/refill primitives is awkward;
-  // since AP is reset-only or spend-only, we expose a setForRestore method
-  // on ApSystem (added in Task 4 alongside effort counters). For P4 Task 1
-  // we fake it with a fresh refill + spend the difference.
+  // AP: restore current value via reset + spend.
   ap.resetForNewDay();
   if (state.apCurrent < ap.max) {
     ap.spend(ap.max - state.apCurrent);
   }
+
+  // Effort counters: restore from saved state.
+  ap.setEffortForRestore(state.effortOvertime, state.effortHero, state.effortOverage);
 
   // KPI: similar — needs a setForRestore that bypasses the additive guard.
   // For P4 Task 1, only reset to defaults; Task 4 wires real restore.
