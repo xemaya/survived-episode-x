@@ -640,7 +640,7 @@ Semver：0.1.0 起步，0.2.0 第一公开 demo，1.0.0 正式。`game/package.j
 | **P0 Hello Pixi in Tauri** | ✅ 完成 2026-05-04（tag `v0.1.0-p0`） | `game/` 骨架 + 13 个 commits；`pnpm tauri build` 产出 `.app` + 27MB `.dmg`，安装后 1280×720 窗口居中显示主角精灵。完整执行记录见 `docs/superpowers/plans/2026-05-03-slice1-p0-hello-pixi-tauri.md`。 |
 | **P1 FSM + 主菜单 + 进 day 1** | ✅ 完成 2026-05-04（tag `v0.2.0-p1`） | flow/ FSM (Red Line 4 runtime-enforced) + Preact main menu + workstation 4 props + Esc pause overlay。Plan: `docs/superpowers/plans/2026-05-04-slice1-p1-fsm-main-menu.md`。 |
 | **P2 AP / KPI / 卡牌循环** | ✅ 完成 2026-05-04（tag `v0.3.0-p2`，scope C: hybrid） | AP=8 + 8 槽贴纸行 + KPI Formula B（potential 项实装）+ 4 张卡（4 状态机 + 7 步前 3 步）+ monitor KPI 绑定 + AP=0 一日结束。+ "modern indie pixel art" 渲染管线（linear scale + devicePixelRatio）。Plan: `docs/superpowers/plans/2026-05-04-slice1-p2-ap-kpi-cards.md`。 |
-| **P3 结束今日 → KPI Review → GameOver/下一天** | 2d | "结束今日"或 AP=0 自动 → KPI Review → 任一超阈值 GameOver；否则 day += 1 |
+| **P3 结束今日 → KPI Review → GameOver/下一天** | ✅ 完成 2026-05-04（tag `v0.4.0-p3`，scope B: GDD MVP） | calendar + day-cycle controller + 4 新状态（recap/kpi_review/gameover）+ Preact 浮层（daily/weekly/KPI review/game over）+ Formula B 月末结算 + 2 死法 + 「下班」 早退按钮 + 6 卡占位手牌。energy/Archive/effort 推到 P4。Plan: `docs/superpowers/plans/2026-05-04-slice1-p3-day-cycle-kpi-review-gameover.md`。 |
 | **P4 Save / Load** | 1d | "继续"加载 day/AP/KPI/手牌；切场景前自动写盘 |
 | **P5 打包 + 发给朋友** | 1d | 生 .icns；产 .dmg；记录朋友 5 分钟内的反馈 |
 
