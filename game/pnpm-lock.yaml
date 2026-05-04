@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@tauri-apps/plugin-fs':
+        specifier: ~2.0.4
+        version: 2.0.4
       howler:
         specifier: ~2.2.4
         version: 2.2.4
@@ -17,6 +20,9 @@ importers:
       preact:
         specifier: ~10.25.4
         version: 10.25.4
+      zod:
+        specifier: ~3.23.8
+        version: 3.23.8
     devDependencies:
       '@biomejs/biome':
         specifier: ~1.9.4
@@ -751,6 +757,9 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
+  '@tauri-apps/plugin-fs@2.0.4':
+    resolution: {integrity: sha512-hOq0OVGBz2gnsUnV49nlcj5ognlONvbZsO/uvDE+/6VFhGZrCakW1xiHjIn8A9XFf2w+FfhG45H5hIMDAOrXTQ==}
+
   '@types/css-font-loading-module@0.0.12':
     resolution: {integrity: sha512-x2tZZYkSxXqWvTDgveSynfjq/T2HyiZHXb00j/+gy19yp70PHCizM48XFdjBCWH7eHBD0R5i/pw9yMBP/BH5uA==}
 
@@ -1188,6 +1197,9 @@ packages:
 
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
+
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
 snapshots:
 
@@ -1692,6 +1704,10 @@ snapshots:
       '@tauri-apps/cli-win32-ia32-msvc': 2.1.0
       '@tauri-apps/cli-win32-x64-msvc': 2.1.0
 
+  '@tauri-apps/plugin-fs@2.0.4':
+    dependencies:
+      '@tauri-apps/api': 2.1.1
+
   '@types/css-font-loading-module@0.0.12': {}
 
   '@types/earcut@2.1.4': {}
@@ -2124,3 +2140,5 @@ snapshots:
   yallist@3.1.1: {}
 
   zimmerframe@1.1.4: {}
+
+  zod@3.23.8: {}

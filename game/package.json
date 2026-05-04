@@ -30,8 +30,10 @@
     "vitest": "~2.1.9"
   },
   "dependencies": {
+    "@tauri-apps/plugin-fs": "~2.0.4",
     "howler": "~2.2.4",
     "pixi.js": "~8.5.0",
-    "preact": "~10.25.4"
+    "preact": "~10.25.4",
+    "zod": "~3.23.8"
   }
 }

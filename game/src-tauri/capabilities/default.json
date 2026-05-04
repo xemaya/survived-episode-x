@@ -3,5 +3,14 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "fs:default",
+    "fs:allow-app-write",
+    "fs:allow-app-read",
+    "fs:allow-app-meta",
+    "fs:allow-mkdir",
+    "fs:allow-rename",
+    "fs:allow-exists"
+  ]
 }
