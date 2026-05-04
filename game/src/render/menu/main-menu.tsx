@@ -26,6 +26,8 @@ export function MainMenu(): preact.JSX.Element {
     });
   };
 
+  const viewArchive = (): void => flow.request({ kind: 'archive_list' });
+
   return (
     <div class="menu-root menu-root--main">
       <h1 class="menu-title">活过第 X 集</h1>
@@ -46,6 +48,9 @@ export function MainMenu(): preact.JSX.Element {
           style={{ opacity: hasSave ? 1 : 0.4, cursor: hasSave ? 'pointer' : 'not-allowed' }}
         >
           继续
+        </button>
+        <button type="button" class="menu-button" onClick={viewArchive}>
+          档案
         </button>
       </div>
     </div>

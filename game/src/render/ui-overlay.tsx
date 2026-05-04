@@ -2,6 +2,7 @@ import { flow } from '@/flow/dispatcher';
 import type { SceneState } from '@/flow/scene-state';
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { ArchiveList } from './menu/archive-list';
 import { DailyRecap } from './menu/daily-recap';
 import { GameOver } from './menu/gameover';
 import { KpiReview } from './menu/kpi-review';
@@ -27,7 +28,8 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
       state.kind === 'pause' ||
       state.kind === 'recap' ||
       state.kind === 'kpi_review' ||
-      state.kind === 'gameover';
+      state.kind === 'gameover' ||
+      state.kind === 'archive_list';
     host.style.display = hasOverlay ? 'flex' : 'none';
     host.style.pointerEvents = hasOverlay ? 'auto' : 'none';
   }, [state.kind, host]);
@@ -54,6 +56,9 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     case 'gameover':
       assertOverlayAllowed(state);
       return <GameOver reason={state.reason} monthIndex={state.monthIndex} />;
+    case 'archive_list':
+      assertOverlayAllowed(state);
+      return <ArchiveList />;
   }
 }
 

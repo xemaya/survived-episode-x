@@ -2,8 +2,13 @@ import type { CardId } from '@/card/card';
 import type { ApSystem } from '@/economy/ap';
 import { POTENTIAL_DISMISSAL } from '@/economy/constants';
 import type { KpiSystem } from '@/economy/kpi';
+import { appendToArchive, buildRunSummary } from '@/run-meta/archive';
+import { snapshotCurrentRunState } from '@/save/snapshot';
+import { save as defaultSave } from '@/save/system';
+import type { SaveSystem } from '@/save/system';
 import type { CalendarSystem } from './calendar';
 import type { FlowDispatcher } from './dispatcher';
+import type { GameOverReason } from './scene-state';
 
 export interface DayCycleDeps {
   ap: ApSystem;
@@ -11,6 +16,8 @@ export interface DayCycleDeps {
   calendar: CalendarSystem;
   flow: FlowDispatcher;
   playedThisDay: Set<CardId>;
+  // Optional: allows tests to inject a mock save. Defaults to production singleton.
+  save?: SaveSystem;
 }
 
 // Orchestrates day/month transitions. Subscribes to ap (depletion = day end)
@@ -82,10 +89,25 @@ export class DayCycleController {
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
   }
 
+  // Writes the run archive atomically at GameOver time.
+  // Called BEFORE flow.request(gameover) so that by the time GameOver
+  // renders, the save side is already committed.
+  private async commitGameOverArchive(reason: GameOverReason): Promise<void> {
+    const saveSystem = this.deps.save ?? defaultSave;
+    const meta = await saveSystem.loadMeta();
+    const runId = meta.nextRunId;
+    const snapshot = snapshotCurrentRunState();
+    const summary = buildRunSummary(runId, reason, snapshot);
+    await saveSystem.writeArchiveSnapshot(runId, snapshot);
+    await saveSystem.writeMeta(appendToArchive(meta, summary));
+    await saveSystem.clearCurrentRun();
+  }
+
   // Called by the kpi_review UI when the player confirms. Runs the monthly
   // recalc, evaluates game-over conditions, then either advances to the
   // next month or transitions to gameover.
-  confirmKpiReview(): void {
+  // async because gameover path writes archive before transitioning.
+  async confirmKpiReview(): Promise<void> {
     const { ap, kpi, calendar, flow, playedThisDay } = this.deps;
     if (flow.state.kind !== 'kpi_review') {
       throw new Error(`confirmKpiReview called from non-kpi_review state: ${flow.state.kind}`);
@@ -99,6 +121,7 @@ export class DayCycleController {
     // make this gate unreachable.
     const rawPotential = (kpi.actualKpi - kpi.monthlyThreshold) / kpi.monthlyThreshold;
     if (rawPotential < POTENTIAL_DISMISSAL) {
+      await this.commitGameOverArchive('dismissal_severe');
       flow.request({
         kind: 'gameover',
         reason: 'dismissal_severe',
@@ -117,6 +140,7 @@ export class DayCycleController {
     // setup) must keep kpi.month in sync with calendar.monthIndex via
     // the kpi.advanceMonth() call in Step 4.
     if (kpi.monthlyThreshold > kpi.capacityNow) {
+      await this.commitGameOverArchive('kpi_exceeds_capacity');
       flow.request({
         kind: 'gameover',
         reason: 'kpi_exceeds_capacity',

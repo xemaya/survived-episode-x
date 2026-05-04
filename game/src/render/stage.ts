@@ -11,6 +11,7 @@ const OVERLAY_ALLOWED: ReadonlySet<SceneState['kind']> = new Set([
   'recap',
   'kpi_review',
   'gameover',
+  'archive_list',
   // future: 'settings'
 ]);
 

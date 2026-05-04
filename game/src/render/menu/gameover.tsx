@@ -8,8 +8,8 @@ interface Props {
 
 // design/gdd/kpi-review-game-over-ui.md: ironic dismissal certificate.
 // "恭喜晋升" stamp on every variant (anti-励志 lint whitelist). Body
-// copy varies by reason. Click anywhere → main_menu (P3 skips Archive
-// flow — P4 adds it alongside save persistence).
+// copy varies by reason. Click anywhere → archive_list (P4 wires archive
+// flow — previously was main_menu in P3).
 
 const REASON_BODY: Record<GameOverReason, string> = {
   kpi_exceeds_capacity: '本月 KPI 阈值已超出承担能力上限。\n经评议，您的产出潜力已饱和。',
@@ -17,14 +17,14 @@ const REASON_BODY: Record<GameOverReason, string> = {
 };
 
 export function GameOver({ reason, monthIndex }: Props): preact.JSX.Element {
-  const goToMainMenu = (): void => {
-    flow.request({ kind: 'main_menu' });
+  const goToArchive = (): void => {
+    flow.request({ kind: 'archive_list' });
   };
 
   return (
     <button
       class="menu-root menu-root--gameover"
-      onClick={goToMainMenu}
+      onClick={goToArchive}
       style={{ cursor: 'pointer' }}
       type="button"
     >
@@ -34,7 +34,7 @@ export function GameOver({ reason, monthIndex }: Props): preact.JSX.Element {
         <p class="gameover-reason">{REASON_BODY[reason]}</p>
         <p class="gameover-stamp">恭喜晋升</p>
       </div>
-      <p class="recap-hint">点击任意位置回到主菜单</p>
+      <p class="recap-hint">点击任意位置查看归档</p>
     </button>
   );
 }

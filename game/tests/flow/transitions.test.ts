@@ -12,6 +12,7 @@ const weeklyRecap: SceneState = { kind: 'recap', recapKind: 'weekly', day: 5 };
 const kpiReview: SceneState = { kind: 'kpi_review', monthIndex: 1 };
 const gameOverCap: SceneState = { kind: 'gameover', reason: 'kpi_exceeds_capacity', monthIndex: 1 };
 const gameOverDis: SceneState = { kind: 'gameover', reason: 'dismissal_severe', monthIndex: 1 };
+const archiveList: SceneState = { kind: 'archive_list' };
 
 describe('isLegalTransition (P1 subset)', () => {
   it('main_menu → action_day is legal (game start)', () => {
@@ -115,5 +116,24 @@ describe('isLegalTransition (P3: day-cycle, kpi_review, gameover)', () => {
   it('pause is unchanged: P1 invariant still holds (pause only from action_day with matching resumeTo)', () => {
     expect(isLegalTransition(day1, day1Pause)).toBe(true);
     expect(isLegalTransition(mainMenu, mainMenuPause)).toBe(false);
+  });
+});
+
+describe('isLegalTransition (P4: archive_list)', () => {
+  it('main_menu → archive_list is legal (player clicks 档案 button)', () => {
+    expect(isLegalTransition(mainMenu, archiveList)).toBe(true);
+  });
+
+  it('gameover → archive_list is legal (auto-shown after death)', () => {
+    expect(isLegalTransition(gameOverCap, archiveList)).toBe(true);
+    expect(isLegalTransition(gameOverDis, archiveList)).toBe(true);
+  });
+
+  it('archive_list → main_menu is legal (back button)', () => {
+    expect(isLegalTransition(archiveList, mainMenu)).toBe(true);
+  });
+
+  it('action_day → archive_list is illegal (no mid-game archive access)', () => {
+    expect(isLegalTransition(day1, archiveList)).toBe(false);
   });
 });

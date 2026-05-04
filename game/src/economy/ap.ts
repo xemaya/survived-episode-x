@@ -14,6 +14,20 @@ export class ApSystem {
   private value: number = BASE_AP_PER_DAY;
   private listeners = new Set<ApListener>();
 
+  // Stub fields for snapshot/restore plumbing; real wiring lands in Task 4.
+  private _effortOvertime = 0;
+  private _effortHero = 0;
+  private _effortOverage = 0;
+  get effortOvertime(): number {
+    return this._effortOvertime;
+  }
+  get effortHero(): number {
+    return this._effortHero;
+  }
+  get effortOverage(): number {
+    return this._effortOverage;
+  }
+
   get current(): number {
     return this.value;
   }

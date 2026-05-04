@@ -15,10 +15,21 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
     return from.kind === 'action_day' && JSON.stringify(to.resumeTo) === JSON.stringify(from);
   }
 
+  // archive_list: enterable from main_menu (player clicks 档案 button)
+  // or from gameover (auto-shown after death). Exits to main_menu only.
+  if (to.kind === 'archive_list') {
+    return from.kind === 'main_menu' || from.kind === 'gameover';
+  }
+
   // main_menu: enterable from action_day (quit), pause (quit-from-pause),
-  // or gameover (player click after death).
+  // gameover (player click after death), or archive_list (back button).
   if (to.kind === 'main_menu') {
-    return from.kind === 'action_day' || from.kind === 'pause' || from.kind === 'gameover';
+    return (
+      from.kind === 'action_day' ||
+      from.kind === 'pause' ||
+      from.kind === 'gameover' ||
+      from.kind === 'archive_list'
+    );
   }
 
   // action_day: enterable from main_menu (game start), pause (resume),
