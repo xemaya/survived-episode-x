@@ -1,17 +1,14 @@
 """Build and run the final ffmpeg compose command.
 
-Timeline (seconds) — every shot's source mp4 already matches its target length:
+Timeline (seconds) — 7 Veo3-generated 8s clips + 4s tpad of S7's last frame:
 
-  0.0  - 5.0   A1  aerial push-in (golden bloom)
-  5.0  - 10.0  A2  fake-smile pull-out
-  10.0 - 15.0  B1  drowsy + 06:30 clock + flicker
-  15.0 - 20.0  B2  monitor state crossfade (idle→critical)
-  20.0 - 25.0  B3  boss looms in
-  25.0 - 31.0  B4  NPC strip pan (tryhard / slacker / toady)
-  31.0 - 36.0  B5  HR slides past
-  36.0 - 43.0  B6  coffee timelapse + sticky pile
-  43.0 - 50.0  B7  cubicle lights extinguish
-  50.0 - 60.0  C1  exhausted hold (10s long for the title beat)
+  0.0  - 8.0    S1  aerial dolly-down to a single cubicle (golden bloom)
+  8.0  - 16.0   S2  fake-smile pull-out reveals the empty wall
+  16.0 - 24.0   S3  workstation: drowsy worker, monitor goes red
+  24.0 - 32.0   S4  boss looms past with tryhard/slacker silhouettes
+  32.0 - 40.0   S5  HR walks past pretend-busy player
+  40.0 - 48.0   S6  overtime night, lights extinguishing
+  48.0 - 60.0   S7  exhausted hold (8s clip + 4s clone-pad of last frame)
 
 Title overlay timeline (overlaid on the concat'd base):
   0.0  - 1.0    title_fake fade in (top-right band)
@@ -22,7 +19,7 @@ Title overlay timeline (overlaid on the concat'd base):
   57.0 - 60.0   title_real fades in at center
   58.0 - 60.0   subtitle fades in below
 
-Hard cuts between all shots. No audio.
+Hard cuts between shots. No audio (Veo3 includes audio but we strip it via -an).
 """
 from __future__ import annotations
 
@@ -36,17 +33,18 @@ FPS = 30
 
 # (clip_id, output_start, output_end, source_trim_start, source_trim_end)
 SEGMENTS = [
-    ("A1",  0.0,  5.0,  0.0, 5.0),
-    ("A2",  5.0, 10.0,  0.0, 5.0),
-    ("B1", 10.0, 15.0,  0.0, 5.0),
-    ("B2", 15.0, 20.0,  0.0, 5.0),
-    ("B3", 20.0, 25.0,  0.0, 5.0),
-    ("B4", 25.0, 31.0,  0.0, 6.0),
-    ("B5", 31.0, 36.0,  0.0, 5.0),
-    ("B6", 36.0, 43.0,  0.0, 7.0),
-    ("B7", 43.0, 50.0,  0.0, 7.0),
-    ("C1", 50.0, 60.0,  0.0, 10.0),
+    ("S1",  0.0,  8.0,  0.0, 8.0),
+    ("S2",  8.0, 16.0,  0.0, 8.0),
+    ("S3", 16.0, 24.0,  0.0, 8.0),
+    ("S4", 24.0, 32.0,  0.0, 8.0),
+    ("S5", 32.0, 40.0,  0.0, 8.0),
+    ("S6", 40.0, 48.0,  0.0, 8.0),
+    # S7 is presented as 12 seconds: source trimmed 0-8s + tpad clone of the
+    # last frame for an additional 4 seconds, giving the title-reversal beat
+    # space to play out over a frozen final frame.
+    ("S7", 48.0, 60.0,  0.0, 8.0),
 ]
+S7_PAD_SECONDS = 4.0
 
 
 def build_compose_args(*, clips: Mapping[str, Path], titles: Mapping[str, Path],
@@ -65,18 +63,25 @@ def build_compose_args(*, clips: Mapping[str, Path], titles: Mapping[str, Path],
     parts: list[str] = []
 
     # Per-clip: trim, ensure 1920x1080@30, force yuv420p so concat is happy.
+    # S7 gets an extra tpad to clone its last frame for S7_PAD_SECONDS.
     for idx, (cid, _start, _end, ts, te) in enumerate(SEGMENTS):
-        parts.append(
+        chain = (
             f"[{idx}:v]trim={ts}:{te},setpts=PTS-STARTPTS,"
             f"scale={W}:{H}:force_original_aspect_ratio=decrease:flags=neighbor,"
             f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black,"
-            f"fps={FPS},format=yuv420p[v{idx}]"
+            f"fps={FPS}"
         )
+        if cid == "S7":
+            chain += f",tpad=stop_mode=clone:stop_duration={S7_PAD_SECONDS}"
+        chain += f",format=yuv420p[v{idx}]"
+        parts.append(chain)
 
     concat_in = "".join(f"[v{i}]" for i in range(len(SEGMENTS)))
     parts.append(f"{concat_in}concat=n={len(SEGMENTS)}:v=1:a=0[base]")
 
-    fake_idx, real_idx, sub_idx = 10, 11, 12
+    fake_idx = len(SEGMENTS)
+    real_idx = fake_idx + 1
+    sub_idx = fake_idx + 2
 
     # The fake title PNG is referenced twice (top-right band + center reveal),
     # so it has to be split before any per-use processing.
