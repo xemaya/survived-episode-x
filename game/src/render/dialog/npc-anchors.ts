@@ -53,3 +53,44 @@ export function isKnownNpc(name: string): boolean {
 export function listKnownNpcs(): string[] {
   return Object.keys(NPC_ANCHORS);
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Q-1 (`# speaker:` tag) — id → anchor mapping per GM reply
+// (`p5-phase2-engine-questions.md` Q-1 reply, 2026-05-05).
+//
+// The id namespace is content-stable; engine resolves id → screen
+// anchor without reading dialog text. Once T05/T06 NPC sprite slots
+// land, this table goes away in favor of `npcSpriteSlot[id].anchor`.
+//
+// `protagonist` is intentionally absent — speaker tag of `protagonist`
+// means "笑天 internal voice": no bubble, route to monologue / panel
+// per the existing layered renderer.
+// ─────────────────────────────────────────────────────────────────────
+
+const NPC_ANCHORS_BY_ID: Readonly<Record<string, NpcAnchor>> = {
+  // Deep-cast (5 visible NPCs)
+  lisa: { x: 470, y: 110 },
+  david: { x: 175, y: 115 },
+  vivian: { x: 320, y: 130 },
+  wang_director: { x: 220, y: 95 },
+  lao_zhou: { x: 460, y: 130 },
+  // Bit-cast / S2+ slots
+  zoe: { x: 260, y: 90 },
+  li_ayi: { x: 130, y: 250 },
+  mama: { x: 320, y: 180 },
+  lin_jie: { x: 305, y: 110 },
+  it_xiaoma: { x: 175, y: 200 },
+  food_court_auntie: { x: 320, y: 220 },
+};
+
+export function getNpcAnchorById(id: string): NpcAnchor | null {
+  return NPC_ANCHORS_BY_ID[id.trim()] ?? null;
+}
+
+export function isKnownNpcId(id: string): boolean {
+  return id.trim() in NPC_ANCHORS_BY_ID;
+}
+
+export function listKnownNpcIds(): string[] {
+  return Object.keys(NPC_ANCHORS_BY_ID);
+}

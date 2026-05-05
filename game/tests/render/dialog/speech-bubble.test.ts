@@ -4,7 +4,14 @@
 // pure functions and fully unit-testable headlessly.
 
 import { describe, expect, it } from 'vitest';
-import { getNpcAnchor, isKnownNpc, listKnownNpcs } from '../../../src/render/dialog/npc-anchors';
+import {
+  getNpcAnchor,
+  getNpcAnchorById,
+  isKnownNpc,
+  isKnownNpcId,
+  listKnownNpcIds,
+  listKnownNpcs,
+} from '../../../src/render/dialog/npc-anchors';
 import { parseSpeaker } from '../../../src/render/dialog/speaker-parser';
 import {
   SPEECH_BUBBLE_STYLE,
@@ -37,6 +44,46 @@ describe('npc-anchors registry', () => {
     for (const name of ['Lisa', 'David', 'Vivian', '王总监', '李阿姨']) {
       expect(all).toContain(name);
     }
+  });
+});
+
+describe('npc-anchors id table (Q-1 GM mapping)', () => {
+  it('returns an anchor for every id in the GM-approved table', () => {
+    for (const id of [
+      'lisa',
+      'david',
+      'vivian',
+      'wang_director',
+      'lao_zhou',
+      'zoe',
+      'li_ayi',
+      'mama',
+      'lin_jie',
+      'it_xiaoma',
+      'food_court_auntie',
+    ]) {
+      const a = getNpcAnchorById(id);
+      expect(a).not.toBeNull();
+      expect(a?.x).toBeGreaterThan(0);
+      expect(a?.y).toBeGreaterThan(0);
+    }
+  });
+
+  it('returns null for `protagonist` so the engine routes to monologue/panel', () => {
+    expect(getNpcAnchorById('protagonist')).toBeNull();
+  });
+
+  it('returns null for unknown ids', () => {
+    expect(getNpcAnchorById('nonexistent_npc')).toBeNull();
+    expect(isKnownNpcId('nonexistent_npc')).toBe(false);
+  });
+
+  it('isKnownNpcId is whitespace-tolerant', () => {
+    expect(isKnownNpcId('  lisa ')).toBe(true);
+  });
+
+  it('listKnownNpcIds returns the documented 11 NPC slots', () => {
+    expect(listKnownNpcIds().length).toBe(11);
   });
 });
 

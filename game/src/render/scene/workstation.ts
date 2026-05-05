@@ -8,6 +8,7 @@ import { mountInkDialog } from '@/render/dialog/ink-dialog';
 import { createPropEntity } from '@/render/diegetic/prop-entity';
 import { propRegistry } from '@/render/diegetic/prop-registry';
 import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
+import { installSceneStateTagHandler } from '@/scene/scene-state-mirror';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
 
@@ -335,6 +336,13 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
 
   const teardownPropTags = installPropTagHandler();
   teardowns.push(teardownPropTags);
+
+  // Scene / NPC / time / weather tag stubs (closes QA Bug #8 fully).
+  // Cache the latest tag value in a shared mirror so future scene
+  // composers (T04) and NPC sprite slots (T05/T06) can subscribe
+  // without re-registering on the global TagDispatcher.
+  const teardownSceneStateTags = installSceneStateTagHandler();
+  teardowns.push(teardownSceneStateTags);
 
   // ── Card hand removed (P5: replaced by ink-driven event/choice runtime) ──
   // Action_day no longer presents a card hand. Dialog + choices come from the

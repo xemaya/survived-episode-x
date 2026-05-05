@@ -22,10 +22,11 @@ import { ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
 import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
 import { autosave } from '@/save/autosave';
+import { sceneState } from '@/scene/scene-state-mirror';
 import { Container, Graphics, Text } from 'pixi.js';
 import { type InternalMonologueHandle, mountInternalMonologue } from './internal-monologue';
 import { extractInternalMonologue } from './internal-monologue-parser';
-import { getNpcAnchor } from './npc-anchors';
+import { getNpcAnchor, getNpcAnchorById } from './npc-anchors';
 import { parseSpeaker } from './speaker-parser';
 import { type SpeechBubbleHandle, mountSpeechBubble } from './speech-bubble';
 
@@ -223,15 +224,39 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     clearMonologue();
 
     // Layer 1: NPC speaker → bubble at the speaker's anchor.
+    //
+    // Q-1 contract: prefer the `# speaker: <id>` tag when present (id
+    // resolves to a stable sprite slot). Fall back to the legacy
+    // `parseSpeaker` regex on the dialog text for un-migrated `.ink`
+    // content. `protagonist` id deliberately doesn't render a bubble
+    // — the line falls through to the panel / monologue layers below.
+    const speakerId = sceneState.get('speaker');
+    const idAnchor = speakerId && speakerId !== 'protagonist' ? getNpcAnchorById(speakerId) : null;
     const parsed = parseSpeaker(step.text);
-    const anchor = parsed ? getNpcAnchor(parsed.speaker) : null;
     let working = step.text;
-    if (parsed && anchor) {
+    if (idAnchor && parsed) {
       currentBubble = mountSpeechBubble(container, {
-        anchor,
+        anchor: idAnchor,
         text: stripMarkdown(parsed.dialog),
       });
       working = parsed.remainder;
+    } else if (idAnchor) {
+      // Tag fired but the dialog body isn't `Name：…` shaped — render
+      // the whole step as the bubble body.
+      currentBubble = mountSpeechBubble(container, {
+        anchor: idAnchor,
+        text: stripMarkdown(step.text),
+      });
+      working = '';
+    } else if (parsed) {
+      const legacyAnchor = getNpcAnchor(parsed.speaker);
+      if (legacyAnchor) {
+        currentBubble = mountSpeechBubble(container, {
+          anchor: legacyAnchor,
+          text: stripMarkdown(parsed.dialog),
+        });
+        working = parsed.remainder;
+      }
     }
 
     // Layer 2: whole-italic paragraphs → internal monologue overlay.

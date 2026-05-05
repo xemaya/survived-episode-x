@@ -109,5 +109,30 @@
 
 (next: T04 scene registry + transitions if Q-1 still pending; or kick off T05 NPC sprite slot work so `npc-anchors.ts` becomes a sprite-position binding once Q-1 ack lands. Will reassess after looking at GM replies.)
 
+---
+
+## 2026-05-05 · batch 5 — scene-state mirror + speaker tag (Q-1 W1) · Bug #8 ✓ closed
+
+GM replied Q-1 ✅ approving `# speaker: <id>` tag convention with an authoritative id mapping table. This batch implements the W1 step: engine accepts `# speaker:` tag as the preferred bubble-anchor source, with legacy `parseSpeaker` regex retained as fallback until episodes 1-4 finish migration.
+
+- **scene-state mirror** (`game/src/scene/scene-state-mirror.ts`, ~95 lines): single-pass cache for the latest `# scene` / `# npc` / `# time` / `# weather` / `# speaker` tag value. `installSceneStateTagHandler()` registers the listeners on the global TagDispatcher; teardown unregisters. Subscribers can `sceneState.on(key, fn)` for change events; `sceneState.get(key)` reads the latest. Warns once on unknown scene ids (workstation/phone/monitor_modal/endgame/intro/home/reception/meeting_room/cafeteria/elevator are all known).
+- **NPC anchor id table** (`game/src/render/dialog/npc-anchors.ts`): added parallel id → anchor map per the GM Q-1 reply (lisa / david / vivian / wang_director / lao_zhou / zoe / li_ayi / mama / lin_jie / it_xiaoma / food_court_auntie). `protagonist` deliberately absent so the bubble doesn't render for laoxia internal voice.
+- **ink-dialog routing extension**: paint chain now reads `sceneState.get('speaker')` first; if a known id is set (and ≠ protagonist), bubble mounts at `getNpcAnchorById(id)`. Falls back to `parseSpeaker` + `getNpcAnchor(name)` when no tag is present (un-migrated content).
+- **Migration tool** (`tools/ink-speaker-migrate.mjs`): node script that walks `design/vertical-slice/*.ink` and prepends `# speaker: <id>` lines before every recognized speaker prefix. Idempotent (re-runs are no-ops). Dry-run by default; `--write` applies in place. Dry-run reports: 208 tags would be added across 9 ink files. Designer/GM owns whether/when to run with `--write`.
+- **workstation.ts**: `installSceneStateTagHandler()` is mounted alongside the prop tag handler so `# scene:` / `# npc:` / `# time:` / `# weather:` / `# speaker:` start being recorded the moment workstation comes up.
+
+**QA Bug #8** (no listeners for `# scene` / `# npc` / `# prop` / `# diegetic_prop`): ✓ resolved across all 5 axes (prop in batch 4; scene/npc/time/weather/speaker in this batch). Real visual transitions (T04) and NPC sprite slot wiring (T05/T06) are still future work, but the tags are no longer silently dropped.
+
+**Q-1**: ✓ closed — engine W1 step done. Designer can run the migration script when ready; engine keeps fallback parser working until then.
+
+**Tests**: 15 new vitest cases (10 scene-state mirror + 5 npc id table). Total 233/233.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 233/233. Lint deferred to lefthook on commit.
+
+**Open questions / asks for GM**: Q-2 (Bug #3 fix preference) + Q-3 (Bug #6 sticky label length) still pending. None new from this batch.
+
+(next: Q-2 reply blocks Bug #3 work; Q-3 reply blocks any sticky-note label rewrite. While waiting, picking from: T04 scene registry + transitions, T05/T06 NPC sprite slot scaffolding, or T13 day scheduler. Recommend T04 since `sceneState.scene` is now the natural input — changing scene id triggers transition.)
+
+
 
 

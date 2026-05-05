@@ -182,7 +182,12 @@ Either works. (A) is faster; (B) is cleaner if recap is meant to be a phone over
 
 **Note**: explicitly Phase 2 per closure doc. No new info; filing so it doesn't fall through cracks of "the demo plays text" success metric.
 
-**Status**: ⚙️ partial (prop axis only) — `feat(p5-T05-mini+T03-prop)`: `propRegistry` now translates `# prop:` and `# diegetic_prop:` tag values into Pixi sprite swaps via `PropEntity` instances. Workstation registers `fruit_bowl` (apple/strawberry/empty) and `phone` (face_down/face_up/with_badge). Existing P0–P4 binding-driven props (mug/monitor/calendar) keep their direct subscriptions for now; migration to the registry can happen incrementally once ink emits `# prop: mug_*` etc. `# scene:` / `# npc:` interceptors still no-op and need their own batch (T04 scene registry + T05/T06 NPC sprite slots).
+**Status**: ✓ resolved — prop axis live in `feat(p5-T05-mini+T03-prop)` (`6fb3445`); `# scene` / `# npc` / `# time` / `# weather` / `# speaker` axes live in `feat(p5-T03-scene-mirror+speaker-tag)` via `scene/scene-state-mirror.ts`. All five tag streams now have at least one engine-side consumer:
+- `# prop:` / `# diegetic_prop:` → `propRegistry.setStateFromTag()` → sprite swap.
+- `# scene:` → `sceneState.scene` (warns on unknown ids; full transition gated on T04).
+- `# npc:` → `sceneState.npc` (full sprite slot wiring gated on T05/T06).
+- `# time:` / `# weather:` → mirrored for time-of-day filter / BG swap (gated on T04 visual layer).
+- `# speaker:` → `sceneState.speaker` → consumed by ink-dialog as the preferred NPC anchor source (Q-1 contract). Legacy `parseSpeaker` regex retained as fallback until episode-1/2/3/4 finish migration via `tools/ink-speaker-migrate.mjs`.
 
 ---
 
