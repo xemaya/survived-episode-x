@@ -182,7 +182,7 @@ Either works. (A) is faster; (B) is cleaner if recap is meant to be a phone over
 
 **Note**: explicitly Phase 2 per closure doc. No new info; filing so it doesn't fall through cracks of "the demo plays text" success metric.
 
-**Status**: ⏳ open — Phase 2.
+**Status**: ⚙️ partial (prop axis only) — `feat(p5-T05-mini+T03-prop)`: `propRegistry` now translates `# prop:` and `# diegetic_prop:` tag values into Pixi sprite swaps via `PropEntity` instances. Workstation registers `fruit_bowl` (apple/strawberry/empty) and `phone` (face_down/face_up/with_badge). Existing P0–P4 binding-driven props (mug/monitor/calendar) keep their direct subscriptions for now; migration to the registry can happen incrementally once ink emits `# prop: mug_*` etc. `# scene:` / `# npc:` interceptors still no-op and need their own batch (T04 scene registry + T05/T06 NPC sprite slots).
 
 ---
 

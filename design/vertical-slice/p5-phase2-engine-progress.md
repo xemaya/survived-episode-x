@@ -83,4 +83,31 @@
 
 (next: pick whichever Q-1/Q-2 reply lands first — if Q-1 ack lands, do `# speaker:` migration sweep + delete `speaker-parser.ts`/`npc-anchors.ts`; if Q-2 ack lands as option B, implement `# pagebreak` step-loop break and resolve Bug #3. Otherwise start T03 `# scene` / `# npc` / `# prop` interceptor wiring against existing workstation props — closes Bug #8.)
 
+---
+
+## 2026-05-05 · batch 4 — T05-mini prop entity + T03 prop tag interceptor (Bug #8 partial)
+
+- **T05-mini** prop entity + registry: ✓ done
+  - `game/src/render/diegetic/prop-entity.ts` (~95 lines) — generic PixiJS sprite-swap entity. `createPropEntity(parent, { id, states, initialState, x, y, scale })` returns a handle with `setState(name)`/`hasState`/`destroy`. Sprite asset URLs preloaded via `Assets.load` lazily on each state change.
+  - `game/src/render/diegetic/prop-registry.ts` (~95 lines) — `PropRegistry` singleton (`propRegistry`) maps id → entity. `setStateFromTag(value)` parses ink tag values into `{id, state}` via longest-prefix match against registered ids, then dispatches to the entity. Pure helper `parsePropTagValue()` is the unit-tested core.
+  - Longest-prefix parsing handles ids that contain underscores (e.g. `sticky_huo_dao_zhouwu` whose state suffix is `fresh` or `curled_edge_1week`).
+- **T03-prop** tag interceptor wiring: ✓ done
+  - `game/src/render/diegetic/prop-tag-handler.ts` (~25 lines) — `installPropTagHandler()` registers TagDispatcher listeners for both `# prop:` and `# diegetic_prop:` keys; returns a teardown that unregisters them.
+  - `workstation.ts` mount: registers `fruit_bowl` (apple/strawberry/empty) at desk-right + `phone` (face_down/face_up/with_badge) at desk-mid, then `installPropTagHandler()`. Teardowns unregister + destroy on scene unmount.
+  - Existing P0-P4 binding-driven props (mug ← energy, monitor ← kpi, calendar ← currentDay) keep their direct subscriptions for now. Tag-driven override of those props lands when ink starts emitting `# prop: mug_*` / `# prop: monitor_*` / `# prop: calendar_*`.
+- **Tests**: 12 new vitest cases in `tests/render/diegetic/prop-registry.test.ts` — `parsePropTagValue` edge cases (empty / no prefix / overlap / multi-segment state) + `PropRegistry` register/get/setStateFromTag/snapshot/clear. Total 218/218 green.
+
+**QA Bug #8** (`# scene` / `# npc` / `# prop` / `# diegetic_prop` no listeners): ⚙️ partial — `# prop:` and `# diegetic_prop:` axes are live; `# scene:` and `# npc:` still no-op pending T04 scene registry + T05/T06 NPC sprite slots.
+
+**Verify**:
+- `pnpm tsc` ✓
+- `pnpm test` ✓ 218/218
+- `pnpm lint` to be re-run inside lefthook on commit
+- `pnpm dev` HMR — workstation now mounts `fruit_bowl` + `phone` sprites by default; ink emitting `# prop: phone_with_badge` (or any registered state) swaps the sprite live.
+
+**Open questions / asks for GM**: still Q-1/Q-2/Q-3 pending. None new from this batch.
+
+(next: T04 scene registry + transitions if Q-1 still pending; or kick off T05 NPC sprite slot work so `npc-anchors.ts` becomes a sprite-position binding once Q-1 ack lands. Will reassess after looking at GM replies.)
+
+
 

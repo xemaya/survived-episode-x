@@ -3,11 +3,19 @@ import { BASE_AP_PER_DAY, OVERTIME_BONUS_AP } from '@/economy/constants';
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
-import { dayCycle } from '@/flow/day-cycle';
 import type { SceneState } from '@/flow/scene-state';
-import { mountCardHand } from '@/render/cards/hand';
+import { mountInkDialog } from '@/render/dialog/ink-dialog';
+import { createPropEntity } from '@/render/diegetic/prop-entity';
+import { propRegistry } from '@/render/diegetic/prop-registry';
+import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
+
+// P5 demo flag: hide P0-P4 legacy HUD elements (AP row, KPI text, 下班 button).
+// These were the card-era debug surfaces. New diegetic UI per concept images
+// will reintroduce equivalents (mug = state, banking app = money etc) in P6.
+// Toggle to true to bring them back for debugging.
+const SHOW_LEGACY_HUD = false;
 
 // Maximum AP slots to render — covers base (8) + overtime bonus (2) = 10.
 const AP_SLOT_COUNT = BASE_AP_PER_DAY + OVERTIME_BONUS_AP;
@@ -51,6 +59,25 @@ function pickMonitorFrame(actualKpi: number, threshold: number): keyof typeof MO
 
 export async function mountWorkstation(_state: SceneState, ctx: StageContext): Promise<() => void> {
   const teardowns: Array<() => void> = [];
+
+  // ── Workstation BG (full canvas, mounted first so everything else layers on top) ──
+  try {
+    const bgTex = await Assets.load('sprites/backgrounds/workstation_closeup.png');
+    bgTex.source.scaleMode = 'linear';
+    const bg = new Sprite(bgTex);
+    bg.label = 'workstation-bg';
+    bg.anchor.set(0.5);
+    bg.x = 320;
+    bg.y = 180;
+    // Scale to cover 640×360 canvas
+    const sx = 640 / bg.texture.width;
+    const sy = 360 / bg.texture.height;
+    bg.scale.set(Math.max(sx, sy));
+    ctx.worldLayer.addChild(bg);
+    teardowns.push(() => bg.destroy());
+  } catch (err) {
+    console.warn('[workstation] BG load failed; falling back to dark canvas:', err);
+  }
 
   // ── Static props ────────────────────────────────────────────────────────
   for (const spec of STATIC_PROPS) {
@@ -181,132 +208,186 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
     mugContainer.destroy({ children: true });
   });
 
-  // ── Sticky-note AP row (code-drawn, 8 slots) ────────────────────────────
-  const apRow = new Container();
-  apRow.label = 'ap-row';
-  apRow.x = STICKY_X;
-  apRow.y = STICKY_Y;
-  ctx.worldLayer.addChild(apRow);
+  // ── Sticky-note AP row (P0-P4 legacy HUD, gated by SHOW_LEGACY_HUD) ─────
+  if (SHOW_LEGACY_HUD) {
+    const apRow = new Container();
+    apRow.label = 'ap-row';
+    apRow.x = STICKY_X;
+    apRow.y = STICKY_Y;
+    ctx.worldLayer.addChild(apRow);
 
-  const apLabel = new Text({
-    text: 'AP',
-    style: {
-      fontFamily: 'PingFang SC, -apple-system, sans-serif',
-      fontSize: 10,
-      fill: 0xe8e0cc,
-    },
-  });
-  apLabel.anchor.set(1, 0.5);
-  apLabel.x = -6;
-  apLabel.y = STICKY_SIZE / 2;
-  apRow.addChild(apLabel);
+    const apLabel = new Text({
+      text: 'AP',
+      style: {
+        fontFamily: 'PingFang SC, -apple-system, sans-serif',
+        fontSize: 10,
+        fill: 0xe8e0cc,
+      },
+    });
+    apLabel.anchor.set(1, 0.5);
+    apLabel.x = -6;
+    apLabel.y = STICKY_SIZE / 2;
+    apRow.addChild(apLabel);
 
-  // Always render AP_SLOT_COUNT (10) slots so the row doesn't resize when
-  // overtime grants push ap.current above the base 8. Slots beyond ap.current
-  // draw as empty/spent; slots beyond BASE_AP_PER_DAY only light up during
-  // action_overtime when ap.current can legitimately exceed 8.
-  const slots: Graphics[] = [];
-  for (let i = 0; i < AP_SLOT_COUNT; i++) {
-    const g = new Graphics();
-    g.x = i * (STICKY_SIZE + STICKY_GAP);
-    apRow.addChild(g);
-    slots.push(g);
+    const slots: Graphics[] = [];
+    for (let i = 0; i < AP_SLOT_COUNT; i++) {
+      const g = new Graphics();
+      g.x = i * (STICKY_SIZE + STICKY_GAP);
+      apRow.addChild(g);
+      slots.push(g);
+    }
+
+    const drawSlots = () => {
+      for (let i = 0; i < slots.length; i++) {
+        const g = slots[i];
+        if (!g) continue;
+        const filled = i < ap.current;
+        g.clear();
+        g.rect(0, 0, STICKY_SIZE, STICKY_SIZE);
+        g.fill(filled ? 0xc8a85a : 0x1a1d22);
+        g.stroke({ color: 0x5a7080, width: 1 });
+        if (!filled) {
+          g.moveTo(2, 2);
+          g.lineTo(STICKY_SIZE - 2, STICKY_SIZE - 2);
+          g.moveTo(STICKY_SIZE - 2, 2);
+          g.lineTo(2, STICKY_SIZE - 2);
+          g.stroke({ color: 0xc83428, width: 1 });
+        }
+      }
+    };
+    const unsubAp = ap.onChanged(() => drawSlots());
+    drawSlots();
+    teardowns.push(() => {
+      unsubAp();
+      apRow.destroy({ children: true });
+    });
+
+    // KPI numeric readout (debug)
+    const kpiText = new Text({
+      text: '',
+      style: {
+        fontFamily: 'PingFang SC, -apple-system, sans-serif',
+        fontSize: 10,
+        fill: 0xe8e0cc,
+      },
+    });
+    kpiText.anchor.set(0.5, 0);
+    kpiText.x = 320;
+    kpiText.y = 200;
+    ctx.worldLayer.addChild(kpiText);
+
+    const drawKpi = () => {
+      kpiText.text = `KPI ${kpi.actualKpi} / ${kpi.monthlyThreshold} (cap ${Math.round(kpi.capacityNow)})`;
+    };
+    const unsubKpiText = kpi.onChanged(() => drawKpi());
+    drawKpi();
+    teardowns.push(() => {
+      unsubKpiText();
+      kpiText.destroy();
+    });
   }
 
-  const drawSlots = () => {
-    for (let i = 0; i < slots.length; i++) {
-      const g = slots[i];
-      if (!g) continue;
-      const filled = i < ap.current;
-      g.clear();
-      g.rect(0, 0, STICKY_SIZE, STICKY_SIZE);
-      g.fill(filled ? 0xc8a85a : 0x1a1d22);
-      g.stroke({ color: 0x5a7080, width: 1 });
-      if (!filled) {
-        // Spent slots get a crossed-out diagonal (red ✗)
-        g.moveTo(2, 2);
-        g.lineTo(STICKY_SIZE - 2, STICKY_SIZE - 2);
-        g.moveTo(STICKY_SIZE - 2, 2);
-        g.lineTo(2, STICKY_SIZE - 2);
-        g.stroke({ color: 0xc83428, width: 1 });
-      }
-    }
-  };
-  const unsubAp = ap.onChanged(() => drawSlots());
-  drawSlots();
-  teardowns.push(() => {
-    unsubAp();
-    apRow.destroy({ children: true });
-  });
+  // ── Tag-driven diegetic props (P5 T05-mini + T03-prop) ─────────────────
+  // Register prop entities that respond to ink `# prop:` tags. The
+  // existing P0-P4 binding-driven props (mug ← energy, monitor ← kpi,
+  // calendar ← currentDay) keep their direct subscriptions above and
+  // are NOT routed through the registry yet — migration to the registry
+  // can happen incrementally once `# prop: mug_*` etc. land in ink.
+  try {
+    const fruitBowl = await createPropEntity(ctx.worldLayer, {
+      id: 'fruit_bowl',
+      states: {
+        apple: 'sprites/hud/fruit_bowl_apple.png',
+        strawberry: 'sprites/hud/fruit_bowl_strawberry.png',
+        empty: 'sprites/hud/fruit_bowl_empty.png',
+      },
+      initialState: 'apple',
+      x: 510,
+      y: 250,
+      scale: 0.12,
+    });
+    propRegistry.register(fruitBowl);
+    teardowns.push(() => {
+      propRegistry.unregister(fruitBowl.id);
+      fruitBowl.destroy();
+    });
 
-  // ── KPI numeric readout (small text under the monitor for debug/clarity) ─
-  const kpiText = new Text({
-    text: '',
-    style: {
-      fontFamily: 'PingFang SC, -apple-system, sans-serif',
-      fontSize: 10,
-      fill: 0xe8e0cc,
-    },
-  });
-  kpiText.anchor.set(0.5, 0);
-  kpiText.x = 320;
-  kpiText.y = 200;
-  ctx.worldLayer.addChild(kpiText);
+    const phone = await createPropEntity(ctx.worldLayer, {
+      id: 'phone',
+      states: {
+        face_down: 'sprites/hud/phone_face_down.png',
+        face_up: 'sprites/hud/phone_face_up.png',
+        with_badge: 'sprites/hud/phone_with_badge.png',
+      },
+      initialState: 'face_down',
+      x: 380,
+      y: 252,
+      scale: 0.1,
+    });
+    propRegistry.register(phone);
+    teardowns.push(() => {
+      propRegistry.unregister(phone.id);
+      phone.destroy();
+    });
+  } catch (err) {
+    console.warn('[workstation] prop registration failed:', err);
+  }
 
-  const drawKpi = () => {
-    kpiText.text = `KPI ${kpi.actualKpi} / ${kpi.monthlyThreshold} (cap ${Math.round(kpi.capacityNow)})`;
-  };
-  const unsubKpiText = kpi.onChanged(() => drawKpi());
-  drawKpi();
-  teardowns.push(() => {
-    unsubKpiText();
-    kpiText.destroy();
-  });
+  const teardownPropTags = installPropTagHandler();
+  teardowns.push(teardownPropTags);
 
-  // ── Card hand (code-drawn UI; loads its own face sprites) ───────────────
-  const handHandles = await mountCardHand(ctx.worldLayer, ctx.app);
-  teardowns.push(() => handHandles.destroy());
+  // ── Card hand removed (P5: replaced by ink-driven event/choice runtime) ──
+  // Action_day no longer presents a card hand. Dialog + choices come from the
+  // ink runtime via game/src/render/dialog/* and game/src/render/choice/*.
 
-  // ── Early-leave 「下班」 button (top-right corner, above AP row) ─────────
-  // GDD: day ends when AP=0 OR player chooses to leave early. With only 4
-  // P2 placeholder cards (sum 7 AP), the AP=0 path is unreachable —
-  // player would otherwise be stuck. P3 surfaces early-leave so the
-  // loop always closes.
-  const earlyLeaveBtn = new Container();
-  earlyLeaveBtn.label = 'early-leave';
-  earlyLeaveBtn.x = 590;
-  earlyLeaveBtn.y = 16;
-  earlyLeaveBtn.eventMode = 'static';
-  earlyLeaveBtn.cursor = 'pointer';
-  ctx.worldLayer.addChild(earlyLeaveBtn);
+  // ── Ink dialog (P5 minimal demo) ────────────────────────────────────────
+  // Mounts a center-screen text panel + choice buttons that read from the
+  // ink runtime singleton. Production will replace with NPC-anchored speech
+  // bubbles + diegetic choice props.
+  const inkDialog = mountInkDialog(ctx.worldLayer);
+  inkDialog.start();
+  teardowns.push(inkDialog.destroy);
 
-  const earlyLeaveBg = new Graphics();
-  earlyLeaveBtn.addChild(earlyLeaveBg);
-  const earlyLeaveText = new Text({
-    text: '下班',
-    style: {
-      fontFamily: 'PingFang SC, -apple-system, sans-serif',
-      fontSize: 11,
-      fill: 0xe8e0cc,
-      letterSpacing: 2,
-    },
-  });
-  earlyLeaveText.anchor.set(0.5);
-  earlyLeaveBtn.addChild(earlyLeaveText);
+  // ── Early-leave 「下班」 button (P0-P4 legacy, gated by SHOW_LEGACY_HUD) ──
+  // P5 plan: this becomes a diegetic prop in P6 (e.g. mug + chair animation
+  // when player declines an event). For demo we just hide it.
+  if (SHOW_LEGACY_HUD) {
+    const earlyLeaveBtn = new Container();
+    earlyLeaveBtn.label = 'early-leave';
+    earlyLeaveBtn.x = 590;
+    earlyLeaveBtn.y = 16;
+    earlyLeaveBtn.eventMode = 'static';
+    earlyLeaveBtn.cursor = 'pointer';
+    ctx.worldLayer.addChild(earlyLeaveBtn);
 
-  const drawEarlyLeave = (hovering: boolean) => {
-    earlyLeaveBg.clear();
-    earlyLeaveBg.rect(-22, -10, 44, 20);
-    earlyLeaveBg.fill(hovering ? 0x3a5a82 : 0x2c4a6e);
-    earlyLeaveBg.stroke({ color: 0x5a7080, width: 1 });
-  };
-  drawEarlyLeave(false);
-  earlyLeaveBtn.on('pointerover', () => drawEarlyLeave(true));
-  earlyLeaveBtn.on('pointerout', () => drawEarlyLeave(false));
-  earlyLeaveBtn.on('pointertap', () => {
-    dayCycle.endDayEarly();
-  });
-  teardowns.push(() => earlyLeaveBtn.destroy({ children: true }));
+    const earlyLeaveBg = new Graphics();
+    earlyLeaveBtn.addChild(earlyLeaveBg);
+    const earlyLeaveText = new Text({
+      text: '下班',
+      style: {
+        fontFamily: 'PingFang SC, -apple-system, sans-serif',
+        fontSize: 11,
+        fill: 0xe8e0cc,
+        letterSpacing: 2,
+      },
+    });
+    earlyLeaveText.anchor.set(0.5);
+    earlyLeaveBtn.addChild(earlyLeaveText);
+
+    const drawEarlyLeave = (hovering: boolean) => {
+      earlyLeaveBg.clear();
+      earlyLeaveBg.rect(-22, -10, 44, 20);
+      earlyLeaveBg.fill(hovering ? 0x3a5a82 : 0x2c4a6e);
+      earlyLeaveBg.stroke({ color: 0x5a7080, width: 1 });
+    };
+    drawEarlyLeave(false);
+    earlyLeaveBtn.on('pointerover', () => drawEarlyLeave(true));
+    earlyLeaveBtn.on('pointerout', () => drawEarlyLeave(false));
+    earlyLeaveBtn.on('pointertap', () => {
+      // dayCycle.endDayEarly();  // requires dayCycle import; restore when re-enabling
+    });
+    teardowns.push(() => earlyLeaveBtn.destroy({ children: true }));
+  }
 
   return () => {
     for (const t of teardowns) t();
