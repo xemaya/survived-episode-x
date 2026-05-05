@@ -113,6 +113,8 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   let currentBubble: SpeechBubbleHandle | null = null;
   let currentMonologue: InternalMonologueHandle | null = null;
   let currentStickies: StickyNotesHandle | null = null;
+  /** Cleanup for the `# pagebreak` continue affordance (▼ + panel click). */
+  let continueTeardown: (() => void) | null = null;
 
   const clearChoices = () => {
     for (const t of choiceTeardowns) t();
@@ -135,6 +137,13 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     if (currentMonologue) {
       currentMonologue.destroy();
       currentMonologue = null;
+    }
+  };
+
+  const clearContinue = () => {
+    if (continueTeardown) {
+      continueTeardown();
+      continueTeardown = null;
     }
   };
 
@@ -200,6 +209,52 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     queueMicrotask(() => paintStep(nextStep));
   };
 
+  /** Resume the story past a `# pagebreak` and paint the next chunk.
+   * Mirror of advanceChoice but without a choice index — used by the
+   * panel's tap-to-continue affordance (Q-2 GM reply: pagebreak is a
+   * "wait for click" beat, not a choice). Deliberately does NOT
+   * autosave: ink state at this point has already advanced past the
+   * post-pagebreak chunk (the chunk is held in InkRuntime.pendingChunk
+   * which is intra-session only). Saves are taken at choice
+   * boundaries — refreshing mid-pagebreak resumes the player to the
+   * previous choice's first chunk, which they replay through. */
+  const advanceContinue = () => {
+    if (!ink.isLoaded) return;
+    const nextStep = ink.step();
+    tagDispatcher.dispatchAll(nextStep.tags);
+    queueMicrotask(() => paintStep(nextStep));
+  };
+
+  /** Mount the ▼ "tap to continue" indicator at the panel's bottom-
+   * right corner AND make the panel rect itself a click target so the
+   * player doesn't have to hit the small triangle precisely. Returns
+   * a teardown that destroys both. Called only when step.paused. */
+  const renderContinueAffordance = (): (() => void) => {
+    // Triangle indicator (▼) at bottom-right of the panel.
+    const indicator = new Graphics();
+    const tx = PANEL_X + PANEL_W - 18;
+    const ty = PANEL_Y + PANEL_H - 14;
+    const w = 8;
+    const h = 6;
+    indicator.poly([tx - w / 2, ty - h / 2, tx + w / 2, ty - h / 2, tx, ty + h / 2]);
+    indicator.fill({ color: TEXT_COLOR, alpha: 0.7 });
+    container.addChild(indicator);
+
+    // Invisible click hit-rect spanning the entire panel.
+    const hit = new Graphics();
+    hit.rect(PANEL_X, PANEL_Y, PANEL_W, PANEL_H);
+    hit.fill({ color: 0xffffff, alpha: 0 });
+    hit.eventMode = 'static';
+    hit.cursor = 'pointer';
+    hit.on('pointertap', () => advanceContinue());
+    container.addChild(hit);
+
+    return () => {
+      indicator.destroy();
+      hit.destroy();
+    };
+  };
+
   /** Render the workstation sticky-note rack for the current choices. */
   const renderStickyChoices = (choices: Array<{ index: number; text: string }>) => {
     if (choices.length === 0) return;
@@ -222,6 +277,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   const paintStep = (step: ReturnType<typeof ink.step>) => {
     clearBubble();
     clearMonologue();
+    clearContinue();
 
     // Layer 1: NPC speaker → bubble at the speaker's anchor.
     //
@@ -281,6 +337,10 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     if (step.ended) {
       const teardown = renderChoiceButton('（剧本结束）', -1, CANVAS_W / 2, PANEL_Y - 16);
       choiceTeardowns.push(teardown);
+    } else if (step.paused) {
+      // `# pagebreak` arrived — show the accumulated text and a tap-to-
+      // continue affordance. No sticky-notes (this is not a decision).
+      continueTeardown = renderContinueAffordance();
     } else if (step.choices.length > 0) {
       renderStickyChoices(step.choices);
     } else if (step.canContinue) {
@@ -309,6 +369,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   const destroy = () => {
     clearBubble();
     clearMonologue();
+    clearContinue();
     clearChoices();
     container.destroy({ children: true });
   };
