@@ -133,6 +133,40 @@ GM replied Q-1 ✅ approving `# speaker: <id>` tag convention with an authoritat
 
 (next: Q-2 reply blocks Bug #3 work; Q-3 reply blocks any sticky-note label rewrite. While waiting, picking from: T04 scene registry + transitions, T05/T06 NPC sprite slot scaffolding, or T13 day scheduler. Recommend T04 since `sceneState.scene` is now the natural input — changing scene id triggers transition.)
 
+---
+
+## 2026-05-06 · batch 6 — Q-2 `# pagebreak` + Bug #3 ✓ closed
+
+GM Q-2 reply: ✅ Option B (`# pagebreak` tag). This batch implements the runtime + dialog wiring; designer's job is sprinkling `# pagebreak` lines per the GM tagging policy table (already started — `episode_1` knot in `episode-1.ink` got one between the intro/episode-start tags and the divert to `day_1_morning_briefing`).
+
+- **runtime.ts**: `InkStoryStep` gains `paused: boolean`. `step()` loops `Continue()` until canContinue=false OR a chunk's tags include `pagebreak`. On pagebreak, the chunk + tags are stashed on `pendingChunk` / `pendingTags` (intra-session state) and step returns paused=true with text accumulated *before* the pagebreak. Next `step()` drains the stash first (the `pagebreak` tag itself is filtered out — its job is done) then resumes `Continue()` until next break or choice. `loadStory` / `loadStoryFromJson` / `loadState` / `resetState` clear pending state so save round-trips don't leak stale chunks.
+- **ink-dialog.ts**: new `advanceContinue()` (no autosave — saves stay at choice boundaries; pendingChunk is intra-session only). New `renderContinueAffordance()` paints a small `▼` at the panel's bottom-right and an invisible click hit-rect spanning the whole panel rect, so a tap anywhere advances the beat. `paintStep` mounts the affordance instead of stickies when `step.paused`.
+- **Idiom**: standalone `# pagebreak` on its own line between the last beat text and `-> next_stitch`. Tag attaches to the next chunk; engine stashes it so the player sees a clean break of the *previous* beat. Inline placement (`text. # pagebreak`) also works (tag attaches to the same chunk).
+- **Tests**: 9 new vitest cases in `tests/ink/pagebreak.test.ts` covering inline + standalone idioms, back-to-back pagebreaks, legacy story shape, paused-with-content-ahead semantics, pagebreak-tag stripping on resume, loadState clearing pendingChunk. Smoke tests refactored with `drainFrom()` helper since `episode-1.ink` now contains pagebreaks.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 242/242. Lint via lefthook.
+
+**QA Bug #3** (recap blob): ✓ resolved. Bug #6 still discussion-status pending sticky-fit work.
+
+---
+
+## 2026-05-06 · batch 7 — Q-3 sticky-note 2-line + ellipsis · Bug #6 engine-side ✓ closed
+
+GM Q-3 reply: ✅ Option D (2-line wrap + ellipsis). This batch enforces the cap; content sweep on long labels (mechanism-disclosure violations of Pillar-3) is a P6 designer-driven follow-up.
+
+- **sticky-notes-layout.ts**: 3 new pure helpers — `visualCharWidth(ch)` (CJK + full-width punctuation count 2 half-width units, ASCII counts 1), `visualWidth(text)` (sum), `estimateFitLength(text, maxLines, unitsPerLine)` (longest prefix that fits within `maxLines * unitsPerLine` units leaving room for the ellipsis). Style block grew to expose `MAX_LINES`, `UNITS_PER_LINE`, `ELLIPSIS`.
+- **mountSingleSticky** measures actual `Pixi.Text.height` after wrap. If it exceeds `MAX_LINES * LINE_HEIGHT`, the visual-width estimate yields the initial truncation point; if Pixi's measured height still overflows (font-metric drift), the loop trims one char before the ellipsis until it fits. No hover/tap reveal — taps are reserved for choice selection.
+- **Tests**: 14 new vitest cases — `visualCharWidth` ASCII / CJK / full-width punctuation, `visualWidth` sums (incl. mixed CJK + ASCII labels like `'申报加班 -10 状态'` = 17 units), `estimateFitLength` boundary cases (full-fit, CJK truncation, single-char doesn't fit, ASCII-heavy labels, empty input). Plus a style-pin test for the new `MAX_LINES` / `UNITS_PER_LINE` / `ELLIPSIS` constants.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 253/253. Lint via lefthook.
+
+**QA Bug #6** (>6-char choice labels): ⚙️ engine-side ✓ resolved (sticky now truncates cleanly with `…`). Content-side sweep (P6) is on the designer backlog — `[申报加班 -10 状态 +2 AP 等价]` should become `[申报加班]` per Pillar-3, NOT just shorter. Engine accommodates either way.
+
+**Open questions / asks for GM**: none — Q-1, Q-2, Q-3 all closed. Next batch picks from the regular P1 backlog.
+
+(next: T04 scene registry + transitions is the natural step — `sceneState.scene` mirror is the input, T04 is the consumer that actually mounts/unmounts a phone / monitor_modal / endgame composer when the tag changes. Or T05/T06 NPC sprite slots so `npc-anchors.ts` becomes a sprite-position binding. Will pick whichever has cleaner blast radius next batch.)
+
+
 
 
 

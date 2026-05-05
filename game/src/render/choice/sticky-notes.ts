@@ -15,7 +15,7 @@
 // stitches with 4-5 options don't drop the extras silently.
 
 import { Container, Graphics, Text, Ticker } from 'pixi.js';
-import { STICKY_NOTES_STYLE, computeStickyLayout } from './sticky-notes-layout';
+import { STICKY_NOTES_STYLE, computeStickyLayout, estimateFitLength } from './sticky-notes-layout';
 
 export type {
   StickySlot,
@@ -156,6 +156,22 @@ function mountSingleSticky(
   });
   label.anchor.set(0.5);
   note.addChild(label);
+
+  // Q-3: enforce 2-line max with ellipsis. The visual-width estimate
+  // gets us close in one shot; if Pixi's actual measurement still
+  // overflows (font-metric drift), trim one char at a time until it
+  // fits. No hover/tap reveal — taps would conflict with choice
+  // selection and mobile has no hover (per GM reply).
+  const maxHeight = s.MAX_LINES * s.LINE_HEIGHT;
+  if (label.height > maxHeight) {
+    const guess = estimateFitLength(choice.text, s.MAX_LINES, s.UNITS_PER_LINE);
+    let displayText = `${choice.text.slice(0, guess)}${s.ELLIPSIS}`;
+    label.text = displayText;
+    while (label.height > maxHeight && displayText.length > s.ELLIPSIS.length) {
+      displayText = displayText.slice(0, -1 - s.ELLIPSIS.length) + s.ELLIPSIS;
+      label.text = displayText;
+    }
+  }
 
   const repaint = (hover: boolean) => {
     bg.clear();

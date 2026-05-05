@@ -31,7 +31,7 @@
 - The fix is content-side: add `-> day_1_event_K_continue` (or whichever stitch continues the day) at the end of every `* [...]` block in episodes 1-4. The Round-2 worker translation pass should catch these — possibly worth a "lint sweep" before Phase 2 ink integrations expand further.
 - Engineer side, this is already as resilient as it can be: `step()` wraps each `Continue()` in try/catch and returns an "ended" step on failure, which paintStep handles by showing the error text in the narration panel and rendering a "（剧本结束）" choice. Player can't recover within the dead path, but the engine doesn't actually crash.
 
-**Status**: ⏳ open — needs designer pass over `episode-1/2/3/4.ink` to add `-> divert` at the end of every choice block flagged by `loose end` warnings. This is **NOT a T10a regression** — the bug is in ink content authored Round 1; speech-bubble work just exposed it because the user was clicking through more choices to verify the bubble.
+**Status**: ✓ resolved (Round 3, 2026-05-06) — content fix on `episode-1.ink:720` adds gather `-` between Event 2.3 choice block and `~ check_state_after_choice() -> day_2_after_work`, so all 3 choice paths converge to the common continuation. Driver picks `[偷喝那杯，再走]` → no console error → ink advances → state mutates correctly. Working-tree edit (uncommitted at time of verify), no commit message naming Bug #1; recommend committing as `fix(qa-bug-1): close episode-1 Day 2 Event 2.3 loose end via gather`. **Sweep needed**: episode-2/3/4/5/6/7/8.ink may still have similar loose ends — engineer's Round 1 note flagged 8+ in episode-1, more in 2/3/4. Run `pnpm ink:build` and grep for "loose end" warnings to enumerate remaining cases.
 
 **QA confirmation (Round 1, 2026-05-05)**: Reproduced via Playwright driver. Crash fires on Day 2 Event 2.3 `[偷喝那杯，再走]` (line 699). Driver path was: `[新游戏]` → `[开始今日]` → intro 1/2/3 → Day 1 Event 1.1 (auto) → 1.2 `[让 Lisa 先]` → 1.3 `[还行，你呢]` → fall through 1.4/1.5/1.6 → after_work `[按时下班]` → fall-through Day 1 recap + Day 2 morning + Day 2 Event 2.1 `[一起]` → Day 2 Event 2.2 (David, see Bug #2 below) → Day 2 Event 2.3 `[偷喝那杯，再走]` ✗.
 
@@ -55,7 +55,7 @@
 
 **Fix**: change line 643 from `**David**："…"` to `David："…"` (drop the `**` bold). Same fix already applied to episode-2/3/4 per `p5-closure.md` T01 — episode-1 was missed in that sweep.
 
-**Status**: ⏳ open — single-line content fix.
+**Status**: ✓ resolved (Round 3, 2026-05-06) — content fix applied: `episode-1.ink:643` now reads `David："…"` without `**` markers. Driver verifies: Day 2 Event 2.2 no longer presents spurious choice; step blob continues through to Event 2.3's correct 3-choice sticky-note rack. Working-tree edit, recommend committing as `fix(qa-bug-2): drop **David** bold prefix to avoid depth-2 choice parse`.
 
 ---
 
@@ -81,7 +81,7 @@
 
 Either works. (A) is faster; (B) is cleaner if recap is meant to be a phone overlay scene per art-bible §7.1.
 
-**Status**: ⏳ open — designer call on (A) vs (B).
+**Status**: ✓ resolved — `feat(p5-pagebreak)+fix(qa-bug-3)` (`fb3b4df`). Option B as `# pagebreak` tag per Q-2 GM reply. `runtime.ts step()` now stashes the post-pagebreak chunk on `pendingChunk` and returns `paused=true`; ink-dialog mounts a ▼ continue affordance + clickable panel hit-rect; the next click drains the stash and resumes Continue() until the next break or choice. Designer annotates beat boundaries with a standalone `# pagebreak` line between the last beat text and the divert to the next stitch — full tagging policy in `p5-phase2-engine-questions.md` Q-2.
 
 ---
 
@@ -147,7 +147,7 @@ Either works. (A) is faster; (B) is cleaner if recap is meant to be a phone over
 
 **Open question for designer**: is 6-char a hard limit or a "default with leeway"? If hard, after_work options need separate UI treatment (tooltip on hover, not in label). If soft, mark `wontfix`.
 
-**Status**: ⏳ open — discussion.
+**Status**: ⚙️ engine-side ✓ resolved (`feat(p5-T11-fit)+fix(qa-bug-6)`). Per Q-3 GM reply, "≤ 6 char" is "default with leeway" — sticky notes now enforce 2 lines max with ellipsis truncation when label content exceeds the visual budget; long mechanism-disclosure labels (`[申报加班 -10 状态 +2 AP 等价]`) render as `[申报加班 -10 状态…]`. Content-side P6 backlog item — designer-driven sweep over the 60+ daily-choices + 4 episodes + S2 4 episodes — tracked separately and NOT engine scope. The mechanism-disclosure pattern itself violates Pillar-3 (subject inversion) so the sweep is design-correctness, not just length.
 
 ---
 
@@ -289,3 +289,92 @@ Round 2 driver uses `page.mouse.click(canvasRect, …)` instead of `__qa.ink.sel
 - **N6 — Real canvas click works**: `page.mouse.click(canvas.x + lx*scale, canvas.y + ly*scale)` against PixiJS canvas at logical (640×360 → 1280×720 viewport-fit) successfully fires `pointertap` on choice buttons. Verified via VAR mutation post-click for `[不说话，先接你的]` → `lisa_score = -2`. Round 2 driver lives at `game/qa/p5-demo-r2.spec.ts`.
 - **N7 — Stage tree dump approach**: `__qa.app.stage.children` walk yields stable labels (`world` / `workstation-bg` / `monitor` / `calendar` / `mug` / `ink-dialog` / `choices` / `choice-N`). Useful for asserting "no NPC sprite was mounted" without screenshot OCR.
 - **N8 — Round 1 + Round 2 baseline (no dev fixes yet)**: latest commit on main is `f5a33b1 feat(p5-T10a): NPC-anchored speech bubble + dialog routing` — predates Round 1 QA. No `fix(qa-bug-N)` commits seen yet. Will re-run reproducers when they land.
+
+---
+
+## Round 3 — verify dev fixes (`qa/p5-demo-r3.spec.ts`, 6 tests, 5 pass + 1 reveals new minor bug)
+
+Round 3 ran against post-fix tree (3 new commits on main, plus uncommitted ink content sweep on `episode-1.ink`). Smoke tests now 233/233 (was 179 — engineer added 54 new tests covering speech-bubble / monologue / scene-state-mirror / prop-registry / ink-save-schema).
+
+Driver enhancements: walks stage tree to find `sticky-N` / `choice-N` buttons (T11 sticky-notes anchor to desk surface, not to old `PANEL_Y - 16` position). Single helper `clickChoiceByIndex(page, idx)` works regardless of layout.
+
+### Round 1 / 2 bugs verified RESOLVED in Round 3
+
+- ✓ **Bug #1 (engineer-filed crash)** — RESOLVED via **uncommitted ink content sweep** on `episode-1.ink:720` (gather `-` added between Event 2.3 choice block and `~ check_state_after_choice() -> day_2_after_work`). Driver picks `[偷喝那杯，再走]` → no `RUNTIME ERROR: ran out of content` console error → `state` mutates to 88 (was 80 + 6 from prior Day 1 path) → FSM stays at `action_day`.
+  - **Note**: this fix was applied to `episode-1.ink` directly (working-tree edit, no commit message naming Bug #1). Ditto for episodes 2/3/4 — should sweep all 4 to confirm.
+- ✓ **Bug #2 (`**David**：` malformed choice)** — RESOLVED via **uncommitted ink content sweep** on `episode-1.ink:643` (line now reads `David："…"` without `**`). Driver progresses through Day 2 Event 2.1 → blob through 2.2 → presents Event 2.3 sticky-notes (`[偷喝那杯，再走 / 拿走杯子，去洗，再放回 / 主动跟老周说"…"]`). No spurious David choice. Working-tree edit, no commit message.
+- ✓ **Bug #4 (panel overflow)** — RESOLVED in `dedb258`. `mountInkDialog` panel grew 130 → 156 px, line-height 18 → 16. `text.mask = textMask` (Pixi Graphics rect at panel inner box) attached. Driver verifies: `dialog.children.text.mask != null` + `graphicsCount >= 2`. Visual screenshot `qa/output/r3-01-day1-morning-after-fix.png` shows long text clipped cleanly at panel edge instead of bleeding onto BG.
+- ✓ **Bug #5 (ink resets to intro on continue)** — RESOLVED in `dedb258` (T16). `runStateSchema.inkStateJson?` field added; `snapshotCurrentRunState` calls `ink.serializeState()`; `main.ts` boot path calls `ink.loadState(restored.inkStateJson)` when present, else falls back to `divertTo('intro')`. Driver verifies: progress to intro screen 3 → reload → `__qa.flow.state.kind === 'action_day'` (boot skips main_menu since save exists, existing P4 behavior) → ink dialog does NOT show intro screen 1 marker `数咖啡杯`.
+  - **Caveat — see Bug #11 below**: post-reload panel shows literal `...` placeholder text instead of intro-3 narration. Choice button still renders (`[我懂了, 开始第 1 天]`), so player can recover by clicking — but the panel is visually empty.
+- ✓ **Bug #8 (no tag listeners)** — RESOLVED in `6fb3445` (prop registry) + `7f62762` (scene state mirror). Driver verifies: at Day 1 Event 1.1 (Vivian) blob, `__qa.sceneState.snapshot` shows `scene: 'break_room'` (overwritten — see Bug #12), `npc: 'it_xiaoma_back_at_machine'`, `time: '9:14'`. Stage tree at Event 1.1 now contains `prop:fruit_bowl` AND `prop:phone` sprite labels (was 0 in Round 1/2).
+- ✓ **Bug #9 (autosave never fires)** — RESOLVED in `dedb258`. `ink-dialog.ts advanceChoice()` is the single funnel for both legacy and T11 choices, calls `void autosave()` after every `ink.selectChoice()`. Driver verifies: after 1 choice click, `localStorage` has `survived:fs:saves/current_run.save` containing `inkStateJson` field with ink callstack/flags blobs.
+
+### Still OPEN from Round 1 / 2
+
+- ⏳ Bug #3 (daily_recap blob into next-day morning_briefing) — needs designer call on (A) ink-side gate vs (B) renderer-side page-break.
+- ⏳ Bug #6 (>6-char choices) — designer call.
+- ⏳ Bug #7 (提前下班 in Preact vs ink) — design choice.
+- ⏳ Bug #10 (1-frame paint desync) — minor; not investigated this round.
+
+### NEW bugs found in Round 3
+
+---
+
+## Bug #11 — minor — restored ink state shows `...` placeholder text after reload (T16 follow-up)
+
+**Reported by**: QA (Round 3, 2026-05-06)
+**Severity**: minor — choice button still renders so player can recover, but panel is visually empty / disorienting on resume.
+
+**Repro**:
+1. Boot → 新游戏 → 开始今日 → click `[然后呢]` → click `[听懂了]` (now at intro screen 3, panel showing "游戏从 2026 年 5 月开始 / 52 周 / 我妈不知道", choice `[我懂了, 开始第 1 天]`)
+2. Refresh browser
+3. Save loads, FSM → `action_day`, ink restored to intro screen 3 position
+4. Workstation scene mounts; `mountInkDialog().start()` runs `refresh() → step()` → `step()` returns `text: '', choices: [{0, '我懂了, 开始第 1 天'}]` (because `Continue()` has nothing to drain — content was already drained pre-save)
+5. **`paintStep`** sets `text.text = stripMarkdown(step.text.trim() || '...')` → renders `...` in panel
+
+**Expected**: re-paint the last-shown narration text (e.g. intro screen 3's "游戏从 2026 年 5 月…" content)
+
+**Actual**: panel shows `...` (placeholder) but choice button is correct.
+
+**Files involved**: `game/src/render/dialog/ink-dialog.ts:198-201` (the `text.text = ... || '...'` fallback). The save schema doesn't store the last-rendered narration text — only ink state. ink Continue() at restored position has no text to emit.
+
+**Suggested triage**: store the most-recently-rendered `step.text` in the save (alongside `inkStateJson`) so paintStep can pre-fill on restore. OR re-divert to a sub-stitch boundary that re-emits the text — but most events can't be re-entered without repeating side effects.
+
+**Status**: ⏳ open — minor follow-up to T16.
+
+---
+
+## Bug #12 — minor — sceneState mirror only retains LAST tag value when step() blobs multiple events
+
+**Reported by**: QA (Round 3, 2026-05-06)
+**Severity**: minor — visual identity of "current event" drifts to whatever event ends the blob, not what the player should see.
+
+**Repro**:
+1. At Day 1 morning_briefing → click `[开始今日]`
+2. ink `step()` drains through `day_1_event_1_vivian` (no choices) → `day_1_event_2_caishuijian` (3 choices)
+3. Tags fired during the drain (in order):
+   - Event 1.1: `# scene: reception` / `# npc: vivian_smiling` / `# prop: fruit_bowl_apple`
+   - Event 1.2: `# scene: break_room` / `# npc: lisa_holding_milk_tea_cup` / `# npc: lao_li_mopping_background` / `# npc: it_xiaoma_back_at_machine` / `# prop: coffee_machine_broken_sign`
+4. Driver reads `__qa.sceneState.snapshot`:
+   - `scene: 'break_room'` (Event 1.2's value — Event 1.1's `reception` was overwritten)
+   - `npc: 'it_xiaoma_back_at_machine'` (last npc tag — Vivian / Lisa / 李阿姨 all overwritten)
+
+**Expected**: a "currently visible NPC set" not "single NPC value", so all 4 NPCs (Vivian + Lisa + 李阿姨 + IT 小马) can be displayed simultaneously per art-bible §7.1.
+
+**Actual**: single-slot mirror reduces to last value.
+
+**Files involved**: `game/src/scene/scene-state-mirror.ts:81-91` (the `set()` method overwrites `cache[key]`).
+
+**Severity rationale**: this is intrinsically tied to Bug #3 (multi-event step blob). If Bug #3 is fixed (Option A: ink-side choice gate per event, OR Option B: renderer-side page break), then each event renders alone and the single-slot mirror is correct. Until then, the mirror is "best effort" and downstream UI may not reflect the player's mental model of "who's in this scene".
+
+**Status**: ⏳ open — gated on Bug #3 resolution.
+
+---
+
+## Round 3 tooling notes
+
+- **N9 — `__qa` hook extended**: now exposes `sceneState` + `propRegistry` singletons in addition to ink/flow/save/app. Used by Round 3 driver to read scene state mirror snapshot and stage prop labels.
+- **N10 — `localStorage.clear()` initScript breaks reload tests**: changed beforeEach to `goto('about:blank') → evaluate(localStorage.clear) → goto('/')` instead of `addInitScript` (which fires on every reload). Otherwise refresh tests can't see the saved data they just wrote.
+- **N11 — Stage tree at Event 1.1 (post-fix)**: `world / workstation-bg / sticky / monitor / Sprite / calendar / Sprite / mug / Sprite / prop:fruit_bowl / prop:phone / ink-dialog / Graphics / Graphics / choices / internal-monologue / sticky-notes / sticky-0 / Graphics / Graphics / sticky-1 / Graphics / Graphics / sticky-2 / Graphics / Graphics`. Concrete evidence Bug #8 fix lands.
+- **N12 — Smoke tests baseline post-fix**: `pnpm test` = 233/233 passing (was 179). Engineer added 54 new tests covering speech-bubble (T10a), internal monologue (T10b), sticky-notes (T11), scene state mirror, prop registry, ink save schema. No regressions.
+- **N13 — Latest dev commits seen**: `7f62762` (T03 scene mirror), `6fb3445` (T05 + T03 prop), `dedb258` (fix qa-bug-4,5,9 + T16). Plus uncommitted ink content sweep on `episode-1.ink:643/720` closing Bug #1 + #2 silently.

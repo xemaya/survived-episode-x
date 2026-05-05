@@ -155,6 +155,15 @@ Click 触发可以借用 panel 底部小三角图标"▼" 表示"还有更多"�
 
 **Status**: ✅ approved — option B + tagging policy 上表。
 
+**Engine clone follow-up (2026-05-06)**: ✓ landed in `feat(p5-pagebreak)+fix(qa-bug-3)` (`fb3b4df`):
+- `runtime.ts step()` loops `Continue()` until canContinue=false OR a chunk's tags include `pagebreak`. On pagebreak, the chunk + tags are stashed on `pendingChunk` (intra-session state) and step returns `paused=true` with text accumulated *before* the pagebreak. Next step drains the stash first (with the `pagebreak` tag itself filtered out), then resumes `Continue()` until the next break or choice.
+- `ink-dialog.ts` paints paused steps with a small ▼ at the panel's bottom-right + an invisible click hit-rect spanning the whole panel rect; tap anywhere advances the beat. `advanceContinue()` deliberately does NOT autosave (saves stay at choice boundaries; pendingChunk is intra-session).
+- `loadStory` / `loadStoryFromJson` / `loadState` / `resetState` clear pending state so save round-trips don't leak stale chunks.
+- Idiom: standalone `# pagebreak` on its own line between the last beat text and `-> next_stitch` (matches the migrated `episode_1` knot in `episode-1.ink:170-174`). Tag attaches to the next chunk; engine stashes that chunk so the player sees a clean break of the *previous* beat.
+- Tests: 9 vitest cases in `tests/ink/pagebreak.test.ts` + smoke-test refactor with `drainFrom()` helper. 253/253 total.
+
+QA Bug #3 ✓ resolved alongside.
+
 ---
 
 ### Q-3 — Bug #6 (choice text > 6 chars): how do sticky notes handle it?
@@ -198,5 +207,12 @@ Engine batch-2 实测的 wrap-to-2-lines 还要确认：
 
 **Status**: ✅ approved — T11 ship 2-line wrap + ellipsis；P6 backlog
 建 "choice-label-tone-sweep" item by designer。
+
+**Engine clone follow-up (2026-05-06)**: ✓ landed in `feat(p5-T11-fit)+fix(qa-bug-6)`:
+- `sticky-notes-layout.ts` exposes `MAX_LINES=2`, `UNITS_PER_LINE=13`, `ELLIPSIS='…'` constants alongside three pure helpers — `visualCharWidth(ch)` (CJK + full-width punctuation count 2 units, ASCII counts 1), `visualWidth(text)` (sum), and `estimateFitLength(text, maxLines, unitsPerLine)` (longest prefix that fits within `maxLines * unitsPerLine` units, leaving room for ellipsis).
+- `mountSingleSticky` measures the actual `Pixi.Text.height` after wrap. If it exceeds `MAX_LINES * LINE_HEIGHT`, the visual-width estimate gives the initial truncation point; if Pixi's measured height still overflows (font-metric drift), the loop trims one char before the ellipsis until it fits.
+- No hover/tap reveal — taps on stickies are reserved for choice selection, and the GM call was that contextually the first 6-ish chars + ellipsis convey enough.
+- Tests: 14 new vitest cases in `tests/render/choice/sticky-notes.test.ts` covering `visualCharWidth` ASCII vs CJK vs full-width punctuation, `visualWidth` sums, `estimateFitLength` boundary cases (full-fit, CJK truncation, single-char doesn't fit, empty input).
+- P6 follow-up — designer-driven content sweep on choice labels: `[申报加班 -10 状态 +2 AP 等价]` → `[申报加班]` (mechanism-disclosure violates Pillar-3 subject inversion). Tracked separately, NOT in engine scope.
 
 ---

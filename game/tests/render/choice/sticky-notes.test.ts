@@ -5,6 +5,9 @@ import { describe, expect, it } from 'vitest';
 import {
   STICKY_NOTES_STYLE,
   computeStickyLayout,
+  estimateFitLength,
+  visualCharWidth,
+  visualWidth,
 } from '../../../src/render/choice/sticky-notes-layout';
 
 describe('computeStickyLayout', () => {
@@ -95,5 +98,81 @@ describe('sticky-notes style', () => {
 
   it("bob amplitude is subtle (≤ 3 px) so it doesn't distract", () => {
     expect(STICKY_NOTES_STYLE.BOB_AMPLITUDE).toBeLessThanOrEqual(3);
+  });
+
+  it('exposes Q-3 fit constants (MAX_LINES + UNITS_PER_LINE + ELLIPSIS)', () => {
+    expect(STICKY_NOTES_STYLE.MAX_LINES).toBe(2);
+    expect(STICKY_NOTES_STYLE.UNITS_PER_LINE).toBeGreaterThan(0);
+    expect(STICKY_NOTES_STYLE.ELLIPSIS).toBe('…');
+  });
+});
+
+describe('visualCharWidth + visualWidth', () => {
+  it('returns 1 for ASCII letters / digits / common punctuation', () => {
+    expect(visualCharWidth('a')).toBe(1);
+    expect(visualCharWidth('Z')).toBe(1);
+    expect(visualCharWidth('5')).toBe(1);
+    expect(visualCharWidth(',')).toBe(1);
+    expect(visualCharWidth('-')).toBe(1);
+    expect(visualCharWidth(' ')).toBe(1);
+  });
+
+  it('returns 2 for CJK Unified Ideographs', () => {
+    expect(visualCharWidth('你')).toBe(2);
+    expect(visualCharWidth('我')).toBe(2);
+    expect(visualCharWidth('好')).toBe(2);
+  });
+
+  it('returns 2 for full-width / CJK punctuation', () => {
+    expect(visualCharWidth('，')).toBe(2);
+    expect(visualCharWidth('。')).toBe(2);
+    expect(visualCharWidth('：')).toBe(2);
+    expect(visualCharWidth('！')).toBe(2);
+    expect(visualCharWidth('？')).toBe(2);
+  });
+
+  it('visualWidth sums per-char widths correctly', () => {
+    expect(visualWidth('')).toBe(0);
+    expect(visualWidth('hello')).toBe(5);
+    expect(visualWidth('你好')).toBe(4);
+    // L i s a + ：(2) + 好啊(2*2=4) = 4 + 2 + 4 = 10
+    expect(visualWidth('Lisa：好啊')).toBe(10);
+  });
+
+  it('handles mixed CJK + ASCII (typical daily-choice label)', () => {
+    // "申报加班 -10 状态" — 4 CJK + space + dash + 2 digits + space + 2 CJK
+    // = 8 + 1 + 1 + 2 + 1 + 4 = 17 units
+    const label = '申报加班 -10 状态';
+    expect(visualWidth(label)).toBe(17);
+  });
+});
+
+describe('estimateFitLength (Q-3 fit pre-estimate)', () => {
+  it('returns full length when text fits within budget', () => {
+    expect(estimateFitLength('你好', 2, 13)).toBe(2);
+    expect(estimateFitLength('hi', 2, 13)).toBe(2);
+  });
+
+  it('truncates when CJK text exceeds budget', () => {
+    // budget = 2 lines * 13 units - 1 (ellipsis) = 25 units
+    // 13 CJK chars = 26 units → truncate to 12 (24 units)
+    const text = '一二三四五六七八九十一二三四五';
+    const fit = estimateFitLength(text, 2, 13);
+    expect(fit).toBeLessThan(text.length);
+    expect(fit).toBe(12);
+  });
+
+  it('returns 0 when even the first char does not fit', () => {
+    // budget = 1 line * 1 unit - 1 (ellipsis) = 0 → first CJK (2 units) fails
+    expect(estimateFitLength('一二三', 1, 1)).toBe(0);
+  });
+
+  it('handles ASCII-heavy labels (each char = 1 unit)', () => {
+    // budget = 1 * 13 - 1 = 12 → fits 12 ASCII chars
+    expect(estimateFitLength('abcdefghijklmnop', 1, 13)).toBe(12);
+  });
+
+  it('handles empty input', () => {
+    expect(estimateFitLength('', 2, 13)).toBe(0);
   });
 });
