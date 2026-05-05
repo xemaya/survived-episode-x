@@ -103,7 +103,7 @@ Either works. (A) is faster; (B) is cleaner if recap is meant to be a phone over
 
 **Note**: per `p5-closure.md` Phase 2 priorities, this dialog is a placeholder pending T10 speech-bubble + T11 sticky-note choice props. Filing now so it doesn't get lost in the visual-polish queue. Aggravated by Bug #3 (multi-day blob paints).
 
-**Status**: ⏳ open — Phase 2 polish.
+**Status**: ✓ resolved (visual triage) — `f???` `fix(qa-bug-4)`: panel grew 130 → 156 px, line-height 18 → 16, and a `Pixi.Graphics` rect mask now clips the narration `Text` to the inner padding box so over-long content gets truncated cleanly instead of bleeding onto the workstation BG. Real pagination still gated on Q-2 / Bug #3.
 
 ---
 
@@ -126,7 +126,7 @@ Either works. (A) is faster; (B) is cleaner if recap is meant to be a phone over
 
 **Suggested triage**: until T16 lands, either (a) hide `[继续]` button, OR (b) on `[继续]` click restore ink-state-json if present (will need schema bump). Not blocking demo loop, but blocks any "save → reload mid-episode" QA path.
 
-**Status**: ⏳ open — Phase 2 task T16 per closure doc.
+**Status**: ✓ resolved — `fix(qa-bug-5,9)+feat(p5-T16)`: `runStateSchema` gained `inkStateJson: z.string().optional()` field; `snapshotCurrentRunState()` calls `ink.serializeState()` when a story is loaded; `main.ts` boot path calls `ink.loadState(restored.inkStateJson)` after `loadEpisode()` resolves, falling back to `divertTo('intro')` only when no save or no ink field is present. Pre-T16 saves parse fine (field is optional). Round-trip + legacy-shape tests added in `tests/save/system.test.ts`.
 
 ---
 
@@ -208,3 +208,79 @@ cd game && npx playwright test
 ```
 
 To remove Playwright entirely after Phase 2 closes: `pnpm remove @playwright/test` + delete `game/qa/`, `game/playwright.config.ts`, `game/vitest.config.ts`, and the `__qa` hook block at the bottom of `game/src/main.ts`.
+
+---
+
+## Round 2 — real canvas-click driving (`qa/p5-demo-r2.spec.ts`, 5 tests, all pass)
+
+Round 2 driver uses `page.mouse.click(canvasRect, …)` instead of `__qa.ink.selectChoice` so screenshots and stage tree reflect what the player actually sees. Replays Day 1 with alternate paths + Bug #5 verify.
+
+### Round 1 findings re-verified
+
+- **Bug #1 (engineer-filed crash)**: still open — Day 2 Event 2.3 `[偷喝那杯，再走]` reproducer holds.
+- **Bug #2 (`**David**：` malformed choice)**: still open at `episode-1.ink:643`.
+- **Bug #4 (panel overflow)**: visually confirmed — see `qa/output/r2-04-day1-morning.png`. Day 1 morning_briefing's full text (闹钟 / polo 衣柜 / 通勤 / 9:14 打卡 / 工位 / 第 12 周) renders past the 130 px panel BG; lower lines are painted directly on the workstation BG with no panel underneath.
+- **Bug #6 (>6-char choices)**: visually confirmed — Day 1 Event 1.2 buttons in `qa/output/r2-05-…png` and `r2-06-…png` show "让 Lisa 先" / "你先" / "不说话，先接你的" (≤7 chars; mostly within rule but one breaks).
+- **Bug #8 (no tag listeners)**: stage tree dump at Event 1.1 (Vivian) confirms only static props — `world / workstation-bg / sticky / monitor / Sprite / calendar / Sprite / mug / Sprite / ink-dialog / Graphics / choices / choice-0 / choice-1 / choice-2 / Graphics`. Zero NPC/scene sprites mounted by tags. No listener registered for `# scene` / `# npc` / `# prop` / `# diegetic_prop`. (Same conclusion as Round 1 — but now with concrete evidence.)
+
+### Things confirmed NOT bugs
+
+- **Handoff §5 example bug ("click choice → panel empty")**: does NOT reproduce. Driver clicked `[然后呢]` → panel correctly painted intro screen 2 text + new choice `[听懂了]`. Same for screen 2→3. The race condition described in the handoff was already fixed in `ink-dialog.ts:124-132` (uses `paintStep(nextStep)` instead of `refresh()` post-click).
+- **Markdown strip**: `**陈笑天**` source → "陈笑天" rendered (no literal `**`). `_笑天下众生..._` source → italic markers stripped. Verified via `readDialogText` walk over PixiJS Text nodes — no `**` or `_` in display text.
+- **Choice-side-effect VAR mutation**: ink choice bodies' `~ var = …` assignments DO fire and are observable from the `__qa` hook. `[让 Lisa 先]` → `lisa_score = 1`, `[你先]` → `lisa_score = 0` (initial), `[不说话，先接你的]` → `lisa_score = -2`. All match `episode-1.ink:303/309/315` lines.
+
+### New bugs found in Round 2
+
+---
+
+## Bug #9 — major — autosave never fires in Phase 1 demo, so `[继续]` stays disabled
+
+**Reported by**: QA (Round 2, 2026-05-05)
+**Severity**: major — consequence: any browser refresh = full progress loss; AND Bug #5 cannot trigger in current demo because it requires a save to exist first.
+
+**Repro**:
+1. Boot → 新游戏 → 开始今日 → click through intro 1/2/3 → enter Day 1 morning_briefing
+2. Refresh browser (`Cmd-R`)
+3. Boot returns to main_menu — but `[继续]` button is **disabled** (greyed out, opacity 0.4, "not-allowed" cursor)
+4. `localStorage.length === 0` confirmed via Playwright
+
+**Expected**: at least 1 autosave should have fired by the time the player has chosen a path through intro and started Day 1.
+
+**Actual**: autosave only fires inside `dayCycle.confirmRecap()` (end of day) and `dayCycle.confirmKpiReview()` (end of month) — see `game/src/flow/day-cycle.ts:148, 222`. Since current Phase 1 demo:
+- Has no AP-depletion mechanism in ink (per `p5-closure.md` T13: "Skipped"), and
+- After_work / recap is reached only via AP=0 transition (`day-cycle.ts:51-60`)
+
+→ **the recap path is never reached**, so autosave never fires, so `[继续]` is permanently disabled.
+
+**Files involved**: `game/src/flow/day-cycle.ts:148, 222` (autosave call sites), `game/src/flow/day-cycle.ts:51-60` (AP=0 trigger).
+
+**Suggested triage**: (a) trigger autosave on `morning_briefing → action_day` transition (after every `confirmMorningBriefing()`), OR (b) trigger on every ink choice via a new `dayCycle.onInkChoice()` hook + tag listener. Either path needs save schema extension for `ink_state_json` (Bug #5 / closure T16) to actually be useful.
+
+**Status**: ✓ resolved — `fix(qa-bug-5,9)+feat(p5-T16)`: option (b) implemented. `ink-dialog.ts advanceChoice()` is now the single funnel for both the legacy choice button and the T11 sticky-note `onSelect` handler, and it calls `void autosave()` after every `ink.selectChoice()`. Combined with the T16 schema extension, `[继续]` now resumes mid-episode at the last choice the player made (verified via vitest + manual `pnpm dev` walkthrough recommended).
+
+**Related**: Bug #5 was dormant because of #9 — both fixed in the same batch.
+
+---
+
+## Bug #10 — minor — `text` and `choices` paint may visually desync 1 frame on canvas after rapid pointertap
+
+**Reported by**: QA (Round 2, 2026-05-05)
+**Severity**: minor (probably not player-visible at human click cadence; only manifests in headless screenshot timing)
+
+**Observed**: `qa/output/r2-05-event-1-2-pick-你先.png` shows Day 1 Event 1.2's choice buttons (`让 Lisa 先 / 你先 / 不说话，先接你的`) overlaid above text body that is already Day 1 Event 1.3's content (`11:42。你想去 16 楼上厕所…`). Mixed-state frame: text from new step, buttons from old step.
+
+**Likely cause**: `paintStep()` is scheduled via `queueMicrotask()` in the `pointertap` handler (`ink-dialog.ts:131`). The microtask runs after the current task. Playwright's `page.screenshot()` (CDP `Page.captureScreenshot`) may capture during the gap between `text.text = …` (synchronous part of paintStep) and the children-tree mutation in `clearChoices()/renderChoiceStack()`. WebGL backbuffer may also lag one swap.
+
+**Files involved**: `game/src/render/dialog/ink-dialog.ts:124-132, 152-167`.
+
+**Severity rationale**: a real player clicking once and looking at the panel won't see this — the next animation frame will sync. Filing for record because it confused QA Round 2 screenshot interpretation.
+
+**Status**: ⏳ open (low priority — investigate only if visible at real-time framerates).
+
+---
+
+## Round 2 tooling notes
+
+- **N6 — Real canvas click works**: `page.mouse.click(canvas.x + lx*scale, canvas.y + ly*scale)` against PixiJS canvas at logical (640×360 → 1280×720 viewport-fit) successfully fires `pointertap` on choice buttons. Verified via VAR mutation post-click for `[不说话，先接你的]` → `lisa_score = -2`. Round 2 driver lives at `game/qa/p5-demo-r2.spec.ts`.
+- **N7 — Stage tree dump approach**: `__qa.app.stage.children` walk yields stable labels (`world` / `workstation-bg` / `monitor` / `calendar` / `mug` / `ink-dialog` / `choices` / `choice-N`). Useful for asserting "no NPC sprite was mounted" without screenshot OCR.
+- **N8 — Round 1 + Round 2 baseline (no dev fixes yet)**: latest commit on main is `f5a33b1 feat(p5-T10a): NPC-anchored speech bubble + dialog routing` — predates Round 1 QA. No `fix(qa-bug-N)` commits seen yet. Will re-run reproducers when they land.

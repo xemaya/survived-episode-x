@@ -1,4 +1,3 @@
-import { playedThisDay } from '@/card/play';
 import { ap } from '@/economy/ap';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
@@ -7,6 +6,11 @@ import type { RunState } from './schema';
 // Mutates singletons to match a loaded RunState. Called on boot if a
 // save exists. The reverse direction (snapshot singletons → RunState)
 // is in snapshot.ts (used for autosave).
+//
+// Note: ink runtime state restoration is NOT done here — it depends on
+// the ink story JSON having been loaded first (which happens in
+// main.ts after the FSM is set up). main.ts reads `state.inkStateJson`
+// directly and calls `ink.loadState()` after `loadEpisode()` resolves.
 export function applyRunState(state: RunState): void {
   // AP: restore current value via reset + spend.
   ap.resetForNewDay();
@@ -27,7 +31,6 @@ export function applyRunState(state: RunState): void {
   // Calendar
   while (calendar.currentDay < state.currentDay) calendar.advanceDay();
 
-  // Played this day
-  playedThisDay.clear();
-  for (const id of state.playedThisDay) playedThisDay.add(id);
+  // P5: Card hand removed; playedThisDay field is no-op (kept in schema for back-compat).
+  void state.playedThisDay;
 }

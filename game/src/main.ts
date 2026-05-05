@@ -1,5 +1,7 @@
 import { dayCycle } from '@/flow/day-cycle';
 import { flow } from '@/flow/dispatcher';
+import { loadEpisode } from '@/ink/loader';
+import { ink } from '@/ink/runtime';
 import { installKeyboardHandler } from '@/input/keyboard';
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
@@ -38,7 +40,38 @@ async function main(): Promise<void> {
   mountOverlay(overlayRoot);
   installKeyboardHandler();
 
-  console.info('[boot] flow + dayCycle + overlay + keyboard ready');
+  // P5: load episode-1 ink story on boot. Workstation scene's mountInkDialog()
+  // reads from this singleton when action_day mounts.
+  try {
+    await loadEpisode('episode-1');
+    // T16: if a save with ink state exists, restore the runtime to that
+    // position so [继续] resumes mid-episode instead of replaying intro.
+    // Saves predating T16 (no inkStateJson field) fall back to a fresh
+    // intro divert.
+    if (restored?.inkStateJson) {
+      try {
+        ink.loadState(restored.inkStateJson);
+        console.info('[boot] ink: loaded episode-1 + restored ink state');
+      } catch (e) {
+        console.warn('[boot] ink loadState failed; falling back to intro:', e);
+        ink.divertTo('intro');
+      }
+    } else {
+      ink.divertTo('intro');
+      console.info('[boot] ink: loaded episode-1, diverted to intro knot');
+    }
+  } catch (err) {
+    console.error('[boot] ink load failed:', err);
+  }
+
+  console.info('[boot] flow + dayCycle + overlay + keyboard + ink ready');
+
+  // QA hook (dev only) — exposes runtime singletons for Playwright driver to
+  // inspect ink state + drive selectChoice without clicking through canvas.
+  // Stripped from production via import.meta.env.DEV check.
+  if (import.meta.env.DEV) {
+    (globalThis as { __qa?: unknown }).__qa = { ink, flow, save, app };
+  }
 }
 
 void main();

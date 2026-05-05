@@ -59,3 +59,28 @@
 
 (next: address QA Round-1 majors — either Bug #4 panel overflow (in scope of my T10a/T11 area), or move on to T05/T06 NPC sprite slots so `npc-anchors.ts` can become a real binding. Will pick whichever has cleaner blast radius given Q-1/Q-2 design replies.)
 
+---
+
+## 2026-05-05 · batch 3 — QA Bug #4 panel clip + T16 ink save (Bugs #5/#9)
+
+- **Bug #4** panel text overflow: ✓ resolved
+  - `ink-dialog.ts`: panel grew 130 → 156 px, line-height 18 → 16. Added a `Pixi.Graphics` rect mask over the narration `Text` so any text that still exceeds the inner padding box clips cleanly instead of bleeding onto the workstation BG.
+  - This is the visual triage; structural pagination is still gated on Q-2 (Bug #3 fix preference).
+- **Bug #5 + #9** ink runtime save (closure-doc T16): ✓ resolved
+  - `runStateSchema` gained `inkStateJson: z.string().optional()` (no schemaVersion bump — optional field stays back-compat with pre-T16 saves).
+  - `snapshotCurrentRunState()` captures `ink.serializeState()` whenever a story is loaded.
+  - `main.ts` boot path: when a save is restored AND has an `inkStateJson`, calls `ink.loadState(...)` after `loadEpisode()` resolves; falls back to `divertTo('intro')` otherwise. Old saves resume cleanly to intro (graceful migration).
+  - `ink-dialog.ts` factored choice handling through `advanceChoice(idx)` — single funnel for both the legacy button (`renderChoiceButton`) and the T11 sticky-note `onSelect` handler. After every `ink.selectChoice()` it `void autosave()`s. So `[继续]` now lands the player at the last choice they made (Bug #9 fix dependency).
+- **Tests**: 2 new vitest cases in `tests/save/system.test.ts` — round-trip with `inkStateJson` set + parse a legacy shape with the field absent. Total 206/206 green.
+
+**Verify**:
+- `pnpm tsc` ✓
+- `pnpm test` ✓ 206/206
+- `pnpm lint` to be re-run inside lefthook on commit
+- `pnpm dev` HMR — not blocked; manual browser walkthrough recommended (refresh mid-Day-1 → click `[继续]` → expect resume at the last choice rather than restart from intro).
+
+**Open questions / asks for GM**: still Q-1/Q-2/Q-3 from batch-2 questions doc — none new from this batch.
+
+(next: pick whichever Q-1/Q-2 reply lands first — if Q-1 ack lands, do `# speaker:` migration sweep + delete `speaker-parser.ts`/`npc-anchors.ts`; if Q-2 ack lands as option B, implement `# pagebreak` step-loop break and resolve Bug #3. Otherwise start T03 `# scene` / `# npc` / `# prop` interceptor wiring against existing workstation props — closes Bug #8.)
+
+

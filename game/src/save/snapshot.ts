@@ -1,15 +1,15 @@
-import { playedThisDay } from '@/card/play';
 import { ap } from '@/economy/ap';
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
 import { flow } from '@/flow/dispatcher';
+import { ink } from '@/ink/runtime';
 import { type RunState, SCHEMA_VERSION } from './schema';
 
 // Snapshots all singleton state into a RunState. Called by autosave hooks
 // and by gameover transaction. Inverse of restore.ts.
 export function snapshotCurrentRunState(): RunState {
-  return {
+  const base: RunState = {
     schemaVersion: SCHEMA_VERSION,
     apCurrent: ap.current,
     energyCurrent: energy.current,
@@ -22,7 +22,17 @@ export function snapshotCurrentRunState(): RunState {
     effortOverage: ap.effortOverage,
     currentDay: calendar.currentDay,
     currentWeekday: calendar.currentWeekday,
-    playedThisDay: [...playedThisDay],
+    playedThisDay: [], // P5: cards removed; field preserved for save schema back-compat
     sceneState: flow.state as RunState['sceneState'],
   };
+  // P5 T16: capture ink runtime position when a story is loaded.
+  // Pre-T16 saves simply omit the field and resume re-runs `intro`.
+  if (ink.isLoaded) {
+    try {
+      base.inkStateJson = ink.serializeState();
+    } catch (e) {
+      console.warn('[snapshot] ink.serializeState failed:', (e as Error).message);
+    }
+  }
+  return base;
 }

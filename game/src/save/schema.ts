@@ -71,6 +71,10 @@ export const runStateSchema = z.object({
   playedThisDay: z.array(z.string()),
   // FSM
   sceneState: sceneStateSchema,
+  // P5 T16: ink runtime state, serialized via story.state.toJson().
+  // Optional — saves predating T16 simply lack this field and fall
+  // back to a fresh `intro` divert on resume (graceful migration).
+  inkStateJson: z.string().optional(),
 });
 
 export type RunState = z.infer<typeof runStateSchema>;

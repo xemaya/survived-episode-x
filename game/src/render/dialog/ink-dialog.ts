@@ -21,6 +21,7 @@
 import { ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
 import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
+import { autosave } from '@/save/autosave';
 import { Container, Graphics, Text } from 'pixi.js';
 import { type InternalMonologueHandle, mountInternalMonologue } from './internal-monologue';
 import { extractInternalMonologue } from './internal-monologue-parser';
@@ -31,10 +32,17 @@ import { type SpeechBubbleHandle, mountSpeechBubble } from './speech-bubble';
 const CANVAS_W = 640;
 const CANVAS_H = 360;
 const PANEL_W = 600;
-const PANEL_H = 130; // bottom strip
+// Panel taller (was 130) so most multi-paragraph events fit without
+// the QA-bug-#4 overflow. Combined with a clip mask below, any text
+// that still exceeds the panel is truncated cleanly instead of
+// painting onto the workstation BG. Real fix is paginate via Bug #3
+// option B (gated on Q-2 reply); this is the visual triage in
+// the meantime.
+const PANEL_H = 156;
 const PANEL_X = (CANVAS_W - PANEL_W) / 2;
 const PANEL_Y = CANVAS_H - PANEL_H - 8;
 const PANEL_PADDING = 10;
+const PANEL_TEXT_LINE_HEIGHT = 16;
 const TEXT_FONT = 'PingFang SC, -apple-system, sans-serif';
 const TEXT_COLOR = 0xe8e0cc;
 const PANEL_BG = 0x000000;
@@ -71,7 +79,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       fontFamily: TEXT_FONT,
       fontSize: 13,
       fill: TEXT_COLOR,
-      lineHeight: 18,
+      lineHeight: PANEL_TEXT_LINE_HEIGHT,
       wordWrap: true,
       wordWrapWidth: PANEL_W - 2 * PANEL_PADDING,
     },
@@ -79,6 +87,22 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   text.x = PANEL_X + PANEL_PADDING;
   text.y = PANEL_Y + PANEL_PADDING;
   container.addChild(text);
+
+  // Clip the narration text to the panel rect so over-long step
+  // bodies don't bleed onto the workstation BG (QA Bug #4 visual
+  // triage). The mask is a Pixi.Graphics rect matching the inner
+  // padding box; when text height exceeds the box, lower lines are
+  // simply hidden behind the mask edge.
+  const textMask = new Graphics();
+  textMask.rect(
+    PANEL_X + PANEL_PADDING,
+    PANEL_Y + PANEL_PADDING,
+    PANEL_W - 2 * PANEL_PADDING,
+    PANEL_H - 2 * PANEL_PADDING,
+  );
+  textMask.fill(0xffffff);
+  container.addChild(textMask);
+  text.mask = textMask;
 
   const choicesLayer = new Container();
   choicesLayer.label = 'choices';
@@ -156,16 +180,23 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     btn.on('pointerout', () => repaint(false));
     btn.on('pointertap', () => {
       if (idx < 0) return; // ended-state placeholder
-      // selectChoice() already advances the story AND returns the new step
-      // with text + tags + next choices. Don't call refresh() (which would
-      // step() AGAIN and find the content already drained → empty text).
-      const nextStep = ink.selectChoice(idx);
-      tagDispatcher.dispatchAll(nextStep.tags);
-      queueMicrotask(() => paintStep(nextStep));
+      advanceChoice(idx);
     });
 
     choicesLayer.addChild(btn);
     return () => btn.destroy({ children: true });
+  };
+
+  /** Apply a choice + dispatch its tags + autosave + paint the next step.
+   * Called from every choice surface (legacy button + sticky note). T16
+   * autosave fires here so a refresh from any mid-episode position will
+   * resume to the choice the player just made (Bug #9 fix). */
+  const advanceChoice = (idx: number) => {
+    if (idx < 0) return;
+    const nextStep = ink.selectChoice(idx);
+    tagDispatcher.dispatchAll(nextStep.tags);
+    void autosave();
+    queueMicrotask(() => paintStep(nextStep));
   };
 
   /** Render the workstation sticky-note rack for the current choices. */
@@ -177,15 +208,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     }));
     currentStickies = mountStickyNotes(container, {
       choices: stickyChoices,
-      onSelect: (idx) => {
-        if (idx < 0) return;
-        // selectChoice() advances the story AND returns the new step
-        // with text + tags + next choices. Don't call refresh() (which
-        // would step() AGAIN and find the content already drained).
-        const nextStep = ink.selectChoice(idx);
-        tagDispatcher.dispatchAll(nextStep.tags);
-        queueMicrotask(() => paintStep(nextStep));
-      },
+      onSelect: advanceChoice,
     });
   };
 

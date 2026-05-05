@@ -106,4 +106,25 @@ describe('SaveSystem', () => {
       expect(loaded?.apCurrent).toBe(state.apCurrent);
     });
   });
+
+  describe('T16 ink state field', () => {
+    it('round-trips a runState with inkStateJson set', async () => {
+      const state = defaultRunState();
+      state.inkStateJson = '{"flows":{"DEFAULT_FLOW":{"callstack":[]}}}';
+      await save.writeCurrentRun(state);
+      const loaded = await save.loadCurrentRun();
+      expect(loaded?.inkStateJson).toBe(state.inkStateJson);
+    });
+
+    it('parses pre-T16 saves (no inkStateJson field) without error', async () => {
+      // Simulate an older save that predates the T16 schema field.
+      const legacy = { ...defaultRunState() };
+      // biome-ignore lint/performance/noDelete: deliberate legacy shape
+      delete (legacy as Partial<typeof legacy>).inkStateJson;
+      await fs.writeAtomic('saves/current_run.save', JSON.stringify(legacy));
+      const loaded = await save.loadCurrentRun();
+      expect(loaded).not.toBeNull();
+      expect(loaded?.inkStateJson).toBeUndefined();
+    });
+  });
 });
