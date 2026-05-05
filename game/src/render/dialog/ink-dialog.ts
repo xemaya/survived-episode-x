@@ -1,22 +1,29 @@
 // PixiJS dialog router for ink runtime (P5 Phase 2).
 //
-// Two render modes coexist while the diegetic UI is being upgraded:
-//   - NPC-anchored speech bubble (T10a) for lines that begin with a
-//     known speaker, e.g. `**Lisa**："…"` or `Vivian："…"`.
-//   - Bottom narration panel (P5 Phase 1 placeholder) for everything
-//     else — internal monologue, set-piece description, prop quotes.
+// Three render layers compose each step:
+//   1. NPC-anchored speech bubble (T10a) — first paragraph that
+//      starts with a known speaker prefix (`**Lisa**：`, `Vivian：`).
+//   2. Internal monologue overlay (T10b) — paragraphs wholly wrapped
+//      in `_…_` lift to a centered italic semi-transparent text near
+//      the protagonist's position.
+//   3. Bottom narration panel (Phase 1 placeholder) — anything that
+//      didn't go to (1) or (2).
 //
-// Choice rendering is unchanged here; T11 replaces it with sticky-note
+// Choice rendering is unchanged; T11 replaces it with sticky-note
 // props anchored to the desk surface.
 //
 // Markdown handling: PixiJS Text can't render mixed inline styles, so
-// `**bold**` / `_italic_` markers are stripped before render. Semantic
-// loss is acceptable until T10b adds an internal-monologue renderer
-// that paints `_…_` blocks in italic on its own pass.
+// `**bold**` / `_italic_` markers are stripped before render. Whole-
+// paragraph italic is handled structurally by the monologue split;
+// inline italic markers inside narration paragraphs lose their visual
+// distinction (acceptable until a richer text renderer lands).
 
 import { ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
+import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
 import { Container, Graphics, Text } from 'pixi.js';
+import { type InternalMonologueHandle, mountInternalMonologue } from './internal-monologue';
+import { extractInternalMonologue } from './internal-monologue-parser';
 import { getNpcAnchor } from './npc-anchors';
 import { parseSpeaker } from './speaker-parser';
 import { type SpeechBubbleHandle, mountSpeechBubble } from './speech-bubble';
@@ -79,17 +86,30 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
 
   let choiceTeardowns: Array<() => void> = [];
   let currentBubble: SpeechBubbleHandle | null = null;
+  let currentMonologue: InternalMonologueHandle | null = null;
+  let currentStickies: StickyNotesHandle | null = null;
 
   const clearChoices = () => {
     for (const t of choiceTeardowns) t();
     choiceTeardowns = [];
     choicesLayer.removeChildren();
+    if (currentStickies) {
+      currentStickies.destroy();
+      currentStickies = null;
+    }
   };
 
   const clearBubble = () => {
     if (currentBubble) {
       currentBubble.destroy();
       currentBubble = null;
+    }
+  };
+
+  const clearMonologue = () => {
+    if (currentMonologue) {
+      currentMonologue.destroy();
+      currentMonologue = null;
     }
   };
 
@@ -148,21 +168,24 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     return () => btn.destroy({ children: true });
   };
 
-  // Show choices ABOVE the dialog panel (centered), as floating buttons.
-  // Each choice gets its own row, stacked from bottom up.
-  const renderChoiceStack = (choices: Array<{ index: number; text: string }>) => {
+  /** Render the workstation sticky-note rack for the current choices. */
+  const renderStickyChoices = (choices: Array<{ index: number; text: string }>) => {
     if (choices.length === 0) return;
-    const gap = 26;
-    const totalH = choices.length * gap;
-    const startY = PANEL_Y - 14 - totalH + gap / 2;
-    choices.forEach((c, i) => {
-      const teardown = renderChoiceButton(
-        stripMarkdown(c.text),
-        c.index,
-        CANVAS_W / 2,
-        startY + i * gap,
-      );
-      choiceTeardowns.push(teardown);
+    const stickyChoices = choices.map((c) => ({
+      index: c.index,
+      text: stripMarkdown(c.text),
+    }));
+    currentStickies = mountStickyNotes(container, {
+      choices: stickyChoices,
+      onSelect: (idx) => {
+        if (idx < 0) return;
+        // selectChoice() advances the story AND returns the new step
+        // with text + tags + next choices. Don't call refresh() (which
+        // would step() AGAIN and find the content already drained).
+        const nextStep = ink.selectChoice(idx);
+        tagDispatcher.dispatchAll(nextStep.tags);
+        queueMicrotask(() => paintStep(nextStep));
+      },
     });
   };
 
@@ -174,23 +197,32 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   /** Paint a given step (text + choices) into the dialog UI. Pure render. */
   const paintStep = (step: ReturnType<typeof ink.step>) => {
     clearBubble();
+    clearMonologue();
 
-    // Route NPC-prefixed first paragraph to a speech bubble; show any
-    // remaining narration text in the bottom panel. If the entire step
-    // is one speaker line, the panel is hidden so the bubble stands alone.
+    // Layer 1: NPC speaker → bubble at the speaker's anchor.
     const parsed = parseSpeaker(step.text);
     const anchor = parsed ? getNpcAnchor(parsed.speaker) : null;
-    let panelText = step.text;
+    let working = step.text;
     if (parsed && anchor) {
       currentBubble = mountSpeechBubble(container, {
         anchor,
         text: stripMarkdown(parsed.dialog),
       });
-      panelText = parsed.remainder;
+      working = parsed.remainder;
     }
 
-    const trimmedPanel = panelText.trim();
-    if (trimmedPanel.length === 0 && currentBubble) {
+    // Layer 2: whole-italic paragraphs → internal monologue overlay.
+    const split = extractInternalMonologue(working);
+    if (split.monologue.length > 0) {
+      currentMonologue = mountInternalMonologue(container, {
+        text: split.monologue,
+      });
+    }
+
+    // Layer 3: everything left → bottom narration panel. Hide if empty
+    // when at least one of the higher layers rendered.
+    const trimmedPanel = split.remainder.trim();
+    if (trimmedPanel.length === 0 && (currentBubble || currentMonologue)) {
       hidePanel();
     } else {
       text.text = stripMarkdown(trimmedPanel || '...');
@@ -202,7 +234,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       const teardown = renderChoiceButton('（剧本结束）', -1, CANVAS_W / 2, PANEL_Y - 16);
       choiceTeardowns.push(teardown);
     } else if (step.choices.length > 0) {
-      renderChoiceStack(step.choices);
+      renderStickyChoices(step.choices);
     } else if (step.canContinue) {
       // Edge case: no text emitted but story can continue. Step + repaint.
       const nextStep = ink.step();
@@ -228,6 +260,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
 
   const destroy = () => {
     clearBubble();
+    clearMonologue();
     clearChoices();
     container.destroy({ children: true });
   };
