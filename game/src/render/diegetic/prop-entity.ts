@@ -13,6 +13,7 @@
 // once # prop tags arrive from ink for those props too.
 
 import { Assets, type Container, Rectangle, Sprite, Texture } from 'pixi.js';
+import { type ChromaKeySpec, loadChromaKeyedTexture } from './chroma-key';
 
 export type PropScope = 'permanent' | 'scene';
 
@@ -61,6 +62,12 @@ export interface PropEntitySpec {
    * placement). All four sides default to 0 — no crop. When W5 lands
    * Option A (re-cut sheets without labels), drop this field. */
   cropEdges?: PropCropEdges;
+  /** Q-W (Bug #36 fix B): replace pixels matching `color` (within
+   * `tolerance`) with alpha=0 so the prop sprite stops rendering its
+   * source-baked cream BG rectangle. Applied uniformly to every
+   * state's texture. Backup if W5 re-generates with explicit
+   * transparent_bg. */
+  chromaKey?: ChromaKeySpec;
 }
 
 export interface PropEntity {
@@ -134,7 +141,9 @@ export async function createPropEntity(
   }
 
   const initialUrl = spec.states[spec.initialState] as string;
-  const baseTex = await Assets.load(initialUrl);
+  const baseTex = spec.chromaKey
+    ? await loadChromaKeyedTexture(initialUrl, spec.chromaKey)
+    : await Assets.load(initialUrl);
   baseTex.source.scaleMode = 'linear';
   const tex = applyCropEdges(baseTex, spec.cropEdges);
   const sprite = new Sprite(tex);
@@ -166,7 +175,9 @@ export async function createPropEntity(
       );
       return;
     }
-    const newBase = await Assets.load(url);
+    const newBase = spec.chromaKey
+      ? await loadChromaKeyedTexture(url, spec.chromaKey)
+      : await Assets.load(url);
     newBase.source.scaleMode = 'linear';
     sprite.texture = applyCropEdges(newBase, spec.cropEdges);
     current = state;

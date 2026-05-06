@@ -214,9 +214,13 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
         empty: 'sprites/hud/fruit_bowl_empty.png',
       },
       initialState: 'apple',
-      x: 510,
-      y: 250,
-      scale: 0.12,
+      // Q-W (Bug #36 A): moved from desk-center (510, 250) to left-mid
+      // edge (60, 220) so the prop doesn't overlap the panel/sticky
+      // band; scale halved from 0.12 → 0.06 for the smaller corner
+      // footprint.
+      x: 60,
+      y: 220,
+      scale: 0.06,
       // Bug #15 fix (Option C — Pixi-side crop): the source PNGs are
       // 341×844 with "Front" label baked at the top edge and a "9:00"
       // timestamp at the bottom. Symmetric ~80px crop top/bottom hides
@@ -224,6 +228,9 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
       // relative to the sprite's anchor (0.5, 0.5). Drop this field
       // when W5 lands Option A (re-cut sheets without labels).
       cropEdges: { top: 80, bottom: 80 },
+      // Q-W (Bug #36 B): strip the cream BG rectangle baked into the
+      // source PNGs (W5 generated with non-transparent #E8E0CC fill).
+      chromaKey: { color: 0xe8e0cc, tolerance: 8 },
     });
     propRegistry.register(fruitBowl);
     teardowns.push(() => {
@@ -239,9 +246,15 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
         with_badge: 'sprites/hud/phone_with_badge.png',
       },
       initialState: 'face_down',
-      x: 380,
-      y: 252,
-      scale: 0.1,
+      // Q-W (Bug #36 A): moved from desk-center (380, 252) to top-right
+      // corner (580, 130) so the prop doesn't overlap panel (y=240+) or
+      // sticky band (y=170-240). y=130 sits below Status HUD bottom
+      // (y=88) with ~40 px clearance; scale 0.1 → 0.06 for corner
+      // footprint.
+      x: 580,
+      y: 130,
+      scale: 0.06,
+      chromaKey: { color: 0xe8e0cc, tolerance: 8 },
     });
     propRegistry.register(phone);
     teardowns.push(() => {
