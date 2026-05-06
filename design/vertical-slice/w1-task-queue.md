@@ -71,6 +71,36 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 
 ---
 
+## 🆕 P0 — Post Q-R playtest fixes (small W1 tasks)
+
+### Q-T · Bug #33 — narration 段 panel header `[视角]` 不必要
+
+**Why**: GM playtest 2026-05-06 post Q-R: user confused "[视角] 不明所以". narration 是默认旁白, 无需 source label.
+
+**Fix**: `ink-dialog.ts` paintStep 内 `mountPanelHeader(source)` — narration source → return early (无 header). monologue → header `[ 笑天 ]`. NPC → `[ <NPC name> ]`.
+
+**File**: `game/src/render/dialog/ink-dialog.ts`
+
+**Test**: Day 1 morning_briefing (mostly narration) → panel 无 header. Day 1 Event 1.2 茶水间 Lisa speech → header `[ Lisa ]`. Italic monologue step → `[ 笑天 ]`.
+
+**Estimate**: 10 min
+
+**Note**: `avg-architecture.md` §1.3 表已同步 update — narration 无 header.
+
+**Status**: ✅ done in commit `9446295` (batch 23, 2026-05-06). drawPanel now skips header bar entirely for narration; body region shifts up to fill full panel rect. Monologue + NPC keep header.
+
+### Q-U · Bug #26 PRIORITY BUMP — calendar Pixi Graphics widget
+
+**Why bump**: GM playtest 2026-05-06 reiterate "左上角的日历没改, 还是破烂的贴图". 从 P2 polish bump 到 P0 (在 Q-T 之后).
+
+**Spec**: 详下面 P2 Q-O 段 (现 alias Q-U)。Pixi Container + Graphics 程序绘制台历, 绑 `calendar.onDateChanged` auto-redraw.
+
+**Estimate**: 1-2h
+
+**Status**: ✅ done in commit `<pending>` (batch 23, 2026-05-06). New `calendar-widget.ts` with 80×80 desk-calendar visual: paper BG + 装订红 banner with month label + 7×5 date grid (past gray / current red ring / weekend red / weekday ink); self-binds to onDateChanged. workstation.ts swapped from sprite path to `mountCalendarWidget()`.
+
+---
+
 ## P0 — KPI Review cinematic (simulation 心跳)
 
 ### Q-Q · Bug #31 — KPI 月末 Review cinematic (per avg-architecture.md §2.5)

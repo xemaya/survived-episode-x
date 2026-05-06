@@ -1,8 +1,8 @@
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
-import { calendar } from '@/flow/calendar';
 import type { SceneState } from '@/flow/scene-state';
 import { mountInkDialog } from '@/render/dialog/ink-dialog';
+import { mountCalendarWidget } from '@/render/diegetic/calendar-widget';
 import { createPropEntity } from '@/render/diegetic/prop-entity';
 import { propRegistry } from '@/render/diegetic/prop-registry';
 import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
@@ -117,49 +117,13 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
     monitorContainer.destroy({ children: true });
   });
 
-  // ── Calendar (date binding, swappable sprite) ───────────────────────────
-  // Subscribes to calendar.onDateChanged. P3 has 4 calendar sprites
-  // available; map currentDay → nearest available frame.
-  const calendarContainer = new Container();
-  calendarContainer.label = 'calendar';
-  calendarContainer.x = 70;
-  calendarContainer.y = 60;
-  ctx.worldLayer.addChild(calendarContainer);
-
-  const CALENDAR_FRAMES = {
-    start: 'sprites/hud/calendar_month_day_1.png',
-    mid: 'sprites/hud/calendar_mid_week.png',
-    weekend: 'sprites/hud/calendar_weekend_marked.png',
-    end: 'sprites/hud/calendar_month_end.png',
-  } as const;
-
-  function pickCalendarFrame(day: number): string {
-    if (day <= 1) return CALENDAR_FRAMES.start;
-    if (day <= 4) return CALENDAR_FRAMES.mid;
-    if (day <= 6) return CALENDAR_FRAMES.weekend;
-    return CALENDAR_FRAMES.end; // day 7 = month end
-  }
-
-  let currentCalendarSprite: Sprite | null = null;
-  const swapCalendarTo = async (url: string) => {
-    const tex = await Assets.load(url);
-    tex.source.scaleMode = 'linear';
-    if (currentCalendarSprite) currentCalendarSprite.destroy();
-    const s = new Sprite(tex);
-    s.anchor.set(0.5);
-    s.scale.set(0.25);
-    calendarContainer.addChild(s);
-    currentCalendarSprite = s;
-  };
-  await swapCalendarTo(pickCalendarFrame(calendar.currentDay));
-
-  const unsubCalendar = calendar.onDateChanged(() => {
-    void swapCalendarTo(pickCalendarFrame(calendar.currentDay));
-  });
-  teardowns.push(() => {
-    unsubCalendar();
-    calendarContainer.destroy({ children: true });
-  });
+  // ── Calendar (Q-U Bug #26: programmatic Pixi widget) ────────────────────
+  // Replaces the legacy 4-frame sprite mount. The widget self-binds to
+  // calendar.onDateChanged and redraws when the day advances. Position
+  // matches the prior sprite anchor (centered around (70, 60) → top-
+  // left at (30, 20)). See calendar-widget.ts for the visual spec.
+  const calendarHandle = mountCalendarWidget(ctx.worldLayer, { x: 30, y: 20 });
+  teardowns.push(calendarHandle.destroy);
 
   // ── Mug (energy binding, swappable sprite) ──────────────────────────────
   // 5 tiers per energy level. tier = floor(energy / 20), clamped 0..4.

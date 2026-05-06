@@ -641,6 +641,58 @@ P2: Bug #26 calendar widget polish.
 
 (next /loop tick: 按 queue P0 顺序 → Q-Q 还是 Q-S 看哪个 ink 内容 ready。Q-Q 需要 episode-1 D7 ink 末加 `# kpi_review_path_X` tag，Q-S 单独 modal 不依赖 ink。优先 Q-S 估时短 + unblocks weekly cadence；Q-Q 紧随其后。)
 
+---
+
+## 2026-05-06 · batch 23 — Q-T (Bug #33) + Q-U (Bug #26 calendar Pixi widget)
+
+GM playtest after batch 22 added 2 P0 small post Q-R fixes; both shipped together.
+
+### Q-T (Bug #33) — drop `[视角]` header for narration paints
+
+Per avg-architecture.md §1.3 update: narration is the default旁白; the `[视角]` label was visual noise. `drawPanel()` now branches on `source.kind === 'narration'` and skips the header bar entirely (no BG, no divider, no label). The body region shifts up to fill the full panel rect (`bodyText.y = PANEL_Y + PANEL_PADDING_Y` instead of `PANEL_BODY_Y + PANEL_PADDING_Y`), and the body mask is redrawn per paint to match the dynamic body rect. Monologue + NPC keep their header bar so the disambiguation cue (`[笑天]` / `[Lisa]` / etc) survives.
+
+**File**: `game/src/render/dialog/ink-dialog.ts` (drawPanel only)
+**Tests**: 288/288 passing (purely visual; no unit-test surface — pure helpers `decideDialogPhase` / `detectSource` unaffected)
+**Closes**: Bug #33
+
+### Q-U (Bug #26) — calendar Pixi Graphics widget
+
+Replaces the legacy 4-frame sprite-based calendar (`calendar_month_day_1.png` / `calendar_mid_week.png` / `calendar_weekend_marked.png` / `calendar_month_end.png`) with a programmatically-drawn `mountCalendarWidget()`. The sprites were low-fidelity and only mapped 4 buckets (`day≤1` / `day≤4` / `day≤6` / `day=7`); they didn't track each day individually and looked rough at 0.25× scale.
+
+**New file**: `game/src/render/diegetic/calendar-widget.ts` (~200 LOC)
+- 80 × 80 px desk-calendar visual: paper BG `#EFE6D2` (warm cream) + 1 px border `#2A1F14`
+- Top 16 px banner `#8A4A3A` (装订深红) with month label "{N} 月 · {EN}" (e.g. "1 月 · JAN") + 2 binding rings poking up from top edge
+- 7-col × 5-row date grid below (covers all 30 days of MONTH_DAYS)
+- Color rules per day: past = light gray `#B8A890`; current = red `#C83428` text + red ring outline; weekend cols (Sa=col 5, Su=col 6) = red `#C83428`; weekday future = ink `#2A1F14`
+- Self-binds to `calendar.onDateChanged`; gridLayer redraws on every fire (paper + banner are static)
+- Returns `{ container, destroy }` — destroy unsubscribes + tears down container
+
+**Workstation refactor**: `game/src/render/scene/workstation.ts` lost ~40 LOC of CALENDAR_FRAMES + pickCalendarFrame + swapCalendarTo + onDateChanged subscription; now just `mountCalendarWidget(ctx.worldLayer, { x: 30, y: 20 })` + push the handle's `destroy` onto teardowns. The legacy `calendar` import from `@/flow/calendar` is no longer needed at workstation level (biome auto-removed).
+
+**Visual position**: top-left of widget at (30, 20) → centered ~(70, 60) matches the prior sprite anchor exactly.
+
+**Tests**: 288/288 passing (no new tests — Pixi rendering can't be vitest-asserted cleanly; pure helpers `monthEnglish` etc are trivial and exercised inline by the widget's refresh path).
+
+**Closes**: Bug #26
+
+### Verification
+
+- `pnpm tsc` ✓ clean (both batches)
+- `pnpm test` ✓ 288/288
+- All lefthook hooks green
+
+### Open after this tick
+
+P0:
+- Q-Q · Bug #31 KPI Review cinematic (4-6h, ink + cinematic together)
+- Q-S · Weekly meter modal (2-3h, no ink dependency)
+- Q-K-2nd · First-time tutorial modal (1-2h)
+
+P1: T-1 scene registry, T-2 NPC sprite slots, Bug #29 (Status HUD diegetic-first reassessment).
+
+(next /loop tick: Q-S — shortest, no ink dependency, unblocks weekly cadence. Q-Q after.)
+
+
 
 
 
