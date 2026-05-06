@@ -4,8 +4,17 @@
 // These positions are STUBS for the workstation scene (640×360 logical
 // canvas). They will be refreshed when T05/T06 wires real NPC sprite slots
 // — at that point the anchor for each NPC becomes a function of the
-// sprite's actual `npc.position + headOffset`. For now they place each
-// known NPC roughly where their sprite would land in concept 01/02.
+// sprite's actual `npc.position + headOffset`. Until then the coords are
+// hand-tuned to "narratively plausible" positions per GM playtest
+// (Bug #16, 2026-05-06):
+//
+//   - protagonist sits center-bottom; visible cubicles flank left + right
+//   - Lisa is the right-adjacent cubicle peer
+//   - 老周 sits further right (mid-row)
+//   - David occupies the mid-left desk area (across the room)
+//   - 王总监 / Zoe enter from the top (meeting / HR room)
+//   - 李阿姨 mops along the bottom-left
+//   - IT 小马 hangs around the coffee machine (lower-left)
 //
 // `getNpcAnchor()` returns null for unknown speakers so the dialog router
 // can fall back to the narration panel rather than render a bubble at a
@@ -18,27 +27,27 @@ export interface NpcAnchor {
 }
 
 const NPC_ANCHORS: Readonly<Record<string, NpcAnchor>> = {
-  // Deep-cast (5)
-  Lisa: { x: 470, y: 110 },
-  David: { x: 175, y: 115 },
-  大伟: { x: 175, y: 115 },
-  Vivian: { x: 320, y: 130 },
-  王总监: { x: 220, y: 95 },
-  李阿姨: { x: 130, y: 250 },
+  // Deep-cast (5) — narrative geometry per GM Bug #16 re-tune
+  Lisa: { x: 480, y: 130 }, // right-near adjacent cubicle
+  David: { x: 180, y: 160 }, // mid-left desk, across the room
+  大伟: { x: 180, y: 160 },
+  Vivian: { x: 440, y: 80 }, // reception / entrance (top-right)
+  王总监: { x: 320, y: 80 }, // mid-top — projector / walks past
+  李阿姨: { x: 120, y: 250 }, // cleaning, bottom-left
 
   // Bit-cast (5)
-  'IT 小马': { x: 175, y: 200 },
-  老周: { x: 460, y: 130 },
-  周哥: { x: 460, y: 130 },
-  妈妈: { x: 320, y: 180 },
-  林姐: { x: 305, y: 110 },
+  'IT 小马': { x: 140, y: 210 }, // coffee machine lower-left
+  老周: { x: 540, y: 160 }, // right-mid (further right than Lisa)
+  周哥: { x: 540, y: 160 },
+  妈妈: { x: 320, y: 180 }, // phone scene only — mid-screen
+  林姐: { x: 200, y: 130 }, // cross-team lead, mid-left
 
-  // Future NPCs introduced via daily choices / S2+ slots
+  // Future NPCs (daily choices / S2+ slots) — placeholder positions
   Beth: { x: 480, y: 130 },
   Eric: { x: 380, y: 130 },
   Cassie: { x: 220, y: 100 },
-  Zoe: { x: 260, y: 90 },
-  食堂阿姨: { x: 320, y: 220 },
+  Zoe: { x: 260, y: 80 }, // HR room (top-mid-left)
+  食堂阿姨: { x: 320, y: 200 }, // cafeteria (mid)
 };
 
 export function getNpcAnchor(name: string): NpcAnchor | null {
@@ -68,19 +77,20 @@ export function listKnownNpcs(): string[] {
 // ─────────────────────────────────────────────────────────────────────
 
 const NPC_ANCHORS_BY_ID: Readonly<Record<string, NpcAnchor>> = {
-  // Deep-cast (5 visible NPCs)
-  lisa: { x: 470, y: 110 },
-  david: { x: 175, y: 115 },
-  vivian: { x: 320, y: 130 },
-  wang_director: { x: 220, y: 95 },
-  lao_zhou: { x: 460, y: 130 },
+  // Deep-cast (5 visible NPCs) — coords mirror the Chinese-name table
+  // above; both go away once T05/T06 sprite slots own positioning.
+  lisa: { x: 480, y: 130 }, // right-near adjacent cubicle
+  david: { x: 180, y: 160 }, // mid-left desk, across the room
+  vivian: { x: 440, y: 80 }, // reception / entrance (top-right)
+  wang_director: { x: 320, y: 80 }, // mid-top — projector / walks past
+  lao_zhou: { x: 540, y: 160 }, // right-mid (further right than Lisa)
   // Bit-cast / S2+ slots
-  zoe: { x: 260, y: 90 },
-  li_ayi: { x: 130, y: 250 },
-  mama: { x: 320, y: 180 },
-  lin_jie: { x: 305, y: 110 },
-  it_xiaoma: { x: 175, y: 200 },
-  food_court_auntie: { x: 320, y: 220 },
+  zoe: { x: 260, y: 80 }, // HR room (top-mid-left)
+  li_ayi: { x: 120, y: 250 }, // cleaning, bottom-left
+  mama: { x: 320, y: 180 }, // phone scene only — mid-screen
+  lin_jie: { x: 200, y: 130 }, // cross-team lead, mid-left
+  it_xiaoma: { x: 140, y: 210 }, // coffee machine lower-left
+  food_court_auntie: { x: 320, y: 200 }, // cafeteria (mid)
 };
 
 export function getNpcAnchorById(id: string): NpcAnchor | null {

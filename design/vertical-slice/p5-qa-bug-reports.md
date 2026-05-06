@@ -378,3 +378,126 @@ Driver enhancements: walks stage tree to find `sticky-N` / `choice-N` buttons (T
 - **N11 — Stage tree at Event 1.1 (post-fix)**: `world / workstation-bg / sticky / monitor / Sprite / calendar / Sprite / mug / Sprite / prop:fruit_bowl / prop:phone / ink-dialog / Graphics / Graphics / choices / internal-monologue / sticky-notes / sticky-0 / Graphics / Graphics / sticky-1 / Graphics / Graphics / sticky-2 / Graphics / Graphics`. Concrete evidence Bug #8 fix lands.
 - **N12 — Smoke tests baseline post-fix**: `pnpm test` = 233/233 passing (was 179). Engineer added 54 new tests covering speech-bubble (T10a), internal monologue (T10b), sticky-notes (T11), scene state mirror, prop registry, ink save schema. No regressions.
 - **N13 — Latest dev commits seen**: `7f62762` (T03 scene mirror), `6fb3445` (T05 + T03 prop), `dedb258` (fix qa-bug-4,5,9 + T16). Plus uncommitted ink content sweep on `episode-1.ink:643/720` closing Bug #1 + #2 silently.
+
+---
+
+## Bug #13 — major UX — sticky-note choices vertically overlap dialog narration text
+
+**Reported by**: GM playtest (2026-05-06, Day 1 茶水间 + Day 2 老周凉茶 sessions)
+**Severity**: major UX — sticky cards mounted at desk-surface Y (~265) collide with bottom-anchored narration panel (y=180-336, height 156). Players see choice cards covering 2-3 lines of narration body.
+
+**Repro**:
+1. New game → 开始今日 → Day 1 Event 1.2 (茶水间 Lisa) — narration paints with "工位旁边的水果盘今天是…茶水间…她手里的不是保温杯…茶水间另一头, 李阿姨在拖地…" then 3 sticky choices (`让 Lisa 先 / 你先 / 不说话, 先接你的`) appear in the middle 1/3 of the panel area, hiding the bottom 3 lines of narration.
+2. Same pattern repeats at Day 2 Event 2.3 老周凉茶 — choices `[偷喝那杯, 再走 / 拿走杯子, 去洗, 再放回 / 主动跟老周说"对不起..."]` cover "你站在他工位侧后. 他低头看 Excel..." narration lines.
+
+**Expected** (per art-bible §7.1 + sticky-note design intent):
+- Either: narration shows in panel, then `# pagebreak` click → hide panel + show choices alone at desk surface
+- OR: panel shrinks to top 1/3 of bottom area (~y=180-240), sticky-notes occupy bottom 1/3 (~y=240-336)
+
+**Actual**: panel + sticky overlap, both Y-overlap in the same 156px region.
+
+**Files involved**: `game/src/render/dialog/ink-dialog.ts` (panel position/size), `game/src/render/choice/sticky-notes.ts` (sticky Y constant).
+
+**Suggested fix path**:
+- **Option A (smallest)**: bump sticky-notes `STICKY_CENTER_Y` from ~265 → ~310 (last 50px row), shrink panel to `PANEL_H = 100` (only top 100px of bottom area). Risk: 100px is tight for daily_recap text.
+- **Option B (cleaner per art-bible)**: when `step.choices.length > 0`, hide narration panel entirely; choices render alone at desk surface y=240-336. Force player to use pagebreak `▼` continuation to read narration before choices appear. Requires new flow: text→pagebreak→text→...→text→choices.
+
+**GM recommendation**: Option B. Aligns with "sticky-note choices on desk = main interaction, narration panel = transient flavor between beats" art-bible intent.
+
+**GM decision (2026-05-06, post-playtest)**: ✅ **Option B confirmed**.
+
+W1 implementation spec:
+1. When `step.choices.length > 0` AND `step.text` non-empty: paint narration into panel only, do NOT mount sticky-notes yet. Mount the existing pagebreak `▼` continuation affordance.
+2. Player click ▼ → drain narration panel (clear `text.text`) → call `step()` again to either reveal more narration (if pagebreak split it) OR fall through to choice presentation.
+3. When `step.text` is empty AND `step.choices.length > 0`: mount sticky-notes alone at desk surface (current y=265 OK once panel is gone).
+4. Edge: if `step.text` only contains 1-2 short lines + choices (Decision Moment style — no `# pagebreak` separator before choices), render narration in a smaller header band ABOVE the sticky rack (not bottom panel). Keeps short prompts together with their choices, removes need for ▼ click.
+
+`step` shape today: `{ text: string, choices: Array, paused: boolean, tags: ... }`. The "text + choices same step" case is what currently collides — Option B splits it into two paint phases gated by ▼.
+
+W1 may add a heuristic: if `step.text.length < 60` (~3 line short prompt) AND no `# pagebreak` tag was seen before the choices, skip the ▼ gate and use header-band layout. Tunable.
+
+**Status**: ⏳ open — W1 pickup confirmed Option B.
+
+---
+
+## Bug #14 — major — phone (and other) prop persists across scenes; covers daily_recap text
+
+**Reported by**: GM playtest (2026-05-06, Day 1 daily_recap)
+**Severity**: major — daily_recap KPI/钱/状态/关键时刻 text rendered, but phone sprite (face_up state, mounted via earlier `# prop: phone_*` tag) is positioned in the middle of the screen, covering the recap body text. Mug + fruit bowl correctly stay at desk left/right edges, but phone has no off-desk parking position.
+
+**Repro**:
+1. Day 1 morning_briefing → progress through Day 1 events. At some point ink emits `# prop: phone_face_up` (or similar — daily intro / Lisa text setup).
+2. End of day → after_work `[按时下班]` → daily_recap paints in narration panel.
+3. Phone sprite stays mounted at its desk-mid position (which on the 640×360 canvas is the same area where recap text renders).
+4. Visual collision: phone body intersects recap text "今日 钱: 5502 (起始 5500)" + "今日 状态: 82/100".
+
+**Expected**: scene transition (morning_briefing → recap) should either (a) unmount transient props, OR (b) move recap text to a non-prop-occupied region.
+
+**Actual**: PropRegistry tracks props by id but doesn't unmount on scene change. T04 (scene registry + transitions) not yet done.
+
+**Files involved**: `game/src/render/diegetic/prop-registry.ts`, `game/src/render/scene/workstation.ts` (mounts phone with no teardown trigger).
+
+**Suggested fix path**:
+- Short-term: when ink emits `# scene: <new>`, PropRegistry destroys non-permanent props. Permanent (mug/monitor/calendar) are bg-bound; transient (phone/fruit_bowl) are scene-bound.
+- Or: dedicated daily_recap scene with its own BG that hides desk surface.
+
+**Status**: ⏳ open — W1 pickup (T04 sub-task or PropRegistry teardown trigger).
+
+---
+
+## Bug #15 — minor → major (per visibility) — sprite sheet label leakage visible at runtime
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: was minor in W5 round-1 self-check (assumed sprite scale ≥0.1 hides it); actual scale at runtime makes it visible — promote to major visual.
+
+**Visible labels**:
+- `fruit_bowl_apple.png`: top-right "Front" text + bottom-right "9:00" timestamp visible in all screenshots
+- `xiaotian_polo` expression sub-sprites: similar (W5 round-2 audit confirmed cuts.yaml mapping is correct, but labels leak through)
+
+**Files involved**: `assets/sprites/test_outputs/fruit_bowl_3frame_sheet.png` source — labels are baked into the sheet at the cell-edge boundaries, cuts.yaml `label_band=60` doesn't fully strip them.
+
+**Suggested fix path**:
+- **Option A**: re-cut with bigger `label_band` value (try 80 or 100), re-sync. Cheap.
+- **Option B**: re-prompt the sheet without label band entirely (W5 round 3, ~$0.13 per asset). Slow but clean.
+- **Option C**: PixiJS Sprite-side crop mask removes top-right + bottom-right N pixels after Assets.load. W1 task.
+
+**GM recommendation**: Option A first (15 min). If still visible, fall back to C.
+
+**Status**: ⏳ open — W5 (Option A) or W1 (Option C). User decides.
+
+---
+
+## Bug #16 — major — speech bubble anchored to wrong screen position; floats over no NPC
+
+**Reported by**: GM playtest (2026-05-06, Day 2 老周凉茶)
+**Severity**: major — bubble "你喝什么?" appears at top-right of canvas (~x=560, y=60) with downward tail pointing to empty wall texture. No NPC sprite there. The line is 老周's, but his stub anchor position doesn't match where he should visually be.
+
+**Repro**:
+1. Day 2 morning → after_work events → reach Day 2 Event 2.3 老周凉茶
+2. 老周's line "你喝什么?" mounts as bubble at npc-anchors.ts stub coords for `lao_zhou` (likely top-right per default registry order).
+3. Visually: speech bubble floats high-right, but the narration says "你站在他工位侧后" — he's behind/right of the player. Bubble position doesn't match narrative geometry.
+
+**Expected**: bubble appears at NPC's actual on-screen position OR at narrative-consistent position (老周 = right-side workstation).
+
+**Actual**: stub anchors are placeholder coords pending T05/T06 sprite slot wiring. They don't reflect NPC position.
+
+**Files involved**: `game/src/render/dialog/npc-anchors.ts` (stub coords table). `T05/T06` will replace with sprite-anchored positions, but until then stub coords are visible.
+
+**Suggested fix path**:
+- Quick fix: re-tune stub coords in `npc-anchors.ts` to plausible workstation-context positions (老周=right-mid, Lisa=right-near, David=mid-left, 王总监=mid-top, etc) so bubbles at least don't float in absurd locations.
+- Real fix: T05/T06 NPC sprite slots — bubble anchors to sprite.position + headOffset.
+
+**GM recommendation**: stub-tune NOW (~30min of W1 time), real T05/T06 lands next batch.
+
+**Status**: ✓ resolved (interim) — `fix(qa-bug-16)` (batch 8 W1 pickup, 2026-05-06). `npc-anchors.ts` re-tuned: 老周 → x=540 y=160 (right-mid, further right than Lisa), David → x=180 y=160 (mid-left), Vivian → x=440 y=80 (reception top-right), 王总监 → x=320 y=80 (mid-top projector), Lisa → x=480 y=130 (right-near), 李阿姨 → x=120 y=250 (bottom-left cleaning), IT 小马 → x=140 y=210 (coffee machine), Zoe → x=260 y=80 (HR top-mid-left), 林姐 → x=200 y=130 (cross-team mid-left), 妈妈 → x=320 y=180 (phone scene mid). Bubbles now lock to narratively-plausible positions; real fix still lands at T05/T06 NPC sprite slot wiring (these stubs go away then). Both `NPC_ANCHORS` (Chinese name table, legacy fallback) and `NPC_ANCHORS_BY_ID` (Q-1 id table, primary path) updated together.
+
+---
+
+## Bug #17 — minor — narration text appears to render outside panel BG bounds
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: minor — possibly a visual artifact of panel transparency + text antialiasing, hard to confirm from screenshots. Some narration text lines appear partially behind sticky-notes (which is Bug #13 root cause).
+
+**Suggested action**: investigate after Bug #13 fix lands. Likely auto-resolves if Option B (hide panel when choices show) is implemented.
+
+**Status**: ⏳ open — gated on Bug #13.

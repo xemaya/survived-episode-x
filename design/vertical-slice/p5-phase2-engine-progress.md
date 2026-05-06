@@ -166,6 +166,31 @@ GM Q-3 reply: ✅ Option D (2-line wrap + ellipsis). This batch enforces the cap
 
 (next: T04 scene registry + transitions is the natural step — `sceneState.scene` mirror is the input, T04 is the consumer that actually mounts/unmounts a phone / monitor_modal / endgame composer when the tag changes. Or T05/T06 NPC sprite slots so `npc-anchors.ts` becomes a sprite-position binding. Will pick whichever has cleaner blast radius next batch.)
 
+---
+
+## 2026-05-06 · batch 8 — /loop tick 1 — commit Bug #1+#2 + Bug #16 stub-anchor re-tune
+
+W1 (engine) /loop dynamic-paced tick 1. Read `p5-phase2-engine-bug-reports.md` and `p5-phase2-engine-questions.md`, picked unresolved tasks by priority block > major > minor.
+
+- **Bug #1 + #2** (block, content fix) ✓ committed at `7ded1bd` — `fix(qa-bug-1,2): commit episode-1.ink content fixes verified by QA Round 3`. The content edits (gather between Event 2.3 choice block and continuation; drop `**` from David line at 643) were already in the working tree of `episode-1.ink` (file was untracked). QA Round 3 verified both reproducers no longer fire; this commit puts the file under git tracking. NOT included: sweep of episode-2/3/4/5/6/7/8.ink for similar loose-end patterns — designer scope per handoff §5.
+- **Bug #16** (major UX, stub anchors) ✓ resolved (interim) at `<batch 8 hash>` — `fix(qa-bug-16): re-tune NPC anchor stubs to narrative geometry`. `npc-anchors.ts` updated for both `NPC_ANCHORS` (Chinese name fallback) and `NPC_ANCHORS_BY_ID` (Q-1 id primary path):
+  - 老周 540/160 (right-mid, further right than Lisa)
+  - David 180/160 (mid-left across the room)
+  - Vivian 440/80 (reception entrance, top-right)
+  - 王总监 320/80 (mid-top projector)
+  - Lisa 480/130 (right-near adjacent cubicle, was 470/110)
+  - 李阿姨 120/250 (bottom-left cleaning)
+  - IT 小马 140/210 (coffee machine lower-left)
+  - Zoe 260/80, 林姐 200/130, 妈妈 320/180, food_court_auntie 320/200
+  - Real fix still lands at T05/T06 NPC sprite slot wiring (these stubs go away then).
+
+**Verify**: `pnpm tsc` ✓, dialog tests 34/34 ✓.
+
+**Open major bugs after this tick**: #13 (sticky/narration overlap, Option B confirmed by GM), #14 (phone prop persists across scenes, T04 sub-task), #15 (sprite sheet label leakage, W5 owns Option A first). #11/#12/#17 are minor.
+
+(next /loop tick: pick up Bug #13 — Option B impl in ink-dialog: when `step.choices.length > 0` AND `step.text` non-empty, show panel only with ▼ continue affordance, no sticky-notes; click ▼ → step() again until `step.text` empty, then mount sticky-notes alone. ~1-2h work, biggest UX impact.)
+
+
 
 
 
