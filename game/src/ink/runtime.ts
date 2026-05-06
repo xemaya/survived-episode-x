@@ -7,6 +7,7 @@
 // Save/load: ink runtime state is serialized via story.state.toJson() and
 // stored alongside the rest of the game save (see save/system.ts P5 extension).
 
+import { PANEL_TEXT_BUDGET, paginateAtSentenceBoundary } from '@/render/dialog/panel-paginate';
 import { type Source, detectSource, sourcesEqual } from '@/render/dialog/source-detector';
 import { Story } from 'inkjs';
 import { pathInterceptor } from './path-interceptor';
@@ -190,6 +191,25 @@ export class InkRuntime {
         ended: true,
         paused: false,
       };
+    }
+
+    // Q-V (Bug #34): if the assembled text exceeds the panel budget,
+    // split at the latest sentence/paragraph boundary and stash the
+    // tail. This reuses the same pendingChunk/paused mechanism as
+    // explicit `# pagebreak` (Q-2) and Q-R source-split, so the
+    // renderer's ▼ continue affordance handles the multi-page read
+    // without any new state. Skipped when the loop already paused
+    // (pagebreak / source-split takes precedence).
+    if (!paused && text.length > PANEL_TEXT_BUDGET) {
+      const split = paginateAtSentenceBoundary(text, PANEL_TEXT_BUDGET);
+      if (split.tail.length > 0) {
+        text = split.head;
+        this.pendingChunk = split.tail;
+        // Tags carried with the head chunks already pushed onto `tags`;
+        // the tail is pure text-domain spillover with no new tags.
+        this.pendingTags = [];
+        paused = true;
+      }
     }
 
     const choices: InkChoice[] = (story.currentChoices ?? []).map((c, i) => ({

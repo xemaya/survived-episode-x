@@ -376,7 +376,15 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
         } else {
           hidePanel();
         }
-        renderStickyChoices(step.choices);
+        // Q-V (Bug #34): when a long body forces a paginate split, the
+        // runtime returns paused=true even though `choices` is still
+        // populated. Show the ▼ first so the player reads the head;
+        // the sticky rack mounts on the LAST page (paused=false).
+        if (step.paused) {
+          continueTeardown = renderContinueAffordance();
+        } else {
+          renderStickyChoices(step.choices);
+        }
         break;
       }
       case 'narration': {
