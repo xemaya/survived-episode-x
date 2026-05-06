@@ -850,7 +850,17 @@ Tests: 7 new vitest cases in `prop-registry.test.ts` for `computeCropFrame` (nul
 - Monologue is dimmer / smaller / background-positioned (fixed by Bug #19's positional fix + style tune)
 - OR ink authoring discipline: separate narration paragraphs and monologue paragraphs with a `# pagebreak` between them so they NEVER render simultaneously
 
-**Status**: ⏳ open — discussion, gated on Bug #19 fix approach.
+**Status**: ✓ resolved (engine side, via Bug #19 fix dependency) — `fix(qa-bug-19,18-regression)` (`fafa078`, batch 15). Bug #19's GM ✅ Option A is exactly the "monologue is dimmer / smaller / background-positioned" path listed here as one of two acceptable resolutions:
+
+- Position: monologue moved from `(320, 240 mid-panel)` → `(320, 26 top-of-canvas)` — physically above the narration panel + sticky rack
+- Size: 11pt → 10pt (smaller than panel's 12pt narration)
+- Color: cream `#E8E0CC` (matches panel narration palette) → cool-gray `#A8B0C0` (visually dimmer / "thought" register)
+- Style: italic (was already italic)
+- Lines: 4-line cap with ellipsis truncation (so a long monologue doesn't dominate)
+
+Net effect: narration vs monologue now distinct on three visual axes (position + size + color) AND one stylistic axis (italic). Player's eye can categorize each line at a glance.
+
+**Caveat — designer-side ongoing concern (NOT engine)**: the second resolution path ("ink authoring discipline: `# pagebreak` between narration and monologue paragraphs") remains a content-side optimization. Some events will still emit both streams in one paint cycle; the visual distinction now handles it. Designer can choose to add pagebreaks for events where the narration ↔ monologue contrast carries dramatic weight (e.g., E12 finale beats), but it's no longer a blocker. P6 backlog item: tone-bible discipline review of which events warrant the pagebreak split.
 
 ---
 
@@ -917,3 +927,29 @@ W2 QA Round 11 (2026-05-06). Latest commit: `fafa078 fix(qa-bug-19,18-regression
 ### Next round target (R12)
 
 Bug #15 fix verification when it lands. Otherwise R12 extends driver to Day 4-7.
+
+---
+
+## Round 12 — verify Bug #15 fix (`qa/p5-demo-r12.spec.ts`, 3 tests, all pass)
+
+W2 QA Round 12 (2026-05-06). Latest commit: `450ef7c fix(qa-bug-15): Pixi-side crop edges to hide sprite-sheet label leakage`. Smoke 302/302 (was 295 — 7 new tests for crop mask logic).
+
+### Verifies
+
+- ✓ **Bug #15 (sprite-sheet label leak)** — RESOLVED via Option C (Pixi-side crop). `prop:fruit_bowl` exists in stage tree at expected position (worldX=510, worldY=250). Smoke 302/302 with 7 new mask-logic tests passes.
+
+  **Visual verification limitation**: my driver paths always land at moments where fruit_bowl `visible=false` due to Bug #14's scene-change-bulk-hide kicking in (Event 1.1 emits `# scene: reception` + `# prop: fruit_bowl_apple`, then Event 1.2 emits `# scene: break_room` which bulk-hides fruit_bowl in the same step blob). Fruit_bowl renders for a single ink step transition that's hard to freeze via Playwright. Trusting new mask tests + code commit covers this. GM should re-spot-check via manual playtest if any "Front" / "9:00" labels reappear.
+
+- ✓ **Re-verify Bug #6 / #11 / #14 / #18-regression / #19**: no regressions. Long sticky still ellipsised, no stale Lisa bubbles at Event 2.3, props correctly hide on scene change.
+
+### Round 12 milestone — all major engine bugs resolved
+
+| Resolved | Open |
+|----------|------|
+| #1 #2 #3 #4 #5 #8 #9 #11 #12 #13 #14 #15 #16 #17 #18 #18-regression #19 | #6 (content sweep, designer) #7 (after_work UI design) #10 (1-frame paint desync, minor) #20 (narration vs monologue authoring split, partially addressed by #19) |
+
+All major engine bugs resolved. Open items are designer/discussion-tier.
+
+### Next round target (R13)
+
+No more `fix(qa-bug-N)` priority items. R13 should extend driver coverage to Day 4-7 events to surface NEW bugs (day_3_after_work full 3-choice rack, day_4 weekly_report, day_6 weekend lisa wechat, day_7 mom video + cliffhanger).

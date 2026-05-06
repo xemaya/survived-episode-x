@@ -382,6 +382,34 @@ All W1-actionable bugs closed. Remaining items are designer scope or low-priorit
 
 (next /loop tick: re-read; if no new W1-scope task, output "no task, idle".)
 
+---
+
+## 2026-05-06 · batch 17 — /loop tick 10 — Bug #20 close-by-Bug-#19 dependency (no engine change)
+
+W1 (engine) /loop tick 10. Bug #20 was the last open W1-touchable item — discussion-status, gated on Bug #19 fix approach. Bug #19's GM ✅ Option A landed in batch 15 (`fafa078`) and is exactly the "monologue is dimmer / smaller / background-positioned" path Bug #20 listed as one of two acceptable resolutions:
+
+- Position: top region (320, 26) — physically above narration panel + sticky rack
+- Size: 10pt vs panel's 12pt
+- Color: cool-gray #A8B0C0 vs panel's cream #E8E0CC
+- Style: italic
+- 4-line cap with ellipsis
+
+Three visual axes + one stylistic axis make narration ↔ monologue distinguishable at a glance.
+
+- **p5-qa-bug-reports.md** Bug #20 status updated to ✓ resolved (engine side).
+- Documented the second resolution path (designer authoring discipline: `# pagebreak` between narration and monologue paragraphs) as P6 backlog content-side optimization, NOT engine-blocking.
+
+No code change. 302/302 tests still green.
+
+**Open after this tick**:
+- Bug #7 discussion (designer scope: 提前下班 in Preact vs ink — design choice on canonical after_work UI)
+- Bug #10 minor (paint desync — only headless screenshot timing, low priority)
+
+Both are non-W1-actionable. **All W1-actionable bugs and questions are now closed.**
+
+(next /loop tick: re-read both docs; if QA hasn't filed new bugs and GM hasn't filed new questions, output "no task, idle".)
+
+
 
 
 
