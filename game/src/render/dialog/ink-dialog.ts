@@ -18,12 +18,13 @@
 // inline italic markers inside narration paragraphs lose their visual
 // distinction (acceptable until a richer text renderer lands).
 
-import { ink } from '@/ink/runtime';
+import { type InkStoryStep, ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
 import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
 import { autosave } from '@/save/autosave';
 import { sceneState } from '@/scene/scene-state-mirror';
 import { Container, Graphics, Text } from 'pixi.js';
+import { decideDialogPhase } from './dialog-phase';
 import { type InternalMonologueHandle, mountInternalMonologue } from './internal-monologue';
 import { extractInternalMonologue } from './internal-monologue-parser';
 import { getNpcAnchor, getNpcAnchorById } from './npc-anchors';
@@ -115,6 +116,16 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   let currentStickies: StickyNotesHandle | null = null;
   /** Cleanup for the `# pagebreak` continue affordance (▼ + panel click). */
   let continueTeardown: (() => void) | null = null;
+  /** QA Bug #13 fix: when a step carries text + choices, the rack is
+   * mounted *only after* the player taps ▼ to flush the panel. The
+   * step is parked here so advanceContinue() knows to re-render the
+   * SAME step's choices (no ink advance) instead of calling step()
+   * again (which would be a no-op at a choice point). */
+  let deferredChoicesStep: InkStoryStep | null = null;
+  /** Header-band Text node — short prompts (< SHORT_PROMPT_THRESHOLD)
+   * sit ABOVE the sticky rack instead of in the bottom panel, so
+   * narration + choices render together without overlap. */
+  let headerBand: Text | null = null;
 
   const clearChoices = () => {
     for (const t of choiceTeardowns) t();
@@ -145,6 +156,39 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       continueTeardown();
       continueTeardown = null;
     }
+  };
+
+  const clearHeaderBand = () => {
+    if (headerBand) {
+      headerBand.destroy();
+      headerBand = null;
+    }
+  };
+
+  /** Header band Text positioned just above the sticky rack (rack
+   * center y=248 per sticky-notes-layout default; sticky height 70 →
+   * top edge ~213). Header sits at y=200 (bottom-anchored) so the
+   * baseline of the last text line nestles above the rack. */
+  const renderHeaderBand = (txt: string) => {
+    clearHeaderBand();
+    const node = new Text({
+      text: txt,
+      style: {
+        fontFamily: TEXT_FONT,
+        fontSize: 12,
+        fill: TEXT_COLOR,
+        lineHeight: 16,
+        align: 'center',
+        wordWrap: true,
+        wordWrapWidth: 480,
+        breakWords: true,
+      },
+    });
+    node.anchor.set(0.5, 1);
+    node.x = CANVAS_W / 2;
+    node.y = 200;
+    container.addChild(node);
+    headerBand = node;
   };
 
   const drawPanelBg = () => {
@@ -211,14 +255,33 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
 
   /** Resume the story past a `# pagebreak` and paint the next chunk.
    * Mirror of advanceChoice but without a choice index — used by the
-   * panel's tap-to-continue affordance (Q-2 GM reply: pagebreak is a
-   * "wait for click" beat, not a choice). Deliberately does NOT
-   * autosave: ink state at this point has already advanced past the
-   * post-pagebreak chunk (the chunk is held in InkRuntime.pendingChunk
-   * which is intra-session only). Saves are taken at choice
-   * boundaries — refreshing mid-pagebreak resumes the player to the
-   * previous choice's first chunk, which they replay through. */
+   * panel's tap-to-continue affordance.
+   *
+   * Two cases:
+   *   1. Deferred-choices flush (QA Bug #13): step has both text and
+   *      choices; first paint shows panel + ▼; this call hides the
+   *      panel and mounts the sticky rack for the SAME step (no ink
+   *      advance — ink is already at the choice point).
+   *   2. Pagebreak resume (Q-2): step paused at `# pagebreak` with
+   *      pendingChunk stashed; this call drives ink.step() to drain
+   *      the stash and produce the next paint.
+   *
+   * Deliberately does NOT autosave: ink state in case 2 has already
+   * advanced past the post-pagebreak chunk (held intra-session in
+   * InkRuntime.pendingChunk). Saves are taken at choice boundaries —
+   * refreshing mid-pagebreak resumes the player to the previous
+   * choice's first chunk, which they replay through. */
   const advanceContinue = () => {
+    // Case 1: flush deferred-choices into the sticky rack.
+    if (deferredChoicesStep) {
+      const step = deferredChoicesStep;
+      deferredChoicesStep = null;
+      clearContinue();
+      hidePanel();
+      renderStickyChoices(step.choices);
+      return;
+    }
+    // Case 2: pagebreak resume.
     if (!ink.isLoaded) return;
     const nextStep = ink.step();
     tagDispatcher.dispatchAll(nextStep.tags);
@@ -323,31 +386,93 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       });
     }
 
-    // Layer 3: everything left → bottom narration panel. Hide if empty
-    // when at least one of the higher layers rendered.
+    // Layer 3 (bottom panel + sticky rack + ▼ continue): pick a phase
+    // per QA Bug #13 fix and mount the appropriate widgets. The pure
+    // helper picks one of: empty / ended / paged / deferred-choices /
+    // header-band / choices-only / narration-only.
     const trimmedPanel = split.remainder.trim();
-    if (trimmedPanel.length === 0 && (currentBubble || currentMonologue)) {
-      hidePanel();
-    } else {
-      text.text = stripMarkdown(trimmedPanel || '...');
-      drawPanelBg();
-    }
-
     clearChoices();
-    if (step.ended) {
-      const teardown = renderChoiceButton('（剧本结束）', -1, CANVAS_W / 2, PANEL_Y - 16);
-      choiceTeardowns.push(teardown);
-    } else if (step.paused) {
-      // `# pagebreak` arrived — show the accumulated text and a tap-to-
-      // continue affordance. No sticky-notes (this is not a decision).
-      continueTeardown = renderContinueAffordance();
-    } else if (step.choices.length > 0) {
-      renderStickyChoices(step.choices);
-    } else if (step.canContinue) {
-      // Edge case: no text emitted but story can continue. Step + repaint.
-      const nextStep = ink.step();
-      tagDispatcher.dispatchAll(nextStep.tags);
-      queueMicrotask(() => paintStep(nextStep));
+    clearHeaderBand();
+    deferredChoicesStep = null;
+
+    const phase = decideDialogPhase({
+      remainingTextTrimmed: trimmedPanel,
+      step: {
+        text: step.text,
+        choices: step.choices,
+        canContinue: step.canContinue,
+        ended: step.ended,
+        paused: step.paused,
+      },
+    });
+
+    switch (phase) {
+      case 'ended': {
+        // Story reached `-> END` — show "（剧本结束）" placeholder.
+        if (trimmedPanel.length > 0 || !(currentBubble || currentMonologue)) {
+          text.text = stripMarkdown(trimmedPanel || '...');
+          drawPanelBg();
+        } else {
+          hidePanel();
+        }
+        const teardown = renderChoiceButton('（剧本结束）', -1, CANVAS_W / 2, PANEL_Y - 16);
+        choiceTeardowns.push(teardown);
+        break;
+      }
+      case 'paged': {
+        // `# pagebreak` arrived — accumulated text + ▼ tap-to-continue.
+        text.text = stripMarkdown(trimmedPanel || '');
+        drawPanelBg();
+        continueTeardown = renderContinueAffordance();
+        break;
+      }
+      case 'deferred-choices': {
+        // QA Bug #13 fix: long narration + choices → show panel only,
+        // park the step on `deferredChoicesStep`. Click ▼ flushes panel
+        // and mounts sticky rack alone (advanceContinue handles it).
+        deferredChoicesStep = step;
+        text.text = stripMarkdown(trimmedPanel);
+        drawPanelBg();
+        continueTeardown = renderContinueAffordance();
+        break;
+      }
+      case 'header-band': {
+        // Short prompt + choices: narration as header band ABOVE the
+        // sticky rack, no bottom panel BG, no ▼ gate. Decision-Moment
+        // style — keeps prompt and choices together.
+        hidePanel();
+        renderHeaderBand(stripMarkdown(trimmedPanel));
+        renderStickyChoices(step.choices);
+        break;
+      }
+      case 'choices-only': {
+        // Empty narration text → sticky rack alone at desk surface.
+        hidePanel();
+        renderStickyChoices(step.choices);
+        break;
+      }
+      case 'narration-only': {
+        // Just text, no choices, not paused — panel only.
+        text.text = stripMarkdown(trimmedPanel);
+        drawPanelBg();
+        break;
+      }
+      case 'empty': {
+        // Step was wholly consumed by upper layers, OR canContinue
+        // with no emit; auto-step in the latter case.
+        if (currentBubble || currentMonologue) {
+          hidePanel();
+        } else if (step.canContinue) {
+          const nextStep = ink.step();
+          tagDispatcher.dispatchAll(nextStep.tags);
+          queueMicrotask(() => paintStep(nextStep));
+          return;
+        } else {
+          text.text = '...';
+          drawPanelBg();
+        }
+        break;
+      }
     }
   };
 
@@ -370,6 +495,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     clearBubble();
     clearMonologue();
     clearContinue();
+    clearHeaderBand();
     clearChoices();
     container.destroy({ children: true });
   };

@@ -416,7 +416,15 @@ W1 implementation spec:
 
 W1 may add a heuristic: if `step.text.length < 60` (~3 line short prompt) AND no `# pagebreak` tag was seen before the choices, skip the ▼ gate and use header-band layout. Tunable.
 
-**Status**: ⏳ open — W1 pickup confirmed Option B.
+**Status**: ✓ resolved — `fix(qa-bug-13)` (batch 9 W1 pickup, 2026-05-06). Pure phase-decision helper `dialog-phase.ts` (`decideDialogPhase()` returns one of 7 phases: `ended` / `paged` / `deferred-choices` / `header-band` / `choices-only` / `narration-only` / `empty`). `ink-dialog.ts paintStep` switches on phase:
+- **deferred-choices** (text length ≥ `SHORT_PROMPT_THRESHOLD = 60`): panel + ▼; click → flush panel → mount sticky rack alone (no ink advance, same step's choices).
+- **header-band** (text length < threshold): no panel, narration as small Text node centered at `y=200` (above the sticky rack), rack mounts simultaneously. Decision-Moment style.
+- **choices-only**: empty narration → rack alone at desk surface (existing behavior).
+- All other phases (`ended`/`paged`/`narration-only`/`empty`) preserve their prior render path.
+
+`advanceContinue()` extended: handles two cases — flushing the deferred-choices step (no ink advance, just transition phase A → phase B) AND the existing pagebreak resume.
+
+Tests: 12 new vitest cases in `tests/render/dialog/dialog-phase.test.ts` covering all 7 phases + boundary at threshold + pagebreak override + custom threshold + reproducer + Decision-Moment short prompt. 266/266 total.
 
 ---
 
@@ -500,4 +508,29 @@ W1 may add a heuristic: if `step.text.length < 60` (~3 line short prompt) AND no
 
 **Suggested action**: investigate after Bug #13 fix lands. Likely auto-resolves if Option B (hide panel when choices show) is implemented.
 
-**Status**: ⏳ open — gated on Bug #13.
+**Status**: ✓ resolved (likely) — `fix(qa-bug-13)` (batch 9): panel is now hidden when sticky rack is up (deferred-choices phase 2 + choices-only + header-band). Re-verify on next QA round; if any text is still visible outside panel bounds in narration-only / paged phases, file a follow-up bug.
+
+---
+
+## Round 4 — verify Bug #3 + Bug #6 dev fixes (`qa/p5-demo-r4.spec.ts`, 3 tests, all pass)
+
+W2 QA Round 4 (2026-05-06). Verifies the two `fix(qa-bug-N)` commits that landed since Round 3:
+- `fb3b4df feat(p5-pagebreak)+fix(qa-bug-3)`
+- `3b91ff1 feat(p5-T11-fit)+fix(qa-bug-6)`
+
+Driver gained `advanceToChoices(page)` + `pickChoiceAndAdvance(page, idx)` helpers that handle the new pagebreak gates by tap-to-continue clicking the panel until next choice surfaces.
+
+### Verifies
+
+- ✓ **Bug #3 (daily_recap blob)** — RESOLVED. Driver picks `[按时下班]` on Day 1 → immediate paint has 0 sticky/choice buttons (gate active) + panel text contains end of `day_1_after_work` ("Lisa: 明天见啊…") but NOT yet `day_2_morning` markers. After ≥ 1 tap-to-continue, lands at Day 2 `[开始今日]` with panel "早上你出门时下小雨" (Day 2 morning's opening). Each day-end → next-day-start now properly gated. Pagebreak count seen Day 1 → Day 2: 2 taps (matches `# pagebreak` placement at episode-1.ink:517 + :544).
+- ✓ **Bug #6 (sticky-note ellipsis)** — RESOLVED. Day 2 Event 2.3's longest choice `[主动跟老周说"对不起，您那杯茶我喝了"]` (17+ chars source) renders as `主动跟老周说"对不起，您…` (13 chars + `…`) — proves 2-line + ellipsis truncation per Q-3 spec. Medium choices (`让 Lisa 先`, `不说话，先接你的`) render fully. Intro screen 3 single-choice `[我懂了, 开始第 1 天]` (9 chars) renders fully (within 2-line budget).
+
+### Round 4 tooling notes
+
+- **N14 — Pagebreak interaction in driver chains**: clicking a sticky-note often does NOT immediately reveal the next choice — pagebreak gates intervene. Driver helpers `advanceToChoices(page, maxTaps=8)` + `pickChoiceAndAdvance(page, idx)` make chains resilient. Going forward all R5+ drivers should use these.
+- **N15 — Smoke tests post-fix**: 253/253 (was 233 in R3, 179 baseline). 20 new tests added covering pagebreak + sticky-fit. No regressions.
+- **N16 — Day 1 → Day 2 path now playable end-to-end**: from boot to Day 2 Event 2.3 picks all work without console errors. Bug #1 (engineer-filed runtime crash) confirmed silent on this path again. Day 3+ untested in R4 but next round.
+
+### Next round target (R5)
+
+Verify GM-filed Bug #13 (sticky overlay/narration overlap) + Bug #14 (phone prop persists across scenes) + Bug #15 (sprite sheet label leak) + Bug #16 (speech bubble anchor) + Bug #17 (narration outside panel BG) — all from 2026-05-06 GM playtest. Plus extend driver to Day 3-7 paths since Day 1+2 stable.

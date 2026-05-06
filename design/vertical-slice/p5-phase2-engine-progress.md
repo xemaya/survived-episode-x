@@ -190,6 +190,31 @@ W1 (engine) /loop dynamic-paced tick 1. Read `p5-phase2-engine-bug-reports.md` a
 
 (next /loop tick: pick up Bug #13 — Option B impl in ink-dialog: when `step.choices.length > 0` AND `step.text` non-empty, show panel only with ▼ continue affordance, no sticky-notes; click ▼ → step() again until `step.text` empty, then mount sticky-notes alone. ~1-2h work, biggest UX impact.)
 
+---
+
+## 2026-05-06 · batch 9 — /loop tick 2 — Bug #13 deferred-choices flow + Bug #17 likely-resolves
+
+W1 (engine) /loop dynamic-paced tick 2. Picked Bug #13 (major UX, GM-confirmed Option B).
+
+- **dialog-phase.ts** (~95 lines, NEW): pure helper. `decideDialogPhase()` returns one of 7 phases (`ended`/`paged`/`deferred-choices`/`header-band`/`choices-only`/`narration-only`/`empty`) based on `{ remainingTextTrimmed, step, shortPromptThreshold }`. `SHORT_PROMPT_THRESHOLD = 60` chars (tunable). Pure function — vitest-able without Pixi.
+- **ink-dialog.ts paintStep** refactor: layer 3 (panel + rack + ▼) replaced with `switch (phase)` on the helper's output:
+  - `deferred-choices` (text ≥ 60 chars + choices): park step on `deferredChoicesStep`, render panel + ▼; click flushes panel and mounts sticky rack alone.
+  - `header-band` (short text + choices): no panel, narration as centered Text at `y=200` above the sticky rack, rack mounts simultaneously. No ▼ gate. Decision-Moment style.
+  - `choices-only`, `narration-only`, `paged`, `ended`, `empty`: existing render paths preserved.
+- **ink-dialog.ts advanceContinue** extended with two cases: (1) flush deferred-choices (transition phase A→B in same step, no ink advance), (2) pagebreak resume (existing — drives `ink.step()`).
+- **headerBand Text node**: bottom-anchored at `(CANVAS_W/2, 200)`, max width 480 px, font 12 / lineHeight 16, center-aligned. Sits just above sticky rack center y=248.
+
+QA Bug #13 ✓ resolved. QA Bug #17 (narration outside panel bounds) ✓ likely resolved as a side-effect (panel hidden whenever rack is up). Re-verify next QA round.
+
+Tests: 12 new vitest cases in `tests/render/dialog/dialog-phase.test.ts` covering all 7 phases + boundary at threshold + pagebreak override + custom threshold + Day 1 Event 1.2 reproducer + Decision-Moment short prompt. Total 266/266.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 266/266.
+
+**Open major bugs after this tick**: #14 (phone prop persists across scenes — T04 sub-task or PropRegistry teardown trigger), #15 (sprite sheet label leakage — W5 owns Option A first, W1 fallback Option C). Plus Q-4 path interceptor (not blocking until E8/E12 finale paths are exercised).
+
+(next /loop tick: pick up Bug #14 — implement PropRegistry scene-bound teardown so phone/fruit_bowl unmount when `# scene` tag changes. Probably adds `scope: 'scene' | 'permanent'` field to PropEntity + a `sceneState.scene` listener that destroys non-permanent props on change.)
+
+
 
 
 
