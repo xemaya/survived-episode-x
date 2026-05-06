@@ -29,8 +29,17 @@ async function main(): Promise<void> {
   const restored = await save.loadCurrentRun();
   if (restored) {
     applyRunState(restored);
-    flow.setInitialState(restored.sceneState);
-    console.info('[boot] restored save:', restored.sceneState.kind);
+    // QA Bug #23: morning_briefing was removed from the live day-cycle
+    // (its Preact card was a P0-P4 holdover; AVG narrative covers the
+    // day intro inline). Old saves can still have sceneState =
+    // morning_briefing; bridge them to action_day so boot doesn't land
+    // on a no-overlay state with no UI affordance.
+    const initial =
+      restored.sceneState.kind === 'morning_briefing'
+        ? ({ kind: 'action_day', day: restored.sceneState.day, phase: 'morning' } as const)
+        : restored.sceneState;
+    flow.setInitialState(initial);
+    console.info('[boot] restored save:', initial.kind);
   } else if (save.lastLoadError) {
     flow.setInitialState({ kind: 'save_corrupt', errorMessage: save.lastLoadError });
     console.warn('[boot] save load failed:', save.lastLoadError);

@@ -10,10 +10,10 @@ export function MainMenu(): preact.JSX.Element {
   }, []);
 
   const startGame = (): void => {
-    // P4 Task 5 transition matrix: main_menu → action_day is no longer
-    // legal; every day starts at morning_briefing. Player clicks
-    // 「开始今日」 in the briefing to advance to action_day.
-    flow.request({ kind: 'morning_briefing', day: 1 });
+    // QA Bug #23 fix (2026-05-06): morning_briefing card was removed —
+    // AVG narrative covers day intro inline. New-game transit goes
+    // directly to action_day (legalized in transitions.ts).
+    flow.request({ kind: 'action_day', day: 1, phase: 'morning' });
   };
 
   const continueGame = (): void => {

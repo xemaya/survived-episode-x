@@ -1,6 +1,4 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { Card } from '../../src/card/card';
-import { playCard } from '../../src/card/play';
 import { ApSystem } from '../../src/economy/ap';
 import { MONTH_DAYS, OVERTIME_BONUS_AP } from '../../src/economy/constants';
 import { EnergySystem } from '../../src/economy/energy';
@@ -44,7 +42,6 @@ describe('DayCycleController', () => {
   let calendar: CalendarSystem;
   let flow: FlowDispatcher;
   let controller: DayCycleController;
-  let playedThisDay: Set<string>;
   let mockSave: SaveSystem;
 
   beforeEach(() => {
@@ -53,7 +50,6 @@ describe('DayCycleController', () => {
     energy = new EnergySystem();
     calendar = new CalendarSystem();
     flow = new FlowDispatcher();
-    playedThisDay = new Set(['placeholder_card']);
     mockSave = new SaveSystem(new MemoryFs());
     controller = new DayCycleController({
       ap,
@@ -61,12 +57,12 @@ describe('DayCycleController', () => {
       energy,
       calendar,
       flow,
-      playedThisDay,
       save: mockSave,
     });
     controller.attach();
-    // Boot into action_day for most tests: main_menu → morning_briefing → action_day
-    flow.request({ kind: 'morning_briefing', day: 1 });
+    // Boot into action_day for most tests. Bug #23 (2026-05-06):
+    // morning_briefing card removed; main_menu → action_day is now
+    // a legal direct transit.
     flow.request(day1);
   });
 
@@ -158,7 +154,6 @@ describe('DayCycleController', () => {
       energy,
       calendar,
       flow: freshFlow,
-      playedThisDay,
       save: mockSave,
     });
     freshFlow.request({ kind: 'morning_briefing', day: 1 }); // main_menu → morning_briefing
@@ -174,20 +169,19 @@ describe('DayCycleController', () => {
     );
   });
 
-  // ─── confirmRecap now → morning_briefing (not action_day) ─────────────────
+  // ─── confirmRecap → action_day (Bug #23: morning_briefing card removed) ──
 
-  it('confirmRecap() advances day, refills AP, clears playedThisDay, → morning_briefing', async () => {
+  it('confirmRecap() advances day, refills AP, → action_day', async () => {
     ap.spend(8); // → after_work
     await controller.confirmAfterWork('end_day'); // → recap
     expect(flow.state.kind).toBe('recap');
     controller.confirmRecap();
     expect(calendar.currentDay).toBe(2);
     expect(ap.current).toBe(8);
-    expect(playedThisDay.size).toBe(0);
-    expect(flow.state.kind).toBe('morning_briefing');
+    expect(flow.state.kind).toBe('action_day');
   });
 
-  // ─── confirmKpiReview → morning_briefing (pass) / gameover (fail) ──────────
+  // ─── confirmKpiReview → action_day (pass) / gameover (fail) ──────────────
 
   it('confirmKpiReview() with KPI severely below threshold → gameover (dismissal_severe)', async () => {
     // raw potential = (50-100)/100 = -0.5 < POTENTIAL_DISMISSAL (-0.15)
@@ -201,7 +195,7 @@ describe('DayCycleController', () => {
     expect((flow.state as { reason: string }).reason).toBe('dismissal_severe');
   });
 
-  it('confirmKpiReview() with KPI exactly at -0.15 boundary → passes → morning_briefing', async () => {
+  it('confirmKpiReview() with KPI exactly at -0.15 boundary → passes → action_day', async () => {
     // raw potential = (85-100)/100 = -0.15 exactly; NOT < -0.15 so no dismissal.
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
@@ -209,10 +203,10 @@ describe('DayCycleController', () => {
     ap.spend(8);
     await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('morning_briefing');
+    expect(flow.state.kind).toBe('action_day');
   });
 
-  it('confirmKpiReview() with KPI exactly at threshold → passes → morning_briefing + month advance', async () => {
+  it('confirmKpiReview() with KPI exactly at threshold → passes → action_day + month advance', async () => {
     // potential = 0; threshold unchanged after recalc; capacity 300 > 100 → pass.
     for (let i = 0; i < MONTH_DAYS - 1; i++) calendar.advanceDay();
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
@@ -220,7 +214,7 @@ describe('DayCycleController', () => {
     ap.spend(8);
     await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('morning_briefing');
+    expect(flow.state.kind).toBe('action_day');
     expect(calendar.currentDay).toBe(1);
     expect(calendar.monthIndex).toBe(2);
   });
@@ -280,7 +274,7 @@ describe('DayCycleController', () => {
     ap.spend(8);
     await controller.confirmAfterWork('end_day');
     await controller.confirmKpiReview();
-    expect(flow.state.kind).toBe('morning_briefing');
+    expect(flow.state.kind).toBe('action_day');
 
     // All effort counters must be zeroed in the pass branch.
     expect(ap.effortOvertime).toBe(0);
@@ -306,25 +300,9 @@ describe('DayCycleController', () => {
     expect(ap.effortHero).toBe(1);
   });
 
-  it('isHero card play increments ap.effortHero via playCard', () => {
-    // Sanity cross-module: playCard with an isHero card increments the counter.
-    const heroCard: Card = {
-      id: 'test_hero_card',
-      apCost: 1,
-      isHero: true,
-      faceUrl: 'test.png',
-      title: 'Test Hero',
-      effects: [],
-    };
-    const localPlayedThisDay = new Set<string>();
-    playCard(heroCard, {
-      ap,
-      kpi,
-      onCardPlayed: () => {},
-      playedThisDay: localPlayedThisDay,
-    });
-    expect(ap.effortHero).toBe(1);
-  });
+  // (P5: 'isHero card play' test removed — card module deleted; effortHero
+  //  tracking now happens via ap.reportHeroCardPlayed() called by future
+  //  ink runtime when a #hero-tagged choice is selected.)
 
   it('endDayEarly() works from action_overtime state too', async () => {
     ap.spend(8); // → after_work

@@ -64,9 +64,13 @@ describe('isLegalTransition (P3: day-cycle, kpi_review, gameover)', () => {
     );
   });
 
-  // NOTE: recap → action_day is NOW ILLEGAL (must go via morning_briefing).
-  it('recap → action_day is NO LONGER LEGAL (must route via morning_briefing)', () => {
-    expect(isLegalTransition(dailyRecap, day1)).toBe(false);
+  // QA Bug #23 (2026-05-06): morning_briefing card removed from
+  // day-cycle. recap and kpi_review now legalize the direct transit
+  // to action_day; the morning_briefing intermediate is gone. The
+  // morning_briefing FSM state itself remains in the enum for
+  // back-compat with old saves but is no longer reachable.
+  it('recap → action_day is legal (was illegal pre-Bug-#23)', () => {
+    expect(isLegalTransition(dailyRecap, day1)).toBe(true);
   });
 
   it('recap → recap is illegal (no nested recap)', () => {
@@ -78,9 +82,8 @@ describe('isLegalTransition (P3: day-cycle, kpi_review, gameover)', () => {
     expect(isLegalTransition(day7, kpiReview)).toBe(false);
   });
 
-  // NOTE: kpi_review → action_day is NOW ILLEGAL (must go via morning_briefing).
-  it('kpi_review → action_day is NO LONGER LEGAL (must route via morning_briefing)', () => {
-    expect(isLegalTransition(kpiReview, day1)).toBe(false);
+  it('kpi_review → action_day is legal (was illegal pre-Bug-#23)', () => {
+    expect(isLegalTransition(kpiReview, day1)).toBe(true);
   });
 
   it('kpi_review → gameover (capacity) is legal', () => {

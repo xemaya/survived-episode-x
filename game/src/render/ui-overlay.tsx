@@ -8,7 +8,6 @@ import { DailyRecap } from './menu/daily-recap';
 import { GameOver } from './menu/gameover';
 import { KpiReview } from './menu/kpi-review';
 import { MainMenu } from './menu/main-menu';
-import { MorningBriefing } from './menu/morning-briefing';
 import { PauseMenu } from './menu/pause-menu';
 import { SaveCorruptDialog } from './menu/save-corrupt-dialog';
 import { WeeklyRecap } from './menu/weekly-recap';
@@ -29,7 +28,6 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     const hasOverlay =
       state.kind === 'main_menu' ||
       state.kind === 'pause' ||
-      state.kind === 'morning_briefing' ||
       state.kind === 'after_work' ||
       state.kind === 'recap' ||
       state.kind === 'kpi_review' ||
@@ -48,8 +46,12 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
       assertOverlayAllowed(state);
       return <PauseMenu state={state} />;
     case 'morning_briefing':
-      assertOverlayAllowed(state);
-      return <MorningBriefing day={state.day} />;
+      // QA Bug #23 fix (2026-05-06): morning_briefing card removed.
+      // The state is no longer reachable via day-cycle (recap +
+      // kpi_review now go directly to action_day) but stays in the
+      // FSM enum for back-compat with old saves. main.ts auto-bridges
+      // restored morning_briefing → action_day on boot.
+      return null;
     case 'after_work':
       assertOverlayAllowed(state);
       return <AfterWork day={state.day} />;

@@ -435,6 +435,36 @@ Both non-W1-actionable. **All W1-actionable bugs closed again.**
 
 (next /loop tick: re-read; if no new W1-scope task, output "no task, idle".)
 
+---
+
+## 2026-05-06 · batch 19 — /loop tick 12 — Bug #23 partial (morning_briefing card removed)
+
+W1 (engine) /loop tick 12. QA Round 12+ filed 7 new bugs (#23-#29). Picked Bug #23 — block onboarding, GM ✅ delete morning_briefing card. Tutorial modal (the second half of the spec) punted to a later batch since it needs its own design pass on the explainer text.
+
+- **day-cycle.ts**: `confirmRecap` + `confirmKpiReview` pass-branch transit DIRECTLY to `action_day`, bypassing `morning_briefing`. Comments updated.
+- **transitions.ts**: legalizes `recap → action_day`, `kpi_review → action_day`, `main_menu → action_day`. Old transitions to `morning_briefing` stay for back-compat but the live flow never takes them.
+- **ui-overlay.tsx**: drops `MorningBriefing` import; `'morning_briefing'` case returns `null`; `hasOverlay` no longer includes it.
+- **main-menu.tsx**: 新游戏 click → `action_day, day:1, phase:'morning'`.
+- **main.ts**: boot path auto-bridges restored `morning_briefing` saves to `action_day`.
+- `morning_briefing` FSM state stays in `scene-state.ts` enum (back-compat).
+
+Tests: 6 day-cycle / transitions cases updated (assertions flipped from `morning_briefing` to `action_day`; legality tests changed `false` → `true`; test setup no longer goes through morning_briefing). Total 302/302.
+
+QA Bug #23 ✓ resolved (card removal half). Tutorial modal half deferred.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 302/302.
+
+**Open after this tick** (QA Round 12+ filed a lot):
+- Bug #23 second half — first-time tutorial modal
+- Bug #24 (auto-split on speaker line — engine-side runtime change)
+- Bug #25 (Bug #13 reverse — panel + sticky coexist; panel 156 → 96)
+- Bug #27 (delete AP system — engine cleanup, ~1-2h)
+- Bug #29 (Status HUD top-right + effect flash)
+- Bug #26, #28, #30 (polish / backlog)
+- Bug #7 / #10 (designer / low priority)
+
+(next /loop tick: pick from #25, #24, #27, #29 — major UX or block design. Probably #25 first since it's the smallest and unblocks demo readability.)
+
 
 
 

@@ -64,7 +64,14 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
       from.kind === 'morning_briefing' ||
       from.kind === 'pause' ||
       from.kind === 'after_work' ||
-      from.kind === 'action_day'
+      from.kind === 'action_day' ||
+      // QA Bug #23 fix (2026-05-06): morning_briefing card was removed
+      // from the day-cycle flow — recap / kpi_review now transit
+      // directly to action_day for the next day. main_menu → action_day
+      // is the new-game entry point (was main_menu → morning_briefing).
+      from.kind === 'recap' ||
+      from.kind === 'kpi_review' ||
+      from.kind === 'main_menu'
     );
   }
 

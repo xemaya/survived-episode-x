@@ -1068,7 +1068,19 @@ Tests still 302/302 — behavior change is at the dispatch site; existing dialog
 
 **Files**: `game/src/flow/dispatcher.ts` + `game/src/main.ts` + 新增 `first-time-tutorial.tsx` + 移除 `morning-briefing.tsx` mount
 
-**Status**: ⏳ open — block onboarding，W1 next pickup。
+**Status**: ✓ resolved (partial — card removal done; tutorial modal punted) — `fix(qa-bug-23)` (batch 19 W1 pickup, 2026-05-06).
+
+Card removal:
+- `day-cycle.ts` confirmRecap + confirmKpiReview pass branch transit DIRECTLY to `action_day` (was `morning_briefing`).
+- `transitions.ts` legalizes `recap → action_day`, `kpi_review → action_day`, `main_menu → action_day`. Old transitions to `morning_briefing` are kept (back-compat) but unused by the live flow.
+- `ui-overlay.tsx` returns `null` for `morning_briefing` (no Preact card mounts) and drops `MorningBriefing` import; `hasOverlay` test no longer includes it.
+- `main-menu.tsx` "新游戏" click goes directly to `action_day, day:1, phase:'morning'`.
+- `main.ts` boot path: if a restored save still has `sceneState.kind === 'morning_briefing'` (older save format), it auto-bridges to `action_day` so the player doesn't land on a no-overlay state with no UI affordance.
+- `morning_briefing` FSM state stays in `scene-state.ts` enum for back-compat; just no longer reachable from the day-cycle flow.
+
+Tests: 6 day-cycle/transitions test cases updated to assert `action_day` (was `morning_briefing`); 2 transition-legality tests flipped to `true` (recap → action_day, kpi_review → action_day); test setup `flow.request({kind: 'morning_briefing'})` step removed since main_menu → action_day is now legal directly. Total 302/302.
+
+**Punted to batch 20**: first-time-tutorial.tsx modal (the second half of Bug #23 spec). Spec said morning-briefing.tsx is P6 backlog; the tutorial modal is a new component that needs its own design pass on the explainer text. Filed as a follow-up.
 
 ---
 
@@ -1225,3 +1237,34 @@ B. Choice effect flash:
 只 onboarding 中说一次。runtime 不再 explain。
 
 **Status**: ⏳ open — gated on Bug #23 first-time-tutorial 实现。
+
+---
+
+## Round 14 — verify Bug #21 + #22 (`qa/p5-demo-r14.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 14 (2026-05-06). Latest commit: `70310ea fix(qa-bug-21,22): episode-end exit + render fix (block UX)`. Smoke 302/302.
+
+### Verifies (using `ink.divertTo('episode_1.day_7_e1_finale_cliffhanger')` to skip-ahead)
+
+- ✓ **Bug #21 (episode-end stuck on "（剧本结束）")** — RESOLVED. At ink END: a single `sticky-0=新游戏` mounts at desk surface (per `mountStickyNotes` rack — same visual idiom as choice racks). No "（剧本结束）" pseudo-button at canvas center. Test 2 verifies clicking [新游戏] → save cleared (localStorage 1 → 0) + page reloads + boot returns to `main_menu` cleanly.
+- ✓ **Bug #22 (panel no BG / text on monitor / mid-canvas pseudo-button)** — RESOLVED. Panel mounts with proper BG. The "monitor render" + "no panel BG" + "mid-canvas pseudo-button" combo from GM screenshot is gone.
+
+### R14 minor edge note (not a regression, just observation)
+
+When the divert path skips fast through the cliffhanger → daily_recap → END (e.g. ink-driven shortcut), the panel ends up empty in the post-bubble-extraction `working`, so the engine renders fallback `剧本结束。` (per `ink-dialog.ts:449`). In a normal player path through Day 7, the recap content WILL render in panel since pagebreak gating + step accumulation should keep the text intact. Just noting because R14 driver uses `divertTo` which short-circuits the natural ink flow.
+
+### Round 14 outstanding (still open)
+
+Many GM-filed bugs queued for next batches:
+- Bug #23 (onboarding redesign — delete morning_briefing card + add first-time-tutorial modal)
+- Bug #24 (one panel mixing multi-NPC dialog + narration multi-beat)
+- Bug #25 (panel should stay visible when sticky shows — reverse of Bug #13 Option B)
+- Bug #26 (calendar sprite残次 + 不更新)
+- Bug #27 (AP system should be removed but still in script + mechanic)
+- Bug #28 (workstation BG static, no NPC立绘)
+- Bug #29 (right-top Status HUD missing)
+- Bug #30 ("我" vs "你" voice distinction)
+
+### Next round target (R15)
+
+Verify whichever GM-filed bugs the dev tackles next. Most are open with substantial design scope.

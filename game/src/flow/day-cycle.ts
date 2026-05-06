@@ -1,4 +1,3 @@
-import type { CardId } from '@/card/card';
 import type { ApSystem } from '@/economy/ap';
 import { OVERTIME_BONUS_AP, POTENTIAL_DISMISSAL } from '@/economy/constants';
 import type { EnergySystem } from '@/economy/energy';
@@ -18,7 +17,6 @@ export interface DayCycleDeps {
   energy: EnergySystem; // needed by confirmAfterWork to gate overtime on canOvertime()
   calendar: CalendarSystem;
   flow: FlowDispatcher;
-  playedThisDay: Set<CardId>;
   // Optional: allows tests to inject a mock save. Defaults to production singleton.
   save?: SaveSystem;
 }
@@ -131,10 +129,14 @@ export class DayCycleController {
   }
 
   // Called by the recap UI when the player dismisses the recap screen.
-  // Transitions to morning_briefing for the next day (instead of action_day
-  // directly) so the full GDD sub-mode chain is preserved.
+  // QA Bug #23 fix (2026-05-06): transit DIRECTLY to action_day —
+  // morning_briefing's Preact card was a P0-P4 holdover; AVG-driven
+  // P5 has the day intro inline in ink narrative ("闹钟响了 3 次..."),
+  // so the card was a redundant interruption. The morning_briefing
+  // FSM state remains in `scene-state.ts` for back-compat with old
+  // saves but is no longer reachable from the day-cycle flow.
   confirmRecap(): void {
-    const { ap, energy, calendar, flow, playedThisDay } = this.deps;
+    const { ap, energy, calendar, flow } = this.deps;
     if (flow.state.kind !== 'recap') {
       throw new Error(`confirmRecap called from non-recap state: ${flow.state.kind}`);
     }
@@ -145,8 +147,8 @@ export class DayCycleController {
       energy.regenForRestDay();
     }
     ap.resetForNewDay();
-    playedThisDay.clear();
-    flow.request({ kind: 'morning_briefing', day: calendar.currentDay });
+    // P5: card hand removed; no per-day card-played reset needed.
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     void autosave();
   }
 
@@ -169,7 +171,7 @@ export class DayCycleController {
   // next month (→ morning_briefing) or transitions to gameover.
   // async because gameover path writes archive before transitioning.
   async confirmKpiReview(): Promise<void> {
-    const { ap, kpi, calendar, flow, playedThisDay } = this.deps;
+    const { ap, kpi, calendar, flow } = this.deps;
     if (flow.state.kind !== 'kpi_review') {
       throw new Error(`confirmKpiReview called from non-kpi_review state: ${flow.state.kind}`);
     }
@@ -212,19 +214,20 @@ export class DayCycleController {
       return;
     }
 
-    // Step 4: pass — advance month, reset day-state, go to morning_briefing.
+    // Step 4: pass — advance month, reset day-state, go to action_day.
+    // QA Bug #23 fix: morning_briefing card removed; transit straight
+    // to action_day for the next month's day 1.
     // Effort counters reset AFTER recalc + game-over checks (per GDD order).
     calendar.advanceMonth();
     kpi.advanceMonth();
     ap.resetForNewDay();
     ap.resetEffortCounters();
-    playedThisDay.clear();
-    flow.request({ kind: 'morning_briefing', day: calendar.currentDay });
+    // P5: card hand removed; no per-day card-played reset needed.
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     void autosave();
   }
 }
 
-import { playedThisDay as defaultPlayedThisDay } from '@/card/play';
 import { ap as defaultAp } from '@/economy/ap';
 import { energy as defaultEnergy } from '@/economy/energy';
 import { kpi as defaultKpi } from '@/economy/kpi';
@@ -239,5 +242,4 @@ export const dayCycle = new DayCycleController({
   energy: defaultEnergy,
   calendar: defaultCalendar,
   flow: defaultFlow,
-  playedThisDay: defaultPlayedThisDay,
 });
