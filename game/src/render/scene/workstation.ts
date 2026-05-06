@@ -1,5 +1,6 @@
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
+import { flow } from '@/flow/dispatcher';
 import type { SceneState } from '@/flow/scene-state';
 import { mountInkDialog } from '@/render/dialog/ink-dialog';
 import { mountCalendarWidget } from '@/render/diegetic/calendar-widget';
@@ -280,6 +281,50 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   const inkDialog = mountInkDialog(ctx.worldLayer);
   inkDialog.start();
   teardowns.push(inkDialog.destroy);
+
+  // ── Q-Y (Bug #38) — pause hamburger button (top-right) ──────────────────
+  // Always-visible 16×16 menu button so the player can return to main
+  // menu without hitting Esc. Click → triggers the same pause SceneState
+  // transition as the keyboard handler. Position top-right (614, 8) →
+  // span (614-630, 8-24) so it doesn't collide with calendar widget
+  // (left side, x≤110) and stays out of the panel/sticky region. Future
+  // Q-N Status HUD will land at (540, 16) and may need to shift left
+  // by ~40 px to clear; that retune is part of Q-N's scope.
+  const hamburger = new Container();
+  hamburger.label = 'pause-button';
+  hamburger.x = 614;
+  hamburger.y = 8;
+  hamburger.eventMode = 'static';
+  hamburger.cursor = 'pointer';
+  ctx.worldLayer.addChild(hamburger);
+
+  const hamburgerBg = new Graphics();
+  hamburger.addChild(hamburgerBg);
+  const hamburgerLines = new Graphics();
+  hamburger.addChild(hamburgerLines);
+
+  const drawHamburger = (hovering: boolean) => {
+    hamburgerBg.clear();
+    hamburgerBg.rect(0, 0, 16, 16);
+    hamburgerBg.fill({ color: hovering ? 0xf3eed8 : 0xe8e0cc, alpha: 0.95 });
+    hamburgerBg.stroke({ color: 0x2a1f14, width: 1 });
+    hamburgerLines.clear();
+    for (const y of [4, 8, 12]) {
+      hamburgerLines.moveTo(3, y);
+      hamburgerLines.lineTo(13, y);
+    }
+    hamburgerLines.stroke({ color: 0x2a1f14, width: 1 });
+  };
+  drawHamburger(false);
+  hamburger.on('pointerover', () => drawHamburger(true));
+  hamburger.on('pointerout', () => drawHamburger(false));
+  hamburger.on('pointertap', () => {
+    const cur = flow.state;
+    if (cur.kind === 'action_day') {
+      flow.request({ kind: 'pause', resumeTo: cur });
+    }
+  });
+  teardowns.push(() => hamburger.destroy({ children: true }));
 
   // ── Early-leave 「下班」 button (P0-P4 legacy, gated by SHOW_LEGACY_HUD) ──
   // P5 plan: this becomes a diegetic prop in P6 (e.g. mug + chair animation
