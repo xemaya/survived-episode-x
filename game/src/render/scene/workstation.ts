@@ -8,6 +8,7 @@ import { createPropEntity } from '@/render/diegetic/prop-entity';
 import { propRegistry } from '@/render/diegetic/prop-registry';
 import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
 import { mountStatusHud } from '@/render/hud/status-hud';
+import { npcRegistry } from '@/render/npc/npc-registry';
 import { installSceneStateTagHandler, sceneState } from '@/scene/scene-state-mirror';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
@@ -283,6 +284,19 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
     propRegistry.hideScopedTo('scene');
   });
   teardowns.push(teardownSceneScopeHide);
+
+  // T-2: NPC sprite registry. `# npc: <id>_<state>` from ink mounts
+  // the matching W5 sprite at its workstation anchor; sprites stay
+  // mounted until the next `# scene:` fires clearAll() (mirrors the
+  // prop scope='scene' lifecycle). Multi-NPC scenes accumulate.
+  npcRegistry.attach(ctx.worldLayer);
+  const teardownNpcTag = sceneState.on('npc', (value) => {
+    if (value) void npcRegistry.handleTag(value);
+  });
+  const teardownNpcSceneClear = sceneState.on('scene', () => {
+    npcRegistry.clearAll();
+  });
+  teardowns.push(teardownNpcTag, teardownNpcSceneClear, () => npcRegistry.detach());
 
   // ── Card hand removed (P5: replaced by ink-driven event/choice runtime) ──
   // Action_day no longer presents a card hand. Dialog + choices come from the
