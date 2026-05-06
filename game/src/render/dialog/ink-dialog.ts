@@ -31,7 +31,13 @@ import { save } from '@/save/system';
 import { Container, Graphics, Text } from 'pixi.js';
 import { decideDialogPhase } from './dialog-phase';
 import { dialogState } from './dialog-state';
-import { NARRATION, type Source, detectSource, sourceLabel } from './source-detector';
+import {
+  NARRATION,
+  type Source,
+  detectSource,
+  sourceLabel,
+  stripSpeakerPrefix,
+} from './source-detector';
 
 const CANVAS_W = 640;
 
@@ -204,7 +210,12 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     const isMonologue = source.kind === 'monologue';
     bodyText.style.fill = isMonologue ? BODY_COLOR_MONOLOGUE : BODY_COLOR_NORMAL;
     bodyText.style.fontStyle = isMonologue ? 'italic' : 'normal';
-    bodyText.text = stripMarkdown(body);
+    // Q-X (Bug #37): strip "Lisa：" / "**Lisa**：" leading prefix from
+    // NPC bodies — the header bar already shows the source label, so
+    // repeating the name in the body is visual noise. Narration and
+    // monologue bodies pass through unchanged.
+    const bodyForRender = source.kind === 'npc' ? stripSpeakerPrefix(body) : body;
+    bodyText.text = stripMarkdown(bodyForRender);
 
     const trimmed = body.trim();
     if (trimmed.length > 0 && trimmed !== '...') {

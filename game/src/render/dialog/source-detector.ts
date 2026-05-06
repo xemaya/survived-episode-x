@@ -75,6 +75,16 @@ const LEGACY_NPC_RE = new RegExp(
   `^\\s*\\*?\\*?(${LEGACY_NPC_NAMES.map(escapeForRegex).join('|')})\\*?\\*?[：]`,
 );
 
+// Q-X (Bug #37): strip the leading "Name：" / "**Name**：" prefix from
+// an NPC body so the panel header `[ Lisa ]` doesn't read with the
+// name appearing twice. Matches any known NPC display name OR alias —
+// the source-detector already mapped 大伟 → David / 周哥 → 老周 via
+// LEGACY_ALIAS_NORMALIZE; the prefix in the original body is whichever
+// the writer used, so we strip whichever matches.
+const STRIP_PREFIX_RE = new RegExp(
+  `^\\s*\\*?\\*?(${LEGACY_NPC_NAMES.map(escapeForRegex).join('|')})\\*?\\*?[：:]\\s*`,
+);
+
 const WHOLE_ITALIC_RE = /^_[\s\S]+_$/;
 
 export function detectSource(text: string, tags: ReadonlyArray<ParsedTag>): Source {
@@ -110,6 +120,14 @@ export function sourcesEqual(a: Source, b: Source): boolean {
   if (a.kind !== b.kind) return false;
   if (a.kind === 'npc' && b.kind === 'npc') return a.name === b.name;
   return true;
+}
+
+/** Q-X (Bug #37): when the panel header bar already shows the NPC
+ * label, the body shouldn't repeat the speaker prefix ("Lisa：…"). Used
+ * by ink-dialog's drawPanel for NPC sources only — narration and
+ * monologue bodies pass through unchanged. */
+export function stripSpeakerPrefix(body: string): string {
+  return body.replace(STRIP_PREFIX_RE, '');
 }
 
 /** Display label shown in the panel's 8px-style header bar (公文抬头). */

@@ -6,6 +6,7 @@ import {
   detectSource,
   sourceLabel,
   sourcesEqual,
+  stripSpeakerPrefix,
 } from '../../../src/render/dialog/source-detector';
 
 const tagsFrom = (...raws: string[]): ParsedTag[] => raws.map((r) => parseTag(r));
@@ -129,6 +130,44 @@ describe('sourcesEqual', () => {
 
   it('narration vs npc NOT equal', () => {
     expect(sourcesEqual(NARRATION, { kind: 'npc', name: 'Lisa' })).toBe(false);
+  });
+});
+
+describe('stripSpeakerPrefix (Q-X / Bug #37)', () => {
+  it('strips plain "Lisa：" prefix', () => {
+    expect(stripSpeakerPrefix('Lisa：你看下这个。')).toBe('你看下这个。');
+  });
+
+  it('strips bold "**David**：" prefix', () => {
+    expect(stripSpeakerPrefix('**David**：嗯，我看看。')).toBe('嗯，我看看。');
+  });
+
+  it('strips alias "大伟：" (caller renders header [ David ])', () => {
+    expect(stripSpeakerPrefix('大伟：嗯。')).toBe('嗯。');
+  });
+
+  it('strips alias "周哥：" (caller renders header [ 老周 ])', () => {
+    expect(stripSpeakerPrefix('周哥：你也加班啊。')).toBe('你也加班啊。');
+  });
+
+  it('strips "IT 小马：" with full-width prefix', () => {
+    expect(stripSpeakerPrefix('IT 小马：你重启一下。')).toBe('你重启一下。');
+  });
+
+  it('preserves leading whitespace in remainder when prefix stripped', () => {
+    expect(stripSpeakerPrefix('Lisa：好的。\n我去准备。')).toBe('好的。\n我去准备。');
+  });
+
+  it('passes through bodies WITHOUT a known speaker prefix unchanged', () => {
+    expect(stripSpeakerPrefix('你 9:14 走到工位区。')).toBe('你 9:14 走到工位区。');
+  });
+
+  it('does NOT strip prop-quote prefixes ("桌面便利贴：")', () => {
+    expect(stripSpeakerPrefix('桌面便利贴："活到周五"')).toBe('桌面便利贴："活到周五"');
+  });
+
+  it('handles ASCII colon ":" as well as full-width "："', () => {
+    expect(stripSpeakerPrefix('Lisa: hello')).toBe('hello');
   });
 });
 
