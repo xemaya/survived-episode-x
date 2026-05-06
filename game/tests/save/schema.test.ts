@@ -11,11 +11,17 @@ describe('runStateSchema', () => {
   it('parses defaultRunState', () => {
     const parsed = runStateSchema.parse(defaultRunState());
     expect(parsed.schemaVersion).toBe(SCHEMA_VERSION);
-    expect(parsed.apCurrent).toBe(8);
+    expect(parsed.apCurrent).toBeUndefined(); // Bug #27: AP system removed
     expect(parsed.energyCurrent).toBe(80);
   });
 
-  it('rejects negative AP', () => {
+  it('accepts legacy apCurrent field on older saves (Bug #27 forward-compat)', () => {
+    // Older saves still carry apCurrent; field is optional, must parse cleanly.
+    const parsed = runStateSchema.parse({ ...defaultRunState(), apCurrent: 5 });
+    expect(parsed.apCurrent).toBe(5);
+  });
+
+  it('rejects negative legacy apCurrent value', () => {
     expect(() => runStateSchema.parse({ ...defaultRunState(), apCurrent: -1 })).toThrow();
   });
 

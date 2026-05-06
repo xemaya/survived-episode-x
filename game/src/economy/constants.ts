@@ -9,13 +9,10 @@
 // `lint:redline-5` will catch them).
 
 // ─── AP ───────────────────────────────────────────────────────────────────
-// design/gdd/ap-economy-system.md §"BASE_AP_PER_DAY = 8 (named constant,
-// NOT a tuning knob — permanently fixed)". Anti-Pillar 1 monotonicity:
-// AP cap can NEVER permanently increase.
-export const BASE_AP_PER_DAY = 8;
-
-// Overtime adds +2 → single-day ceiling 10. Not used in P2; reserved.
-export const OVERTIME_BONUS_AP = 2;
+// Deleted per Bug #27 (2026-05-06 design pivot). The pre-pivot constants
+// `BASE_AP_PER_DAY` (8) + `OVERTIME_BONUS_AP` (2) are gone; effort-
+// counter tracking moved to `economy/effort.ts` (KPI Review still uses
+// the overtime / hero / overage tallies).
 
 // ─── KPI Formula B coefficients ───────────────────────────────────────────
 // design/gdd/kpi-reverse-threshold-system.md "Formula B (conservative)":

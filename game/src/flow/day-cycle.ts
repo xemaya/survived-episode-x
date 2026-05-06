@@ -1,5 +1,5 @@
-import type { ApSystem } from '@/economy/ap';
-import { OVERTIME_BONUS_AP, POTENTIAL_DISMISSAL } from '@/economy/constants';
+import { POTENTIAL_DISMISSAL } from '@/economy/constants';
+import type { EffortSystem } from '@/economy/effort';
 import type { EnergySystem } from '@/economy/energy';
 import { type KpiSystem, computeEffortNorm } from '@/economy/kpi';
 import { appendToArchive, buildRunSummary } from '@/run-meta/archive';
@@ -12,7 +12,7 @@ import type { FlowDispatcher } from './dispatcher';
 import type { GameOverReason } from './scene-state';
 
 export interface DayCycleDeps {
-  ap: ApSystem;
+  effort: EffortSystem;
   kpi: KpiSystem;
   energy: EnergySystem; // needed by confirmAfterWork to gate overtime on canOvertime()
   calendar: CalendarSystem;
@@ -47,18 +47,11 @@ export class DayCycleController {
   attach(): void {
     if (this.attached) return;
     this.attached = true;
-    this.unsubscribers.push(
-      this.deps.ap.onChanged((current) => {
-        // AP=0 in action_day OR action_overtime both trigger day end (→ after_work).
-        if (
-          current === 0 &&
-          (this.deps.flow.state.kind === 'action_day' ||
-            this.deps.flow.state.kind === 'action_overtime')
-        ) {
-          this.handleDayEnd();
-        }
-      }),
-    );
+    // Bug #27 (2026-05-06): AP system deleted. The old AP=0 listener
+    // was the only auto-trigger for `→ after_work`; now the after_work
+    // transition fires only via `endDayEarly()` (legacy 下班 button)
+    // or programmatically from ink narrative tags (future). The
+    // controller still exposes the public surface; just no auto-listen.
   }
 
   detach(): void {
@@ -99,10 +92,12 @@ export class DayCycleController {
   }
 
   // Called by the after_work overlay. The player decides:
-  //   'overtime'  → 加班: spend energy, grant +2 AP, transition to action_overtime.
+  //   'overtime'  → 加班: drain energy + bump effort counter, → action_overtime.
   //   'end_day'   → 按时下班: route to recap (non-month-end) or kpi_review (month-end).
+  // Bug #27: AP grant removed (AP system deleted). Effort counter still
+  // bumps via the `effort` module so KPI Review's α factor still sees it.
   async confirmAfterWork(decision: 'overtime' | 'end_day'): Promise<void> {
-    const { ap, energy, calendar, flow } = this.deps;
+    const { effort, energy, calendar, flow } = this.deps;
     if (flow.state.kind !== 'after_work') {
       throw new Error(`confirmAfterWork called from non-after_work state: ${flow.state.kind}`);
     }
@@ -111,8 +106,7 @@ export class DayCycleController {
         throw new Error('Cannot overtime: energy too low or burnout');
       }
       energy.reportOvertime();
-      ap.grantOvertime(OVERTIME_BONUS_AP); // +2 AP, capped at 10; see GDD Rule 4 comment in ap.ts
-      ap.reportOvertime(); // increment monthly effort counter
+      effort.reportOvertime();
       flow.request({ kind: 'action_overtime', day: calendar.currentDay });
     } else {
       // end_day: route to recap or kpi_review depending on month-end.
@@ -136,7 +130,7 @@ export class DayCycleController {
   // FSM state remains in `scene-state.ts` for back-compat with old
   // saves but is no longer reachable from the day-cycle flow.
   confirmRecap(): void {
-    const { ap, energy, calendar, flow } = this.deps;
+    const { energy, calendar, flow } = this.deps;
     if (flow.state.kind !== 'recap') {
       throw new Error(`confirmRecap called from non-recap state: ${flow.state.kind}`);
     }
@@ -146,7 +140,7 @@ export class DayCycleController {
     if (calendar.currentWeekday >= 6) {
       energy.regenForRestDay();
     }
-    ap.resetForNewDay();
+    // Bug #27: ap.resetForNewDay() removed (AP system deleted).
     // P5: card hand removed; no per-day card-played reset needed.
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     void autosave();
@@ -171,7 +165,7 @@ export class DayCycleController {
   // next month (→ morning_briefing) or transitions to gameover.
   // async because gameover path writes archive before transitioning.
   async confirmKpiReview(): Promise<void> {
-    const { ap, kpi, calendar, flow } = this.deps;
+    const { effort, kpi, calendar, flow } = this.deps;
     if (flow.state.kind !== 'kpi_review') {
       throw new Error(`confirmKpiReview called from non-kpi_review state: ${flow.state.kind}`);
     }
@@ -193,10 +187,14 @@ export class DayCycleController {
       return;
     }
 
-    // Step 2: apply Formula B recalc with real effort_norm from ap counters.
+    // Step 2: apply Formula B recalc with real effort_norm from effort counters.
     // Counters are reset AFTER game-over checks so that the gameover snapshot
     // path (commitGameOverArchive → snapshotCurrentRunState) captures them.
-    const effortNorm = computeEffortNorm(ap.effortOvertime, ap.effortHero, ap.effortOverage);
+    const effortNorm = computeEffortNorm(
+      effort.effortOvertime,
+      effort.effortHero,
+      effort.effortOverage,
+    );
     kpi.applyMonthlyRecalc(effortNorm);
 
     // Step 3: capacity-exceeded check (post-recalc). Use kpi.capacityNow
@@ -216,19 +214,20 @@ export class DayCycleController {
 
     // Step 4: pass — advance month, reset day-state, go to action_day.
     // QA Bug #23 fix: morning_briefing card removed; transit straight
-    // to action_day for the next month's day 1.
+    // to action_day for the next month's day 1. Bug #27 fix:
+    // ap.resetForNewDay() removed (AP system deleted); only the
+    // effort counters reset here.
     // Effort counters reset AFTER recalc + game-over checks (per GDD order).
     calendar.advanceMonth();
     kpi.advanceMonth();
-    ap.resetForNewDay();
-    ap.resetEffortCounters();
+    effort.resetEffortCounters();
     // P5: card hand removed; no per-day card-played reset needed.
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     void autosave();
   }
 }
 
-import { ap as defaultAp } from '@/economy/ap';
+import { effort as defaultEffort } from '@/economy/effort';
 import { energy as defaultEnergy } from '@/economy/energy';
 import { kpi as defaultKpi } from '@/economy/kpi';
 import { calendar as defaultCalendar } from './calendar';
@@ -237,7 +236,7 @@ import { flow as defaultFlow } from './dispatcher';
 // Singleton — production import goes through this.
 // Tests construct their own DayCycleController with custom deps.
 export const dayCycle = new DayCycleController({
-  ap: defaultAp,
+  effort: defaultEffort,
   kpi: defaultKpi,
   energy: defaultEnergy,
   calendar: defaultCalendar,

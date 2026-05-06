@@ -1,4 +1,4 @@
-import { ap } from '@/economy/ap';
+import { effort } from '@/economy/effort';
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
@@ -12,15 +12,14 @@ import { type RunState, SCHEMA_VERSION } from './schema';
 export function snapshotCurrentRunState(): RunState {
   const base: RunState = {
     schemaVersion: SCHEMA_VERSION,
-    apCurrent: ap.current,
     energyCurrent: energy.current,
     energyBurnoutFlag: energy.burnoutFlag,
     kpiActual: kpi.actualKpi,
     monthlyThreshold: kpi.monthlyThreshold,
     monthIndex: kpi.month,
-    effortOvertime: ap.effortOvertime, // Task 4 adds real wiring
-    effortHero: ap.effortHero,
-    effortOverage: ap.effortOverage,
+    effortOvertime: effort.effortOvertime,
+    effortHero: effort.effortHero,
+    effortOverage: effort.effortOverage,
     currentDay: calendar.currentDay,
     currentWeekday: calendar.currentWeekday,
     playedThisDay: [], // P5: cards removed; field preserved for save schema back-compat

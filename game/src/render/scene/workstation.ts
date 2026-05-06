@@ -1,5 +1,3 @@
-import { ap } from '@/economy/ap';
-import { BASE_AP_PER_DAY, OVERTIME_BONUS_AP } from '@/economy/constants';
 import { energy } from '@/economy/energy';
 import { kpi } from '@/economy/kpi';
 import { calendar } from '@/flow/calendar';
@@ -12,20 +10,17 @@ import { installSceneStateTagHandler, sceneState } from '@/scene/scene-state-mir
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
 
-// P5 demo flag: hide P0-P4 legacy HUD elements (AP row, KPI text, 下班 button).
-// These were the card-era debug surfaces. New diegetic UI per concept images
-// will reintroduce equivalents (mug = state, banking app = money etc) in P6.
-// Toggle to true to bring them back for debugging.
+// P5 demo flag: hide P0-P4 legacy HUD elements (KPI text, 下班 button).
+// These were the card-era debug surfaces. New diegetic UI per concept
+// images will reintroduce equivalents (mug = state, banking app = money
+// etc) in P6. Toggle to true to bring them back for debugging.
+// Bug #27: the AP-slot row is gone (AP system deleted).
 const SHOW_LEGACY_HUD = false;
 
-// Maximum AP slots to render — covers base (8) + overtime bonus (2) = 10.
-const AP_SLOT_COUNT = BASE_AP_PER_DAY + OVERTIME_BONUS_AP;
-
 // Layout constants (640×360 logical canvas).
-const STICKY_X = 480;
-const STICKY_Y = 36;
-const STICKY_SIZE = 12;
-const STICKY_GAP = 4;
+// Layout constants for the (now-removed) AP-slot HUD row are gone with
+// Bug #27. STICKY_X / STICKY_Y / STICKY_SIZE / STICKY_GAP only had
+// meaning while the slot row was alive.
 
 interface PropSpec {
   url: string;
@@ -209,60 +204,10 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
     mugContainer.destroy({ children: true });
   });
 
-  // ── Sticky-note AP row (P0-P4 legacy HUD, gated by SHOW_LEGACY_HUD) ─────
+  // ── KPI HUD readout (P0-P4 legacy debug, gated by SHOW_LEGACY_HUD) ──────
+  // Bug #27: the AP slot row is gone (AP system deleted). KPI text below
+  // stays for debugging when the flag flips on.
   if (SHOW_LEGACY_HUD) {
-    const apRow = new Container();
-    apRow.label = 'ap-row';
-    apRow.x = STICKY_X;
-    apRow.y = STICKY_Y;
-    ctx.worldLayer.addChild(apRow);
-
-    const apLabel = new Text({
-      text: 'AP',
-      style: {
-        fontFamily: 'PingFang SC, -apple-system, sans-serif',
-        fontSize: 10,
-        fill: 0xe8e0cc,
-      },
-    });
-    apLabel.anchor.set(1, 0.5);
-    apLabel.x = -6;
-    apLabel.y = STICKY_SIZE / 2;
-    apRow.addChild(apLabel);
-
-    const slots: Graphics[] = [];
-    for (let i = 0; i < AP_SLOT_COUNT; i++) {
-      const g = new Graphics();
-      g.x = i * (STICKY_SIZE + STICKY_GAP);
-      apRow.addChild(g);
-      slots.push(g);
-    }
-
-    const drawSlots = () => {
-      for (let i = 0; i < slots.length; i++) {
-        const g = slots[i];
-        if (!g) continue;
-        const filled = i < ap.current;
-        g.clear();
-        g.rect(0, 0, STICKY_SIZE, STICKY_SIZE);
-        g.fill(filled ? 0xc8a85a : 0x1a1d22);
-        g.stroke({ color: 0x5a7080, width: 1 });
-        if (!filled) {
-          g.moveTo(2, 2);
-          g.lineTo(STICKY_SIZE - 2, STICKY_SIZE - 2);
-          g.moveTo(STICKY_SIZE - 2, 2);
-          g.lineTo(2, STICKY_SIZE - 2);
-          g.stroke({ color: 0xc83428, width: 1 });
-        }
-      }
-    };
-    const unsubAp = ap.onChanged(() => drawSlots());
-    drawSlots();
-    teardowns.push(() => {
-      unsubAp();
-      apRow.destroy({ children: true });
-    });
-
     // KPI numeric readout (debug)
     const kpiText = new Text({
       text: '',

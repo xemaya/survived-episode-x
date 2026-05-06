@@ -53,7 +53,10 @@ const sceneStateSchema = z.discriminatedUnion('kind', [
 export const runStateSchema = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
   // Economy
-  apCurrent: z.number().int().min(0).max(10), // base 8, overtime adds 2
+  // Bug #27 (2026-05-06): AP system deleted. `apCurrent` field is
+  // optional so older saves (with the field) parse cleanly; new saves
+  // omit it. The field is otherwise ignored.
+  apCurrent: z.number().int().min(0).max(10).optional(),
   energyCurrent: z.number().int().min(0).max(100),
   energyBurnoutFlag: z.boolean(),
   // KPI + threshold
@@ -127,7 +130,6 @@ export function defaultMetaState(): MetaState {
 export function defaultRunState(): RunState {
   return {
     schemaVersion: SCHEMA_VERSION,
-    apCurrent: 8,
     energyCurrent: 80, // start with comfortable energy
     energyBurnoutFlag: false,
     kpiActual: 0,

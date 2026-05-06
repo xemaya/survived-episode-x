@@ -465,9 +465,55 @@ QA Bug #23 ✓ resolved (card removal half). Tutorial modal half deferred.
 
 (next /loop tick: pick from #25, #24, #27, #29 — major UX or block design. Probably #25 first since it's the smallest and unblocks demo readability.)
 
+---
 
+## 2026-05-06 · batch 20 — Bug #27 (delete AP system, engine cleanup)
 
+Bug #27 was filed as a **design block**: AP (10/day, refilled at recap) is a holdover from the P0-P4 card-driven prototype. The Ink-driven flow consumes time slots inside the .ink narrative itself (no AP gate at the FSM level), and the design pivot retired the "card play has AP cost" abstraction. Keeping AP around was confusing — the HUD slot row, "+2 AP" overtime badge, and "今日还剩 N AP" copy all suggested a system the design no longer has.
 
+**Scope**: surgical removal of AP-the-resource while keeping the **effort counters** (overtime / hero / overage) which still feed KPI Review Formula B.
+
+### Engine changes
+
+- **Deleted** `game/src/economy/ap.ts` (the entire ApSystem singleton).
+- **New** `game/src/economy/effort.ts` — `EffortSystem` with the three effort counters + `reportOvertime()` / `reportHeroCardPlayed()` / `reportOverage()` / `resetEffortCounters()` / `setEffortForRestore()`. Singleton exported as `effort`. This is exactly the effort half of the old ApSystem, lifted out and renamed.
+- **`game/src/economy/constants.ts`** — removed `BASE_AP_PER_DAY` (8) and `OVERTIME_BONUS_AP` (2). Added one-line comment explaining the field deletions for future readers.
+- **`game/src/flow/day-cycle.ts`** — `DayCycleDeps.ap` → `DayCycleDeps.effort`. The `ap.onChanged(... if (current === 0) → after_work)` listener is **gone**; `controller.endDayEarly()` is now the sole path into `after_work` (matches Bug #23 / Q-2 — player-driven exit). `confirmAfterWork('overtime')` no longer grants `+2 AP`; it only spends energy and bumps `effort.effortOvertime`. `confirmRecap()` no longer calls `ap.resetForNewDay()`. `confirmKpiReview()` reads `effort.effortX` and calls `effort.resetEffortCounters()` on the pass branch.
+- **`game/src/save/{snapshot,restore,schema}.ts`** — `apCurrent` is now an **optional** schema field (not removed from the schema, so older saves with the field still parse cleanly via forward-compat). Snapshot no longer captures it; restore no longer applies it; `defaultRunState()` no longer sets it.
+- **`game/src/render/scene/workstation.ts`** — deleted the `SHOW_LEGACY_HUD` AP slot row Container (and `STICKY_X/Y/SIZE/GAP` constants). The mug 5-frame status sticky is the survivor; the AP row was the last vestige of the legacy HUD.
+- **`game/src/render/menu/after-work.tsx`** — removed the "今日还剩 N AP" status row; overtime button now reads `申报加班 (-15 精力)` (no AP bonus). `OVERTIME_BONUS_AP` import removed.
+- **`game/src/render/menu/daily-recap.tsx`** — removed the "AP 消耗" recap row. Recap shell + auto-progress + skip hint kept (still useful as a beat between days; AVG flow may repurpose).
+
+### Tests
+
+- **Deleted** `tests/economy/ap.test.ts` and `tests/economy/ap-effort.test.ts`.
+- **New** `tests/economy/effort.test.ts` — 14 cases covering the new EffortSystem singleton + the surviving `computeEffortNorm` math (lifted from the old ap-effort.test.ts).
+- **`tests/flow/day-cycle.test.ts`** — full rewrite. Trigger into `after_work` is now `controller.endDayEarly()` instead of `ap.spend(8)`. Removed: `confirmMorningBriefing`-throws case, `confirmRecap` `ap.current === 8` assert, `detach() unsubscribes from ap` case (no longer applicable). Updated 14 cases total.
+- **`tests/save/schema.test.ts`** — `parses defaultRunState` now asserts `apCurrent` is **undefined**; added a forward-compat case proving older saves with `apCurrent: 5` still parse cleanly; "rejects negative AP" kept (legacy field still validated when present).
+- **`tests/save/system.test.ts`** — round-trip witness changed from `apCurrent` to `kpiActual`/`energyCurrent` (since `apCurrent` is no longer set in the default state).
+
+### Verification
+
+- `pnpm tsc` — clean (no errors).
+- `pnpm test` — **289/289 passing** (down from 302; net -13 reflects the deleted ap.test.ts and ap-effort.test.ts cases minus the new effort.test.ts cases plus rewritten day-cycle cases).
+
+### What this unblocks
+
+- The HUD is now physically free of the AP slot row → Bug #29 (Status HUD top-right + effect flash) has a clean canvas to land on next tick.
+- After-work overlay is one button (申报加班) + one button (按时下班) without the now-confusing "+2 AP" prompt → Bug #7's designer scope ("does 提前下班 stay?" — discussion ongoing) can be answered without backlog cruft.
+- Schema is forward-compat: any saves players made during the AP era still load (apCurrent stays optional in the zod schema).
+
+### Open after this tick
+
+- Bug #25 (panel + sticky coexist; panel 156 → 96 reverse of #13)
+- Bug #24 (auto-split on speaker line — engine runtime change)
+- Bug #29 (Status HUD top-right + effect flash — now unblocked since AP slot row is gone)
+- Bug #23 second half — first-time tutorial modal
+- Bug #26 (Pixi calendar widget polish)
+- Bug #28 (T04/T05/T06 backlog — workstation BG / NPC sprites)
+- Bug #30 (gated on tutorial modal)
+
+(next /loop tick: probably Bug #25 — small/local panel-sizing tweak, or Bug #29 since it's now unblocked.)
 
 
 

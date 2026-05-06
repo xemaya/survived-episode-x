@@ -43,13 +43,13 @@ describe('SaveSystem', () => {
 
     it('round-trips a RunState', async () => {
       const state = defaultRunState();
-      state.apCurrent = 5;
       state.kpiActual = 42;
+      state.energyCurrent = 55;
       await save.writeCurrentRun(state);
       const loaded = await save.loadCurrentRun();
       expect(loaded).not.toBeNull();
-      expect(loaded?.apCurrent).toBe(5);
       expect(loaded?.kpiActual).toBe(42);
+      expect(loaded?.energyCurrent).toBe(55);
     });
 
     it('returns null + reports corrupt on schemaVersion mismatch', async () => {
@@ -101,9 +101,10 @@ describe('SaveSystem', () => {
   describe('archive', () => {
     it('writes and reads back per-run archive file', async () => {
       const state = defaultRunState();
+      state.kpiActual = 13;
       await save.writeArchiveSnapshot(7, state);
       const loaded = await save.loadArchiveSnapshot(7);
-      expect(loaded?.apCurrent).toBe(state.apCurrent);
+      expect(loaded?.kpiActual).toBe(13);
     });
   });
 
