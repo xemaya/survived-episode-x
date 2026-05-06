@@ -692,7 +692,95 @@ P1: T-1 scene registry, T-2 NPC sprite slots, Bug #29 (Status HUD diegetic-first
 
 (next /loop tick: Q-S — shortest, no ink dependency, unblocks weekly cadence. Q-Q after.)
 
+---
 
+## 2026-05-07 · batch 24 — post-Q-R UX cleanup sweep + T-2 NPC sprite slots (6 fixes)
 
+GM playtest after batch 22-23 surfaced 5 small/medium UX gaps + reaffirmed T-2 priority since W5 round-3 shipped 11 NPC sprites (under `assets/sprites/npc/`). Working through queue P0 → P1 in order.
 
+### Q-X (`7d3f29c`) — strip "Lisa：" prefix from NPC body (Bug #37)
+
+**Why**: Panel header bar shows `[ Lisa ]` AND body `Lisa："好的。"` → name appears twice. Bodies authored before Q-R speaker-tag convention still carry the legacy prefix.
+
+**Fix**: New `stripSpeakerPrefix(body)` pure helper in `source-detector.ts`. Strips matching known-NPC names AND aliases (大伟 → David / 周哥 → 老周) from leading `Name：` / `**Name**：` (full-width OR ASCII colon). Called by `ink-dialog.drawPanel` ONLY when source.kind === 'npc'. Narration / monologue pass through unchanged. 9 new vitest cases.
+
+### Q-Y (`ed16579`) — pause hamburger button + 回主菜单 hard-restart (Bug #38)
+
+**Why**: No always-visible exit affordance during gameplay. Esc was the only path; player who didn't know couldn't escape mid-run.
+
+**Fix**: 16×16 hamburger button at workstation top-right ((614, 8) initially, then shifted to (516, 8) for Q-N HUD clearance). Click → `flow.request({ kind: 'pause', resumeTo: cur })` — same path as the existing Esc handler.
+
+Also reworked PauseMenu's [回主菜单] handler: per Q-Y spec, performs hard-restart (`save.clearCurrentRun()` + `dialogState.reset()` + `window.location.reload()`) — same brutal-but-reliable pattern as ink-dialog's `triggerNewGame()` (gameover [新游戏]). Label clarified to "回主菜单（清存档）" so destructive intent is explicit.
+
+### Q-N (`93bc3c7`) — always-visible Status HUD top-right (Bug #29 revived)
+
+**Why**: GM playtest 2026-05-06 saw daily_recap blob "今日 KPI: +105 / 今日 钱: 5502 / 今日 状态: 72/100" rendering as a panel monologue. § 2.4 v2 reverses the earlier "diegetic-first only" decision: KPI/钱/状态 belong in a top-right HUD with live updates.
+
+**New file**: `src/render/hud/status-hud.ts` (~180 LOC). 80×72 panel at canvas (540, 16): 3 rows KPI / 钱 / 状态, BG `#1A2A38` + alpha 0.85 + 1 px border `#2A1F14`, cream `#E8E0CC` 10pt body. Reads ink VARs `kpi/money/state` (the design's narrative source of truth). On every refresh: snapshot diff vs prior, queue +N/-N flash badge (打工人黄 positive / 红 negative, 800 ms fade) + ease displayed value toward target via Pixi ticker (TWEEN_EASE 0.18 per frame).
+
+**Wiring**: `mountInkDialog()` now accepts `onAfterAdvance?: () => void`. Fires after every `step()` / `selectChoice()` AND in `start()` initial paint. Workstation passes `statusHud.refresh` as the callback. Hamburger button shifted to (516, 8) so the HUD's (540-620, 16-88) range is clear.
+
+Money formatted with `toLocaleString('en-US')` (¥5,500). KPI shows `/ 200` fallback threshold (real `cap_now` wiring is part of Q-Q KPI Review).
+
+### Q-W (`0cfea3e`) — phone + fruit_bowl off-panel + chroma-key cream BG (Bug #36)
+
+**A. Position + scale**:
+- `phone`: (380, 252) scale 0.1 → (580, 130) scale 0.06. Top-right corner, ~40 px below HUD bottom (y=88), well clear of panel (y=240+).
+- `fruit_bowl`: (510, 250) scale 0.12 → (60, 220) scale 0.06. Left-mid edge, far left of sticky rack center (x=320).
+
+**B. Chroma-key cream BG**:
+- New `src/render/diegetic/chroma-key.ts` (~50 LOC). `loadChromaKeyedTexture(url, { color, tolerance })` projects the URL through canvas2D `getImageData` / `putImageData`, knocks alpha=0 on every pixel within Manhattan-distance `tolerance` of `color`, builds a fresh Texture from the modified canvas. Browser-only (vitest paths gracefully skip).
+- `prop-entity.ts` PropEntitySpec adds optional `chromaKey: ChromaKeySpec`. `createPropEntity` + `setState` load via `loadChromaKeyedTexture` when set.
+- workstation.ts wires `chromaKey: { color: 0xe8e0cc, tolerance: 8 }` for both phone + fruit_bowl. W5 backup: regenerate sources with explicit transparent_bg.
+
+### Q-V (`f027a6d`) — panel auto-paginate via runtime virtual pagebreak (Bug #34)
+
+**Why**: Panel shrunk to 96 px in Q-L Bug #25 reverse; long narration steps overflow the body mask and get clipped (Day 1 Event 1.2 茶水间 5+ paragraph prose).
+
+**Approach**: Spec sub-option A' — runtime auto-inserts a virtual pagebreak when text exceeds budget. Reuses the existing `pendingChunk` / `paused=true` machinery (same path as explicit `# pagebreak` and Q-R source-split). Renderer's existing ▼ continue affordance handles multi-page reads with no new state.
+
+**New file**: `src/render/dialog/panel-paginate.ts` (~50 LOC). `paginateAtSentenceBoundary(text, budget)` returns `{ head, tail }`: prefers Chinese terminators 。？！ in latter half of budget window, falls back to ASCII `?!`, then newline, then forced cut. Default budget = 130 chars (~4 lines × 32 CJK chars). 11 new vitest cases.
+
+**Runtime wire**: `runtime.ts step()` post-loop check — if `text.length > PANEL_TEXT_BUDGET` AND `!paused`, call `paginateAtSentenceBoundary`, replace `text` with head, stash tail on pendingChunk, set `paused=true`. Tags carried with the head; tail is pure text spillover with empty tags.
+
+**ink-dialog.ts choice case**: when paused=true (paginated head with choices populated), show ▼ first (no sticky); sticky mounts on the last page when paused=false.
+
+### T-2 (`bab24ca`) — NPC sprite slot registry (P1 critical, W5 sprites ready)
+
+**Why now**: W5 round-3 shipped 11 NPC sprites (`assets/sprites/npc/<id>_sprite.png`). Without T-2, ink emits `# npc: lisa_holding_milk_tea_cup` and nothing visible changes — player never sees Lisa / Vivian / etc.
+
+**New file**: `src/render/npc/npc-registry.ts` (~145 LOC). `parseNpcId(tagValue)` matches longest known NPC id prefix (`lao_zhou_drinking_tea` → `lao_zhou`, `wang_director` matched whole, `lao_li_mopping_background` aliased to `li_ayi`, `food_court_auntie_serving_lunch` aliased to `cafeteria_auntie`). NpcRegistry holds a parent Container + a `Map<id, Sprite>` of mounted NPCs. `handleTag(value)` mounts sprite at the configured anchor (sprite anchor 0.5, 1 → bottom-center "stands at" config.{x,y}); idempotent (re-emit is a no-op). `clearAll()` unmounts all on scene change.
+
+**NPC_TABLE** covers all 11: Lisa / David / Vivian / Wang director / Lao zhou / Zoe / Li ayi / Mama / Lin jie / IT xiaoma / Cafeteria auntie. Anchors borrow from the deleted npc-anchors.ts (Q-R) but re-purposed as sprite bottom-center (head was bubble tail tip). Scale 0.3 across the board — tunable per-asset if W5 sprites vary.
+
+**workstation wire**: `npcRegistry.attach(ctx.worldLayer)` + listen on `sceneState.on('npc', value => handleTag)` + `sceneState.on('scene', () => clearAll)`. Mirrors the prop scope='scene' lifecycle.
+
+19 new vitest cases for `parseNpcId` + the NPC_TABLE / NPC_ALIASES schema invariants.
+
+### Verification
+
+- `pnpm tsc` ✓ clean across all 6 commits
+- `pnpm test` ✓ 327/327 (was 297 → +9 stripSpeakerPrefix + +11 panel-paginate + +19 npc-registry - 9 dropped from earlier counts, net +30)
+- All lefthook hooks green
+
+### Bugs closed
+
+- Bug #29 (Status HUD always-visible top-right)
+- Bug #33 (`[视角]` header dropped — already done in batch 23, this batch added stripSpeakerPrefix companion)
+- Bug #34 (panel overflow auto-paginate)
+- Bug #36 (phone/fruit_bowl position + chroma-key)
+- Bug #37 (NPC name prefix duplicate with header)
+- Bug #38 (pause hamburger + 回主菜单 hard-restart)
+
+### Open after this tick
+
+P0 (queue):
+- Q-Q · Bug #31 KPI Review cinematic (4-6h)
+- Q-S · Weekly meter modal (2-3h)
+- Q-K-2nd · First-time tutorial modal (1-2h)
+
+P1:
+- T-1 · scene registry (3-5h) — `# scene: break_room` etc.
+
+(next /loop tick: Q-S — small + no ink dependency. Q-Q after, depending on whether episode-1.ink D7 is ready with `# kpi_review_path_X` tags.)
 

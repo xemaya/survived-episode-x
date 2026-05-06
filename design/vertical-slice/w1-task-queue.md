@@ -71,6 +71,68 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 
 ---
 
+## 🆕 P0 — Bug #38 — pause / back-to-main 按钮缺失
+
+### Q-Y · Bug #38 — 游戏过程中无法回主菜单 / 重新开始
+
+**Why**: GM playtest 2026-05-06 — 玩家进入 gameplay 后无 pause 按钮 / 主菜单按钮. 唯一退出路径 = ink end → gameover Archive screen 才出现 [新游戏] / [回主菜单]. 其他时刻只能硬清 localStorage 重启.
+
+**Fix**: 加 always-visible **菜单按钮** 在 canvas 右下角 (或左上角 — 跟 calendar widget 不冲突的地方):
+- 16×16 px 三横线 hamburger icon (公文印章风, 1 px stroke `#2A1F14` on cream `#E8E0CC`)
+- Click → mount Preact pause overlay:
+  - `[继续]` → close overlay
+  - `[回主菜单]` → trigger same `triggerNewGame()` logic that gameover-end fix uses (clearCurrentRun + reload)
+  - `[新游戏]` (alias of 回主菜单) — 当前没区分新游戏 vs 回主菜单, 一个按钮即可
+- Esc 键也 trigger overlay (keyboard accessibility)
+
+**Files**:
+- 新建 `game/src/render/menu/pause-menu.tsx` (Preact overlay, ~50 lines)
+- `game/src/render/scene/workstation.ts` — mount hamburger button at canvas corner
+- `game/src/main.ts` — listen Esc key to toggle pause overlay
+
+**Test**:
+- dev 跑 Day 1 → 点右下角菜单按钮 → overlay 弹出 → 点 [回主菜单] → reload → 进 main_menu (no save) → 干净开始
+- Esc 键同样 trigger overlay
+
+**Estimate**: 30 min
+
+**Status**: ✅ done in commit `ed16579` (batch 24, 2026-05-07). Hamburger button at workstation top-right (516, 8 — shifted from 614 to clear Q-N HUD); click triggers `flow.request({ kind: 'pause', resumeTo: cur })`. PauseMenu's [回主菜单] reworked to hard-restart (clearCurrentRun + dialogState.reset + reload), label clarified to "回主菜单（清存档）".
+
+---
+
+## 🆕 P0 — Bug #37 — NPC speech body 跟 header 重复 (10 min fix)
+
+### Q-X · Bug #37 — strip NPC name prefix from body when header already shows it
+
+**Why**: GM playtest 2026-05-06 image 36 — panel header 显示 `[ Lisa ]` + body 显示 `Lisa："好的。我准备一下。"`. 名字 visible 2 次. 跟 Q-T 改 narration 无 header / NPC 有 header 后, body 里旧的 `Name：` prefix 成为冗余.
+
+**Fix**: paintStep 内当 source.kind === 'npc' 时, 从 body text 移除 leading `<displayName>：` (或 `**<displayName>**：`) prefix:
+
+```ts
+function stripSpeakerPrefix(body: string, npcDisplayName: string): string {
+  // matches "**Lisa**：..." or "Lisa：..." at start
+  const re = new RegExp(`^\\s*\\*?\\*?${escapeRegex(npcDisplayName)}\\*?\\*?[：:]\\s*`);
+  return body.replace(re, '');
+}
+```
+
+调用点: paintStep 内 mountPanelBody 之前, if source NPC → body = stripSpeakerPrefix(body, source.npcName).
+
+**Also**: 同 strip alias (大伟 / 周哥 / etc per source-detector LEGACY_ALIAS_NORMALIZE).
+
+**File**: `game/src/render/dialog/ink-dialog.ts` paintStep + `source-detector.ts` (export stripSpeakerPrefix or add helper)
+
+**Test**:
+- vitest: `stripSpeakerPrefix("Lisa：'好的'", "Lisa")` → `"'好的'"`
+- vitest: `stripSpeakerPrefix("**David**：'兄弟'", "David")` → `"'兄弟'"`
+- dev: Day 1 Event 1.2 茶水间 → Lisa 说话 step → header `[ Lisa ]` + body 仅 `"诶, 你先用吧。"` 不含 `Lisa：` prefix
+
+**Estimate**: 10 min
+
+**Status**: ✅ done in commit `7d3f29c` (batch 24, 2026-05-07). New `stripSpeakerPrefix(body)` pure helper in source-detector.ts; strips known NPC names + aliases from leading `Name：` / `**Name**：`. Called by drawPanel only when source.kind === 'npc'. 9 new vitest cases.
+
+---
+
 ## 🆕 P0 — Post Q-R playtest fixes (small W1 tasks)
 
 ### Q-T · Bug #33 — narration 段 panel header `[视角]` 不必要
@@ -98,6 +160,101 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 **Estimate**: 1-2h
 
 **Status**: ✅ done in commit `70a4b95` (batch 23, 2026-05-06). New `calendar-widget.ts` with 80×80 desk-calendar visual: paper BG + 装订红 banner with month label + 7×5 date grid (past gray / current red ring / weekend red / weekday ink); self-binds to onDateChanged. workstation.ts swapped from sprite path to `mountCalendarWidget()`.
+
+---
+
+## 🆕 P0 — Bug #29 (REVIVED) Status HUD always-visible top-right
+
+### Q-N · Status HUD top-right + choice flash (per avg-architecture.md §2.4 v2 calibration)
+
+**Why**: GM playtest 2026-05-06 看到 daily_recap 把 "今日 KPI: +105 / 今日 钱: 5502 / 今日 状态: 72/100" 渲到 panel 当 monologue, 反馈"这种状态不应该显示给用户, 而是在右上角对 KPI、钱、自我状态的变化". → **revert 之前 §2.4 'no always-visible HUD' 决定**, 改 always-visible HUD.
+
+**Spec source**: `design/vertical-slice/avg-architecture.md` §2.4 v2 (just updated).
+
+**Spec brief**:
+- Pixi Container at `(canvas.W - 100, 16)`, 80×72
+- 3 行 cream `#E8E0CC` 10pt: `KPI: 105 / 200` + `钱: ¥5,502` + `状态: 72 / 100`
+- BG `#1A2A38` + alpha 0.85 + 1px border `#2A1F14`
+- 实时绑 `kpi.onChanged` / `money.onChanged` / `state.onChanged` (or energy module if state-name diff)
+- 选完 sticky → 对应行 flash `+N`/`-N` 0.8s + 数值 500ms tween
+
+**Files**: 新建 `game/src/render/hud/status-hud.ts` + `mountWorkstation` 加 mount + `ink-dialog.ts advanceChoice` 后 trigger HUD flash
+
+**Test**:
+- dev 跑 Day 1 Event 1.2 → 选 [让 Lisa 先] → HUD "状态" 行 flash + tween
+- HUD 永远 visible 右上角 (不 auto-hide)
+
+**Estimate**: 2-3h
+
+**Status**: ✅ done in commit `93bc3c7` (batch 24, 2026-05-07). New `src/render/hud/status-hud.ts` — 80×72 panel at (540, 16) reading ink VARs kpi/money/state with per-row +N/-N flash badge (打工人黄/红 800ms fade) + value tween. mountInkDialog now accepts `onAfterAdvance` callback; workstation wires statusHud.refresh. Hamburger button shifted left (614→516) for clearance.
+
+---
+
+## 🆕 P0 — Bug #36 — 小物品贴图 position + 透明 BG
+
+### Q-W · Bug #36 — phone / fruit_bowl 等 prop 位置撞 panel + 含 cream BG 矩形
+
+**Why**: GM playtest 2026-05-06 image 35: phone prop mounted at desk-center y≈220, 跟 panel (y=240-336) + sticky (y=175-238) 重叠. 且 phone PNG 含 cream `#E8E0CC` 背景矩形 (W5 源图未透明), 不协调.
+
+**Fix 2 子项**:
+
+**A. Position 移到 off-panel 区**:
+- `workstation.ts` 内 transient prop mount 位置改:
+  - `phone` → `(580, 130)` (top-right corner, 不撞 panel + 不撞 HUD)
+  - `fruit_bowl` → `(60, 220)` (left-mid edge, 不撞 panel + 不撞 calendar widget)
+  - 大小调小: scale 0.06 (or matching pixel art smaller)
+- 其他 transient prop 同 review (mug 在 desk-bottom-left 不动 — 不冲突 panel)
+
+**B. 透明 BG (chroma-key remove cream)**:
+- Pixi-side approach: `applyChromaKey(sprite, color: 0xE8E0CC, tolerance: 8)` — 替换 cream pixel 为 alpha 0 (custom shader 或 canvas 2D pixel manipulation 后 wrap as Texture)
+- 或 `prop-entity.ts` `cropEdges` 字段加 `bgColor` removal mode
+- 备选: W5 round-N regenerate phone / fruit_bowl with explicit `transparent_bg` flag in prompt + re-cut
+
+**Recommend**: A + B Pixi-side chroma-key (跟现 cropEdges 同 module). Round-N W5 regenerate 是 backup if chroma-key 看着不干净.
+
+**Files**:
+- `game/src/render/scene/workstation.ts` — 改 phone / fruit_bowl mount position + scale
+- `game/src/render/diegetic/prop-entity.ts` — 加 chroma-key utility (~30 lines pure helper + apply at texture load)
+
+**Test**:
+- dev 跑 Day 2 Event 2.2 (David PPT) → ink emit `# prop: phone_with_badge` → phone 出现在右上角 (180, 130)，不撞 panel + 不含 cream BG 矩形
+
+**Estimate**: 1-2h (A: 5 min, B: 1h chroma-key)
+
+**Status**: ✅ done in commit `0cfea3e` (batch 24, 2026-05-07). A: phone (380,252)→(580,130) scale 0.1→0.06; fruit_bowl (510,250)→(60,220) scale 0.12→0.06. B: new `chroma-key.ts` with canvas2D `loadChromaKeyedTexture(url, {color, tolerance})`; PropEntitySpec `chromaKey?` field threads through `createPropEntity` + `setState`. Wired both phone + fruit_bowl with `{ color: 0xe8e0cc, tolerance: 8 }`.
+
+---
+
+## 🆕 P0 — Bug #34 — panel text overflow auto-paginate
+
+### Q-V · Bug #34 — long narration 段被 panel 96px 截断, 需 auto-paginate ▼
+
+**Why**: GM playtest 2026-05-06 post Q-T+Q-U: Day 1 Event 1.2 茶水间 narration 5+ 段 prose 装不下 96px panel, 末尾被 mask clip 截断 (e.g. "你跌坐..." 切掉).
+
+**Root cause**: Q-L Bug #25 reverse 让 panel 缩到 96px (sticky 占 desk surface 不能 overlap). Long narration step 装不下.
+
+**Fix (Option A — engine auto-paginate)**:
+- paintStep 内 mount panel body Text 后, measure `text.height`
+- if `text.height > panel inner height` (140-2*4 padding = 132? — depends on actual size; calculate from PANEL_H - HEADER_H - 2*PADDING):
+  1. Find natural break point (paragraph boundary / sentence boundary) such that rendered chunk fits within capacity
+  2. Render chunk, mount ▼ continue affordance
+  3. Stash remaining text on `pendingPanelText` (intra-paint state)
+  4. Click ▼ → drain stash, next paint shows next chunk + ▼ if still overflow, etc.
+  5. Last chunk: ▼ behavior reverts to existing (推进 step / show choices)
+
+**Or simpler (sub-option A')**: Use existing `# pagebreak` pendingChunk machinery. When measure overflow detected, engine inserts virtual `# pagebreak` at split point, treats as if ink emit'd it. Then existing ▼ continue affordance + step() pendingChunk drain handles the rest.
+
+A' 更 clean — reuse existing mechanism, no new state. Recommended.
+
+**File**: `game/src/render/dialog/ink-dialog.ts` paintStep + 新 helper `panel-paginate.ts` (~30 lines pure measure + split helper)
+
+**Test**:
+- vitest: `paginate` pure helper unit (input long text + maxLines=N → output chunks array)
+- dev: Day 1 Event 1.2 茶水间 → 验证 5+ 段 prose 分 2 paint, ▼ click 推进 → 第 2 paint 显示 "你跌坐..." 完整
+
+**Estimate**: 1-2h
+
+**Status**: ✅ done in commit `f027a6d` (batch 24, 2026-05-07). Sub-option A' chosen — runtime auto-inserts virtual pagebreak via existing pendingChunk machinery. New `panel-paginate.ts` with pure `paginateAtSentenceBoundary(text, budget)` (CJK 。？！ → ASCII ?! → newline → forced cut); default budget 130 chars. runtime.ts step() splits when text > BUDGET, stashes tail. ink-dialog choice case shows ▼ first when paused (paginated head with choices) and mounts sticky on last page. 11 new vitest cases.
 
 ---
 
@@ -185,6 +342,8 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 **Files**: 新 `npc-registry.ts` + 调 npc-anchors.ts (Q-R 后已删除 — 重新评估)
 
 **Estimate**: 2-3h
+
+**Status**: ✅ done in commit `bab24ca` (batch 24, 2026-05-07). New `src/render/npc/npc-registry.ts` (~145 LOC). `parseNpcId(tagValue)` longest-prefix match (lao_zhou_drinking_tea → lao_zhou; food_court_auntie → cafeteria_auntie alias; lao_li → li_ayi alias). NPC_TABLE covers all 11 named NPCs with workstation anchors (sprite anchor 0.5/1 = bottom-center). Workstation listens on `sceneState.on('npc')` to mount + `on('scene')` to clearAll. Idempotent — repeat tags are no-ops. 19 new vitest cases.
 
 ---
 
