@@ -159,22 +159,47 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
 
   /** Paint the panel surfaces (BG + header bar + label + body text)
    * for a given source + body string. Idempotent — overwrites prior
-   * content, never appends. */
+   * content, never appends.
+   *
+   * Q-T (Bug #33, avg-architecture.md §1.3 update): narration is the
+   * default旁白; the `[视角]` header label is just visual noise. For
+   * narration source, skip the header bar entirely and let the body
+   * fill the full panel rect. Monologue / NPC sources keep the header
+   * bar so the disambiguation cue (`[笑天]` / `[Lisa]` / etc) survives.
+   */
   const drawPanel = (source: Source, body: string) => {
     panelBg.clear();
     panelBg.rect(PANEL_X, PANEL_Y, PANEL_W, PANEL_H);
     panelBg.fill({ color: PANEL_BG, alpha: PANEL_BG_ALPHA });
     panelBg.stroke({ color: PANEL_BORDER, width: 1 });
 
+    const showHeader = source.kind !== 'narration';
     headerBarBg.clear();
-    headerBarBg.rect(PANEL_X, PANEL_Y, PANEL_W, HEADER_BAR_H);
-    headerBarBg.fill({ color: HEADER_BAR_BG, alpha: HEADER_BAR_BG_ALPHA });
-    // Bottom divider line under the header bar.
-    headerBarBg.moveTo(PANEL_X, PANEL_Y + HEADER_BAR_H);
-    headerBarBg.lineTo(PANEL_X + PANEL_W, PANEL_Y + HEADER_BAR_H);
-    headerBarBg.stroke({ color: PANEL_BORDER, width: 1 });
+    if (showHeader) {
+      headerBarBg.rect(PANEL_X, PANEL_Y, PANEL_W, HEADER_BAR_H);
+      headerBarBg.fill({ color: HEADER_BAR_BG, alpha: HEADER_BAR_BG_ALPHA });
+      headerBarBg.moveTo(PANEL_X, PANEL_Y + HEADER_BAR_H);
+      headerBarBg.lineTo(PANEL_X + PANEL_W, PANEL_Y + HEADER_BAR_H);
+      headerBarBg.stroke({ color: PANEL_BORDER, width: 1 });
+      headerLabel.text = `[ ${sourceLabel(source)} ]`;
+    } else {
+      headerLabel.text = '';
+    }
 
-    headerLabel.text = `[ ${sourceLabel(source)} ]`;
+    // Shift body up to fill the full panel when no header is present;
+    // narration gets ~18 px of extra body height, fitting an extra
+    // line of narration without overflow.
+    const bodyTop = showHeader ? PANEL_BODY_Y : PANEL_Y;
+    const bodyHeight = showHeader ? PANEL_BODY_H : PANEL_H;
+    bodyText.y = bodyTop + PANEL_PADDING_Y;
+    bodyMask.clear();
+    bodyMask.rect(
+      PANEL_X + PANEL_PADDING_X,
+      bodyTop + PANEL_PADDING_Y,
+      PANEL_W - 2 * PANEL_PADDING_X,
+      bodyHeight - 2 * PANEL_PADDING_Y,
+    );
+    bodyMask.fill(0xffffff);
 
     const isMonologue = source.kind === 'monologue';
     bodyText.style.fill = isMonologue ? BODY_COLOR_MONOLOGUE : BODY_COLOR_NORMAL;
