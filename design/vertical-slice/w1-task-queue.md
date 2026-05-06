@@ -67,7 +67,7 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 
 **Estimate**: 6-8h
 
-**Status**: ✅ done in commit `<pending>` (batch 22, 2026-05-06). 5 dialog files (speech-bubble + speech-bubble-layout + npc-anchors + speaker-parser + internal-monologue + internal-monologue-parser) + 2 tests deleted; new `source-detector.ts` + 29 cases + 7 source-split runtime cases; runtime.ts step() does source-boundary auto-split via the existing pendingChunk machinery; ink-dialog.ts paintStep is stateless 3-layer with header-bar source label; dialog-phase 7→3. Bug #18 / #18-regression / #19 / #20 / #24 副作用 closed. 288/288 tests passing.
+**Status**: ✅ done in commit `0f7aa6f` (batch 22, 2026-05-06). 5 dialog files (speech-bubble + speech-bubble-layout + npc-anchors + speaker-parser + internal-monologue + internal-monologue-parser) + 2 tests deleted; new `source-detector.ts` + 29 cases + 7 source-split runtime cases; runtime.ts step() does source-boundary auto-split via the existing pendingChunk machinery; ink-dialog.ts paintStep is stateless 3-layer with header-bar source label; dialog-phase 7→3. Bug #18 / #18-regression / #19 / #20 / #24 副作用 closed. 288/288 tests passing.
 
 ---
 
