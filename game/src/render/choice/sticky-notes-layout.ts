@@ -62,10 +62,12 @@ export interface ComputeStickyLayoutOpts {
 }
 
 const DEFAULT_CENTER_X = 320;
-// Bug #25 (2026-05-06): rack moved from y=248 up to y=210 so the
-// shrunk narration panel (96 px tall, y=256-352) can coexist with
-// the sticky rack on the desk surface (rack span y=175-245).
-const DEFAULT_CENTER_Y = 210;
+// Q-R (2026-05-06, avg-architecture.md §1.3): with the panel snapped
+// to spec geometry y=240-336, the sticky rack sits exactly tangent to
+// the panel's top edge — centerY=205 → rack span y=170-240. Header
+// label sits inside the rack; bobbing/tilt stays within the desk-
+// surface band per art-bible §3.3.
+const DEFAULT_CENTER_Y = 205;
 const DEFAULT_GAP = 14;
 const DEFAULT_MAX_SLOTS = 3;
 

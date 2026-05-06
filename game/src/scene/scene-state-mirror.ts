@@ -23,7 +23,9 @@ export interface SceneStateSnapshot {
   time: string | null;
   weather: string | null;
   /** Latest `# speaker: <id>` value per Q-1 contract (id → NPC sprite slot).
-   * `null` until first tag fires; ink-dialog falls back to parseSpeaker. */
+   * `null` until first tag fires. After Q-R, source detection lives in
+   * `source-detector.ts`; this field is kept for future NPC-sprite-slot
+   * (T05/T06) mounting since the dialog renderer no longer reads it. */
   speaker: string | null;
 }
 

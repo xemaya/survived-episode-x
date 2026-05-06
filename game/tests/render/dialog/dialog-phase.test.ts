@@ -1,8 +1,8 @@
-// Unit tests for the QA Bug #13 phase-decision helper.
-// Pure function — no Pixi instantiation needed.
+// Q-R: 3-phase architecture (avg-architecture.md §1.8). Tests cover
+// the new ended / choice / narration trichotomy.
 
 import { describe, expect, it } from 'vitest';
-import { SHORT_PROMPT_THRESHOLD, decideDialogPhase } from '../../../src/render/dialog/dialog-phase';
+import { decideDialogPhase } from '../../../src/render/dialog/dialog-phase';
 
 function step(over: Partial<Parameters<typeof decideDialogPhase>[0]['step']>) {
   return {
@@ -15,144 +15,64 @@ function step(over: Partial<Parameters<typeof decideDialogPhase>[0]['step']>) {
   };
 }
 
-describe('decideDialogPhase (QA Bug #13)', () => {
+describe('decideDialogPhase (Q-R 3-phase)', () => {
   it('returns "ended" when step.ended (overrides text + choice signals)', () => {
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: 'long enough text after layer 2',
-        step: step({ ended: true }),
-      }),
-    ).toBe('ended');
+    expect(decideDialogPhase({ step: step({ ended: true }) })).toBe('ended');
   });
 
-  it('returns "paged" when step.paused (overrides choices)', () => {
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: 'pagebreak text',
-        step: step({ paused: true, choices: [{}, {}] }),
-      }),
-    ).toBe('paged');
+  it('returns "ended" when step.ended even with choices present', () => {
+    expect(decideDialogPhase({ step: step({ ended: true, choices: [{}, {}] }) })).toBe('ended');
   });
 
-  it('returns "deferred-choices" for long narration + choices', () => {
-    const longText = '一'.repeat(40); // 40 CJK chars > 60-char threshold? actually len=40
-    // Use ASCII to ensure length-in-chars > threshold
-    const text = 'a'.repeat(SHORT_PROMPT_THRESHOLD + 10);
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}, {}, {}] }),
-      }),
-    ).toBe('deferred-choices');
-    void longText;
+  it('returns "choice" when step has choices and is not ended', () => {
+    expect(decideDialogPhase({ step: step({ text: 'narration', choices: [{}, {}, {}] }) })).toBe(
+      'choice',
+    );
   });
 
-  it('returns "header-band" for short narration + choices', () => {
-    const text = 'a'.repeat(SHORT_PROMPT_THRESHOLD - 10);
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}, {}] }),
-      }),
-    ).toBe('header-band');
+  it('returns "choice" when step has choices and empty text', () => {
+    expect(decideDialogPhase({ step: step({ text: '', choices: [{}, {}] }) })).toBe('choice');
   });
 
-  it('boundary: text length === threshold uses deferred (>= rule)', () => {
-    const text = 'a'.repeat(SHORT_PROMPT_THRESHOLD);
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}] }),
-      }),
-    ).toBe('deferred-choices');
+  it('returns "narration" when step has only text (no choices, not ended)', () => {
+    expect(decideDialogPhase({ step: step({ text: 'just narration' }) })).toBe('narration');
   });
 
-  it('returns "choices-only" for empty narration + choices', () => {
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: '',
-        step: step({ text: '', choices: [{}, {}] }),
-      }),
-    ).toBe('choices-only');
+  it('returns "narration" for empty text + no choices (the auto-step case)', () => {
+    expect(decideDialogPhase({ step: step({ text: '' }) })).toBe('narration');
   });
 
-  it('returns "narration-only" for text without choices, not paused', () => {
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: 'just narration',
-        step: step({ text: 'just narration', canContinue: false }),
-      }),
-    ).toBe('narration-only');
+  it('returns "narration" when paused at # pagebreak (auto-split / pagebreak boundary)', () => {
+    expect(decideDialogPhase({ step: step({ text: 'pre-break', paused: true }) })).toBe(
+      'narration',
+    );
   });
 
-  it('returns "empty" when nothing remains for layer 3', () => {
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: '',
-        step: step({ text: '' }),
-      }),
-    ).toBe('empty');
+  it('paused + choices → "choice" (sticky still wins; ▼ is panel-only)', () => {
+    expect(decideDialogPhase({ step: step({ text: 'p', paused: true, choices: [{}] }) })).toBe(
+      'choice',
+    );
   });
 
-  it('honors a custom shortPromptThreshold override', () => {
-    const text = 'a'.repeat(30);
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}] }),
-        shortPromptThreshold: 100,
-      }),
-    ).toBe('header-band');
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}] }),
-        shortPromptThreshold: 10,
-      }),
-    ).toBe('deferred-choices');
+  it('returns "narration" when canContinue=true (more chunks pending)', () => {
+    expect(decideDialogPhase({ step: step({ text: 't', canContinue: true }) })).toBe('narration');
   });
 
-  it('"paged" wins over "deferred-choices" when both apply (pagebreak inside text+choices)', () => {
-    const text = 'a'.repeat(SHORT_PROMPT_THRESHOLD + 10);
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, paused: true, choices: [{}] }),
-      }),
-    ).toBe('paged');
+  it('canContinue + choices → "choice"', () => {
+    expect(decideDialogPhase({ step: step({ text: 't', canContinue: true, choices: [{}] }) })).toBe(
+      'choice',
+    );
   });
 
-  it('models the QA Bug #13 reproducer (Day 1 Event 1.2 茶水间, full narration block)', () => {
-    // The actual narration block before Event 1.2 choices is >100 chars
-    // — multi-paragraph rendering of Vivian setup + cafeteria scene
-    // description per `episode-1.ink`. Far over threshold → defer.
-    const text =
-      '你刷工牌过门禁，前台 Vivian 抬头。"嗨～来啦～" 她拖长了音。眼睛已经飘向门口下一个。' +
-      '工位旁边的水果盘今天是苹果。茶水间。她手里的不是保温杯。' +
-      '茶水间另一头, 李阿姨在拖地。她抬头看了你一眼，没说话。';
-    expect(text.length).toBeGreaterThan(SHORT_PROMPT_THRESHOLD);
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}, {}, {}] }),
-      }),
-    ).toBe('deferred-choices');
+  it('models the Day 2 Lisa 茶水间 multi-source step (post-auto-split, narration only)', () => {
+    // After Q-R auto-split, the runtime emits one source per step.
+    // A narration-only paint here.
+    const text = '你 9:14 走到工位区。A 区——Lisa 工位斜对角。';
+    expect(decideDialogPhase({ step: step({ text }) })).toBe('narration');
   });
 
-  it('models a Decision-Moment short prompt ("你看着 Lisa：")', () => {
+  it('models a typical choice point (panel + sticky coexist)', () => {
     const text = '你看着 Lisa：';
-    expect(
-      decideDialogPhase({
-        remainingTextTrimmed: text,
-        step: step({ text, choices: [{}, {}] }),
-      }),
-    ).toBe('header-band');
-  });
-});
-
-describe('SHORT_PROMPT_THRESHOLD constant', () => {
-  it('is a sane default for ~3 lines of CJK', () => {
-    expect(SHORT_PROMPT_THRESHOLD).toBeGreaterThan(20);
-    expect(SHORT_PROMPT_THRESHOLD).toBeLessThan(200);
+    expect(decideDialogPhase({ step: step({ text, choices: [{}, {}, {}] }) })).toBe('choice');
   });
 });

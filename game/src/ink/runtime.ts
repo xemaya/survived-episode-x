@@ -7,6 +7,7 @@
 // Save/load: ink runtime state is serialized via story.state.toJson() and
 // stored alongside the rest of the game save (see save/system.ts P5 extension).
 
+import { type Source, detectSource, sourcesEqual } from '@/render/dialog/source-detector';
 import { Story } from 'inkjs';
 import { pathInterceptor } from './path-interceptor';
 
@@ -88,33 +89,42 @@ export class InkRuntime {
     return this.currentJsonPath;
   }
 
-  /** Drive Continue() until !canContinue OR a `# pagebreak` tag arrives,
-   * batching all output text + tags up to that point. Wraps every
-   * Continue() in try/catch so a single bad path returns an "ended"
-   * step (rendered as "[runtime error]") instead of crashing the Pixi
-   * event handler — caller can recover by diverting elsewhere.
+  /** Drive Continue() until !canContinue OR a virtual/explicit pagebreak
+   * arrives, batching all output text + tags up to that point. Wraps
+   * every Continue() in try/catch so a single bad path returns an
+   * "ended" step (rendered as "[runtime error]") instead of crashing
+   * the Pixi event handler — caller can recover by diverting elsewhere.
    *
-   * Pagebreak semantics (Q-2 GM reply): when a Continue() chunk
-   * carries the `pagebreak` tag, the chunk + tags are stashed on the
-   * runtime and step() returns paused=true with whatever text was
-   * accumulated *before* it. The next step() call drains the stash
-   * first so the player sees a clean break — designer's intent is
-   * "everything before this beat goes on this page; the new chunk is
-   * the start of the next page". Standalone-tag idiom is supported
-   * (the conventional placement: `# pagebreak` on its own line
-   * between recap text and `-> next_stitch`). */
+   * Pause semantics:
+   *   - Q-2 explicit pagebreak (`# pagebreak` tag): chunk + tags are
+   *     stashed and step() returns paused=true with whatever text
+   *     accumulated *before* the chunk. Next step() drains the stash.
+   *   - Q-R virtual pagebreak (avg-architecture.md §1.4 source split):
+   *     when a chunk's source (narration / monologue / NPC) differs
+   *     from what the current step has already accumulated, the chunk
+   *     is stashed using the same machinery and step() returns paused.
+   *     This guarantees one-source-per-paint at the panel layer and
+   *     drives the dialog header bar to show the right `[视角]/[Lisa]
+   *     /[笑天]/…` label without inline mixing.
+   *
+   * The pendingChunk machinery is shared by both — the only carrier
+   * difference is whether the chunk's tags include `pagebreak` (which
+   * is filtered out of the carry on drain because its job is done). */
   step(): InkStoryStep {
     const story = this.requireStory();
     let text = '';
     const tags: ParsedTag[] = [];
     let paused = false;
+    let accumulatedSource: Source | null = null;
 
-    // 1. Drain any chunk stashed by a previous pagebreak. The pagebreak
-    //    tag itself is intentionally dropped — its job is done.
+    // 1. Drain any chunk stashed by a previous pause (pagebreak or
+    //    source-split). The pagebreak tag is dropped on drain since
+    //    its job (force a paint break) is done.
     if (this.pendingChunk !== null) {
+      const drainedTags = (this.pendingTags ?? []).filter((t) => t.key !== 'pagebreak');
       text += this.pendingChunk;
-      const carry = (this.pendingTags ?? []).filter((t) => t.key !== 'pagebreak');
-      for (const t of carry) tags.push(t);
+      for (const t of drainedTags) tags.push(t);
+      accumulatedSource = detectSource(this.pendingChunk, drainedTags);
       this.pendingChunk = null;
       this.pendingTags = null;
     }
@@ -141,13 +151,32 @@ export class InkRuntime {
 
         const hasPagebreak = newTags.some((t) => t.key === 'pagebreak');
         if (hasPagebreak) {
-          // Stash for next step() — current step ends *before* this
-          // chunk is shown so the page break is visible to the player.
+          // Explicit pagebreak — stash for next step().
           this.pendingChunk = chunk;
           this.pendingTags = newTags;
           paused = true;
           break;
         }
+
+        // Q-R: source-boundary auto-split. If the current step already
+        // accumulated chunks of one source (narration/monologue/NPC)
+        // and this chunk reports a different source, stash it and pause
+        // so the panel header bar can flip cleanly on the next paint.
+        // Whitespace-only chunks pass through (they don't define a
+        // source on their own — staying with the accumulated source
+        // avoids bouncing through a no-op narration paint).
+        const chunkTrimmed = chunk.trim();
+        if (chunkTrimmed.length > 0) {
+          const chunkSource = detectSource(chunk, newTags);
+          if (accumulatedSource !== null && !sourcesEqual(accumulatedSource, chunkSource)) {
+            this.pendingChunk = chunk;
+            this.pendingTags = newTags;
+            paused = true;
+            break;
+          }
+          accumulatedSource = chunkSource;
+        }
+
         text += chunk;
         for (const t of newTags) tags.push(t);
       }

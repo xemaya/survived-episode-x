@@ -560,9 +560,86 @@ GM 决定反转 Bug #13 Option B (panel-hides-when-sticky-mounts) → Option A (
 
 (next /loop tick: probably Bug #29 — Status HUD now has a clean top-right corner thanks to Bug #27, and it's a major UX gap. Bug #24 is the alternative if the speaker-blob mixing keeps showing up in QA.)
 
+---
 
+## 2026-05-06 · batch 22 — Q-R 3-layer 公文报告框 dialog rewrite (architecture reset)
 
+GM 重新校准了 design source-of-truth：`design/vertical-slice/avg-architecture.md` (NEW) 是 AVG 时代 dialog UI + daily pressure 的 canonical spec。Q-R 是按这个 spec 把 5-layer (panel/bubble/monologue/header-band/sticky) 累积架构债重写成 3-layer (panel + sticky + ▼) 公文报告框。Bug #18 / #18-regression / #19 / #20 / #24 当作架构副作用一起 close。
 
+### Engine changes
+
+#### 新文件
+- **`game/src/render/dialog/source-detector.ts`** (~110 行 + 29 vitest cases)
+  Pure helper that classifies an ink chunk into `Source = narration | monologue | npc{name}` per spec §1.4 priority:
+  1. `# speaker: <id>` tag with id mapped via `SPEAKER_ID_TO_DISPLAY` (lisa→Lisa, wang_director→王总监, food_court_auntie→食堂阿姨, etc; `protagonist` → monologue).
+  2. Legacy `**Name**：…` / `Name：…` prefix on the first line (with 大伟→David / 周哥→老周 alias normalization).
+  3. Whole-italic `_…_` paragraph → monologue.
+  4. Default → narration.
+  Exports `detectSource()` + `sourcesEqual()` + `sourceLabel()` (returns `视角 / 笑天 / <NPC display name>` for the panel header bar).
+
+#### Runtime auto-split (avg-architecture.md §1.4)
+- **`game/src/ink/runtime.ts step()`** — when an accumulating step's already-claimed source ≠ next chunk's source, the chunk is stashed via the existing pendingChunk machinery and step() returns paused=true. The pause shows up to the renderer as the same "▼ continue" affordance as a `# pagebreak`. Whitespace-only chunks pass through (they don't define a source on their own; staying with the accumulated source avoids no-op narration paints). New `tests/ink/source-split.test.ts` covers 7 cases (narration→monologue split, narration→NPC tag split, NPC→NPC split, same-source pass-through, NPC same-name pass-through, blank-line pass-through, explicit `# pagebreak` interaction).
+
+#### Dialog phase simplification (avg-architecture.md §1.8)
+- **`game/src/render/dialog/dialog-phase.ts`** — collapsed `empty / ended / paged / deferred-choices / header-band / choices-only / narration-only` (7) → `ended / choice / narration` (3). The render layer always mounts the panel; phase only decides what surfaces sit alongside.
+- `SHORT_PROMPT_THRESHOLD` constant deleted (no header-band path anymore).
+- `tests/render/dialog/dialog-phase.test.ts` rewritten: 12 cases covering the 3-phase trichotomy + the spec's two reproducer scenarios (Day 2 茶水间 multi-source post-auto-split narration paint, typical decision-moment choice paint).
+
+#### ink-dialog.ts paintStep rewrite
+- **stateless paint** (§1.7): every paint top unconditionally tears down sticky rack + ▼; bottom mounts fresh per phase.
+- **panel** is always built fresh from `(source, body)` via `drawPanel()` — header bar BG (HEADER_BAR_BG `#3D4A5A` darker than panel BG, 18 px tall) + divider line (`#2A1F14` 1 px) + header label `[ 视角 ]` / `[ 笑天 ]` / `[ Lisa ]` (11pt cream) + body (13pt, cream upright for narration/NPC, cool gray `#A8B0C0` italic for monologue).
+- Panel geometry snaps to spec: y=240-336 (96 tall), border `#2A1F14`, BG `#5A7080` cubicle navy + alpha 0.85.
+- Phase handlers:
+  - `ended`: panel + single sticky `[新游戏]` (hard-restart pattern unchanged).
+  - `choice`: panel (with current source body, OR restored last-narration on first-paint-after-mount when step.text empty) + sticky rack. No ▼ defer (Bug #25 already established panel+sticky coexist; Q-R extends it).
+  - `narration`: panel only. ▼ continue affordance shows whenever step is `paused` (auto-split or pagebreak) OR `canContinue` with non-empty body. Empty + canContinue auto-advances inline (no stuck `...`).
+- File shrunk: 540 lines → 343 lines (-197 LOC after stripping bubble/monologue/header-band machinery).
+
+#### Sticky position snap to spec
+- **`sticky-notes-layout.ts`** `DEFAULT_CENTER_Y`: 210 → 205 (rack span y=170-240 — exactly tangent to the new panel top edge at y=240).
+- **`sticky-notes.ts`** fallback startY tracked.
+
+#### Scene-state mirror comment touch-up
+- Updated speaker-field doc to note that source detection now lives in `source-detector.ts`; the field is kept for future T05/T06 NPC sprite-slot mounting (the renderer no longer reads it).
+
+### 删除的文件
+| 文件 | LOC | 替代物 |
+|---|---|---|
+| `src/render/dialog/speech-bubble.ts` | 106 | inline panel (NPC speech 进 panel + header bar `[Lisa]`) |
+| `src/render/dialog/speech-bubble-layout.ts` | 116 | (no replacement — bubble layer 不存在) |
+| `src/render/dialog/npc-anchors.ts` | 106 | (anchor 数据回归 T05/T06 NPC sprite slots when those land) |
+| `src/render/dialog/speaker-parser.ts` | 46 | `source-detector.ts` (legacy NPC prefix detection now part of detectSource) |
+| `src/render/dialog/internal-monologue.ts` | 117 | inline panel italic body + cool gray fill |
+| `src/render/dialog/internal-monologue-parser.ts` | 55 | source-detector (whole-italic detection) |
+| `tests/render/dialog/speech-bubble.test.ts` | 23 cases | source-detector tests cover speaker detection coverage |
+| `tests/render/dialog/internal-monologue.test.ts` | 13 cases | dialog-phase tests cover monologue → panel routing |
+
+总计 ~546 LOC + 36 tests deleted; ~250 LOC + 36 tests added (source-detector + source-split + dialog-phase rewrites). Net: -296 LOC, 0 net tests change.
+
+### Bugs closed (architecture 副作用)
+
+- **Bug #18 / #18-regression** (bubble lingers across step-blob event boundaries) — bubble layer 删了，没有 lingering 可能。
+- **Bug #19** (monologue Z-overlap with narration panel) — monologue 现在 inline 在 panel，不存在独立 layer 的 Z 冲突。
+- **Bug #20** (narration vs monologue voice 区分模糊) — header bar `[ 笑天 ]` 显式标 + italic + cool gray fill 三重区分。
+- **Bug #24** (multi-speaker 对话 + narration 在同 panel 混杂) — runtime auto-split 是新架构 core feature，每 paint 单 source。
+
+### Verification
+
+- `pnpm tsc` ✓ clean
+- `pnpm test` ✓ **288/288 passing** (was 289 pre-batch — net -1 from the file-count math: 23 + 13 deleted, 29 + 7 + ... added)
+- 所有 lefthook (biome + tsc + vitest) 通过
+
+### What remains open
+
+新 source-of-truth (`avg-architecture.md`) 列出的下一波 P0:
+- **Q-Q · Bug #31 KPI Review cinematic** (simulation 心跳)
+- **Q-S · Weekly meter modal** (周一/周五 daily pressure carrier)
+- **Q-K-2nd · First-time tutorial modal** (Bug #23 second half + Bug #30 close)
+
+P1: T-1 scene registry, T-2 NPC sprite slots, Bug #29 (Status HUD now diegetic-first per §2.4 — 重新评估 priority).
+P2: Bug #26 calendar widget polish.
+
+(next /loop tick: 按 queue P0 顺序 → Q-Q 还是 Q-S 看哪个 ink 内容 ready。Q-Q 需要 episode-1 D7 ink 末加 `# kpi_review_path_X` tag，Q-S 单独 modal 不依赖 ink。优先 Q-S 估时短 + unblocks weekly cadence；Q-Q 紧随其后。)
 
 
 

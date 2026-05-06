@@ -1,76 +1,76 @@
-// PixiJS dialog router for ink runtime (P5 Phase 2).
+// Q-R PixiJS dialog renderer for ink runtime — 公文报告框 architecture
+// (avg-architecture.md §1).
 //
-// Three render layers compose each step:
-//   1. NPC-anchored speech bubble (T10a) — first paragraph that
-//      starts with a known speaker prefix (`**Lisa**：`, `Vivian：`).
-//   2. Internal monologue overlay (T10b) — paragraphs wholly wrapped
-//      in `_…_` lift to a centered italic semi-transparent text near
-//      the protagonist's position.
-//   3. Bottom narration panel (Phase 1 placeholder) — anything that
-//      didn't go to (1) or (2).
+// 3 layer composition:
+//   1. Panel ("报告格式框"): always visible (except `ended`); a slim
+//      header bar at top shows the source label `[ 视角 / 笑天 / Lisa
+//      / 王总监 / … ]` (per `source-detector.ts`). Body renders one
+//      source's content in upright cream (narration / NPC speech) or
+//      italic cool gray (monologue).
+//   2. Sticky rack (T11): mounted only on `choice` phase. Panel stays
+//      visible alongside (Bug #25 reversed Bug #13 hide).
+//   3. ▼ continue affordance: shown when the runtime can advance
+//      further on the next step() — either an explicit `# pagebreak`
+//      pause or a Q-R virtual pagebreak from source-boundary auto-
+//      split.
 //
-// Choice rendering is unchanged; T11 replaces it with sticky-note
-// props anchored to the desk surface.
+// Stateless paint discipline (§1.7): every paintStep() unconditionally
+// tears down all layers, then mounts fresh per phase. No surface
+// leaks across paints — that was the root of Bug #18 / #18-regression
+// / #19 / #20.
 //
-// Markdown handling: PixiJS Text can't render mixed inline styles, so
-// `**bold**` / `_italic_` markers are stripped before render. Whole-
-// paragraph italic is handled structurally by the monologue split;
-// inline italic markers inside narration paragraphs lose their visual
-// distinction (acceptable until a richer text renderer lands).
+// Source detection lives in `source-detector.ts`; the runtime already
+// auto-splits steps so by the time paintStep sees a step, `step.text`
+// carries one source only and `detectSource` resolves it cleanly.
 
 import { ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
 import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
 import { autosave } from '@/save/autosave';
 import { save } from '@/save/system';
-import { sceneState } from '@/scene/scene-state-mirror';
 import { Container, Graphics, Text } from 'pixi.js';
 import { decideDialogPhase } from './dialog-phase';
 import { dialogState } from './dialog-state';
-import { type InternalMonologueHandle, mountInternalMonologue } from './internal-monologue';
-import { extractInternalMonologue } from './internal-monologue-parser';
-import { getNpcAnchor, getNpcAnchorById } from './npc-anchors';
-import { parseSpeaker } from './speaker-parser';
-import { type SpeechBubbleHandle, mountSpeechBubble } from './speech-bubble';
+import { NARRATION, type Source, detectSource, sourceLabel } from './source-detector';
 
 const CANVAS_W = 640;
-const CANVAS_H = 360;
+
+// Panel geometry per avg-architecture.md §1.3:
+// - y=240-336 (96 px tall, bottom-anchored with 24 px gap from canvas
+//   bottom so the workstation BG stays visible underneath)
+// - 600 px wide, centered
+// - 1 px border #2A1F14, BG #5A7080 (cubicle navy) + alpha 0.85
+// - header bar at top (HEADER_BAR_H px) carries the source label
 const PANEL_W = 600;
-// Panel size history:
-//   - originally 130 (P5 mount)
-//   - then 156 to fit multi-paragraph events (Bug #4 visual triage)
-//   - now 96 (Bug #25 — Bug #13 reversed): panel + sticky must
-//     coexist on the same screen, so panel shrinks to the bottom
-//     ~1/3 of the canvas (y=256-352) and the sticky rack moves up
-//     to the desk-surface band (y≈175-245). Long narration that no
-//     longer fits the smaller box is paginated via `# pagebreak`
-//     in the .ink content (Q-2 contract); the clip mask below
-//     hides any residual overflow.
 const PANEL_H = 96;
 const PANEL_X = (CANVAS_W - PANEL_W) / 2;
-const PANEL_Y = CANVAS_H - PANEL_H - 8;
-const PANEL_PADDING = 10;
+const PANEL_Y = 240;
+const HEADER_BAR_H = 18;
+const PANEL_BODY_Y = PANEL_Y + HEADER_BAR_H;
+const PANEL_BODY_H = PANEL_H - HEADER_BAR_H;
+const PANEL_PADDING_X = 12;
+const PANEL_PADDING_Y = 6;
 const PANEL_TEXT_LINE_HEIGHT = 16;
 const TEXT_FONT = 'PingFang SC, -apple-system, sans-serif';
-const TEXT_COLOR = 0xe8e0cc;
-const PANEL_BG = 0x000000;
-const PANEL_BG_ALPHA = 0.78;
-const PANEL_BORDER = 0x5a7080;
-// (Pre-T11 CHOICE_BG / CHOICE_BG_HOVER / CHOICE_BORDER constants removed —
-// the legacy renderChoiceButton was the only consumer; T11 sticky-notes
-// own their palette in sticky-notes-layout.ts.)
+const PANEL_BG = 0x5a7080;
+const PANEL_BG_ALPHA = 0.85;
+const PANEL_BORDER = 0x2a1f14;
+const HEADER_BAR_BG = 0x3d4a5a; // 比 panel BG 暗一档
+const HEADER_BAR_BG_ALPHA = 0.95;
+const HEADER_LABEL_COLOR = 0xe8e0cc;
+const BODY_COLOR_NORMAL = 0xe8e0cc; // narration / NPC speech — cream
+const BODY_COLOR_MONOLOGUE = 0xa8b0c0; // monologue — cool gray
 
-/** Bug #18-regression threshold: when the text after a speaker line
- * (`parsed.remainder`) is longer than this many trimmed chars, the
- * speaker bubble does NOT mount — the step is a multi-paragraph blob
- * and a hovering bubble would linger next to non-speaker narration.
- * The speaker line stays inline in the panel as `Lisa："…"` instead.
- * Tunable; ~30 chars covers "1-2 line continuation" without firing
- * for short Decision-Moment prompts that genuinely belong in a
- * bubble. */
-const BUBBLE_REMAINDER_THRESHOLD = 30;
+// ▼ continue affordance — bottom-right of the panel.
+const CONTINUE_TRI_W = 8;
+const CONTINUE_TRI_H = 6;
+const CONTINUE_TRI_OFFSET_X = 18;
+const CONTINUE_TRI_OFFSET_Y = 14;
 
-/** Strip ink markdown (`**X**` → `X`, `_X_` → `X`) since PixiJS Text can't render mixed styles. */
+/** Strip ink markdown wrappers PixiJS Text can't render mixed-style.
+ * `**bold**` → bold text, `_italic_` → italic body. The italic-paragraph
+ * monologue body sets fontStyle=italic on the Text node, so the markers
+ * are stripped here without losing the italic visual. */
 function stripMarkdown(s: string): string {
   return s.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
 }
@@ -87,85 +87,66 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   container.label = 'ink-dialog';
   parent.addChild(container);
 
-  // Choice popup floats above panel; panel is bottom-anchored.
+  // Panel surfaces: BG + header bar + header label + body text + clip mask.
   const panelBg = new Graphics();
   container.addChild(panelBg);
+  const headerBarBg = new Graphics();
+  container.addChild(headerBarBg);
 
-  const text = new Text({
+  const headerLabel = new Text({
+    text: '',
+    style: {
+      fontFamily: TEXT_FONT,
+      fontSize: 11,
+      fill: HEADER_LABEL_COLOR,
+      lineHeight: HEADER_BAR_H,
+    },
+  });
+  headerLabel.x = PANEL_X + PANEL_PADDING_X;
+  headerLabel.y = PANEL_Y + 2;
+  container.addChild(headerLabel);
+
+  const bodyText = new Text({
     text: '',
     style: {
       fontFamily: TEXT_FONT,
       fontSize: 13,
-      fill: TEXT_COLOR,
+      fill: BODY_COLOR_NORMAL,
       lineHeight: PANEL_TEXT_LINE_HEIGHT,
       wordWrap: true,
-      wordWrapWidth: PANEL_W - 2 * PANEL_PADDING,
+      wordWrapWidth: PANEL_W - 2 * PANEL_PADDING_X,
     },
   });
-  text.x = PANEL_X + PANEL_PADDING;
-  text.y = PANEL_Y + PANEL_PADDING;
-  container.addChild(text);
+  bodyText.x = PANEL_X + PANEL_PADDING_X;
+  bodyText.y = PANEL_BODY_Y + PANEL_PADDING_Y;
+  container.addChild(bodyText);
 
-  // Clip the narration text to the panel rect so over-long step
-  // bodies don't bleed onto the workstation BG (QA Bug #4 visual
-  // triage). The mask is a Pixi.Graphics rect matching the inner
-  // padding box; when text height exceeds the box, lower lines are
-  // simply hidden behind the mask edge.
-  const textMask = new Graphics();
-  textMask.rect(
-    PANEL_X + PANEL_PADDING,
-    PANEL_Y + PANEL_PADDING,
-    PANEL_W - 2 * PANEL_PADDING,
-    PANEL_H - 2 * PANEL_PADDING,
+  // Clip the body to the body region so over-long text bleeds into a
+  // hidden margin instead of painting onto the workstation BG.
+  const bodyMask = new Graphics();
+  bodyMask.rect(
+    PANEL_X + PANEL_PADDING_X,
+    PANEL_BODY_Y + PANEL_PADDING_Y,
+    PANEL_W - 2 * PANEL_PADDING_X,
+    PANEL_BODY_H - 2 * PANEL_PADDING_Y,
   );
-  textMask.fill(0xffffff);
-  container.addChild(textMask);
-  text.mask = textMask;
+  bodyMask.fill(0xffffff);
+  container.addChild(bodyMask);
+  bodyText.mask = bodyMask;
 
-  const choicesLayer = new Container();
-  choicesLayer.label = 'choices';
-  container.addChild(choicesLayer);
-
-  let choiceTeardowns: Array<() => void> = [];
-  let currentBubble: SpeechBubbleHandle | null = null;
-  let currentMonologue: InternalMonologueHandle | null = null;
   let currentStickies: StickyNotesHandle | null = null;
-  /** Cleanup for the `# pagebreak` continue affordance (▼ + panel click). */
+  /** Cleanup for the ▼ tap-to-continue affordance (triangle + hit rect). */
   let continueTeardown: (() => void) | null = null;
-  /** Header-band Text node — short prompts (< SHORT_PROMPT_THRESHOLD)
-   * sit ABOVE the sticky rack instead of in the bottom panel, so
-   * narration + choices render together without overlap. */
-  let headerBand: Text | null = null;
-  /** QA Bug #11: only the FIRST paintStep after a fresh mount is
-   * eligible to use `dialogState.lastNarrationText` as a fallback
-   * when ink emits an empty-text + choices step (i.e. the player
-   * just refreshed mid-flow and ink is sitting at a choice point
-   * with the prior narration already drained). After that first
-   * paint, normal flow takes over and lastNarrationText updates
-   * naturally from each panel render. */
+  /** Q-R: lets `choice`-phase paint the saved narration string when the
+   * step itself has empty text — a refreshed mid-flow save. After the
+   * first paint normal flow takes over (each panel paint updates
+   * dialogState.lastNarrationText). */
   let firstPaintAfterMount = true;
 
-  const clearChoices = () => {
-    for (const t of choiceTeardowns) t();
-    choiceTeardowns = [];
-    choicesLayer.removeChildren();
+  const clearStickies = () => {
     if (currentStickies) {
       currentStickies.destroy();
       currentStickies = null;
-    }
-  };
-
-  const clearBubble = () => {
-    if (currentBubble) {
-      currentBubble.destroy();
-      currentBubble = null;
-    }
-  };
-
-  const clearMonologue = () => {
-    if (currentMonologue) {
-      currentMonologue.destroy();
-      currentMonologue = null;
     }
   };
 
@@ -176,45 +157,41 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     }
   };
 
-  const clearHeaderBand = () => {
-    if (headerBand) {
-      headerBand.destroy();
-      headerBand = null;
-    }
-  };
-
-  /** Header band Text positioned just above the sticky rack. Bug #25
-   * moved the rack from centerY=248 up to centerY=210 so the smaller
-   * panel can coexist below — sticky top edge is now ~175. Header
-   * sits at y=170 (bottom-anchored) so the last line baseline tucks
-   * just above the rack without overlapping. */
-  const renderHeaderBand = (txt: string) => {
-    clearHeaderBand();
-    const node = new Text({
-      text: txt,
-      style: {
-        fontFamily: TEXT_FONT,
-        fontSize: 12,
-        fill: TEXT_COLOR,
-        lineHeight: 16,
-        align: 'center',
-        wordWrap: true,
-        wordWrapWidth: 480,
-        breakWords: true,
-      },
-    });
-    node.anchor.set(0.5, 1);
-    node.x = CANVAS_W / 2;
-    node.y = 170;
-    container.addChild(node);
-    headerBand = node;
-  };
-
-  const drawPanelBg = () => {
+  /** Paint the panel surfaces (BG + header bar + label + body text)
+   * for a given source + body string. Idempotent — overwrites prior
+   * content, never appends. */
+  const drawPanel = (source: Source, body: string) => {
     panelBg.clear();
     panelBg.rect(PANEL_X, PANEL_Y, PANEL_W, PANEL_H);
     panelBg.fill({ color: PANEL_BG, alpha: PANEL_BG_ALPHA });
     panelBg.stroke({ color: PANEL_BORDER, width: 1 });
+
+    headerBarBg.clear();
+    headerBarBg.rect(PANEL_X, PANEL_Y, PANEL_W, HEADER_BAR_H);
+    headerBarBg.fill({ color: HEADER_BAR_BG, alpha: HEADER_BAR_BG_ALPHA });
+    // Bottom divider line under the header bar.
+    headerBarBg.moveTo(PANEL_X, PANEL_Y + HEADER_BAR_H);
+    headerBarBg.lineTo(PANEL_X + PANEL_W, PANEL_Y + HEADER_BAR_H);
+    headerBarBg.stroke({ color: PANEL_BORDER, width: 1 });
+
+    headerLabel.text = `[ ${sourceLabel(source)} ]`;
+
+    const isMonologue = source.kind === 'monologue';
+    bodyText.style.fill = isMonologue ? BODY_COLOR_MONOLOGUE : BODY_COLOR_NORMAL;
+    bodyText.style.fontStyle = isMonologue ? 'italic' : 'normal';
+    bodyText.text = stripMarkdown(body);
+
+    const trimmed = body.trim();
+    if (trimmed.length > 0 && trimmed !== '...') {
+      dialogState.setLastNarrationText(body);
+    }
+  };
+
+  const hidePanel = () => {
+    panelBg.clear();
+    headerBarBg.clear();
+    headerLabel.text = '';
+    bodyText.text = '';
   };
 
   /** Apply a choice + dispatch its tags + autosave + paint the next step.
@@ -229,11 +206,8 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     queueMicrotask(() => paintStep(nextStep));
   };
 
-  /** Bug #21 fix: episode-end "新游戏" handler. Hard-restart pattern —
-   * clears the save file, resets in-memory dialog cache, and reloads
-   * the page. Boot picks up cleanly: no save → ink diverts to intro.
-   * The page-reload approach is brutal but guarantees a clean slate
-   * across all singletons (energy / kpi / ap / calendar) without
+  /** Hard-restart: clear save, reset dialog cache, reload page. Brutal
+   * but guarantees clean singletons across all gameplay state without
    * having to re-implement individual reset paths for a P5 demo. */
   const triggerNewGame = (): void => {
     void (async () => {
@@ -247,19 +221,11 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     })();
   };
 
-  /** Resume the story past a `# pagebreak` and paint the next chunk.
-   * Mirror of advanceChoice but without a choice index — used by the
-   * panel's tap-to-continue affordance.
-   *
-   * Bug #25 (2026-05-06) collapsed this from a two-case dispatch to
-   * a single `paged`-only path: the deferred-choices flush case is
-   * gone now that panel + sticky coexist on the same screen.
-   *
-   * Deliberately does NOT autosave: ink state has already advanced
-   * past the post-pagebreak chunk (held intra-session in
-   * InkRuntime.pendingChunk). Saves are taken at choice boundaries —
-   * refreshing mid-pagebreak resumes the player to the previous
-   * choice's first chunk, which they replay through. */
+  /** Drive the runtime forward one step — used by the ▼ tap-to-continue
+   * affordance for both explicit `# pagebreak` resumes and Q-R virtual
+   * pagebreaks (source-boundary auto-split). Does NOT autosave: stash
+   * state already advanced past the upcoming chunk; saves are taken at
+   * choice boundaries. */
   const advanceContinue = () => {
     if (!ink.isLoaded) return;
     const nextStep = ink.step();
@@ -267,22 +233,24 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     queueMicrotask(() => paintStep(nextStep));
   };
 
-  /** Mount the ▼ "tap to continue" indicator at the panel's bottom-
-   * right corner AND make the panel rect itself a click target so the
-   * player doesn't have to hit the small triangle precisely. Returns
-   * a teardown that destroys both. Called only when step.paused. */
+  /** Mount the ▼ indicator at the panel's bottom-right corner AND make
+   * the panel rect a click target so the player doesn't have to hit
+   * the small triangle precisely. */
   const renderContinueAffordance = (): (() => void) => {
-    // Triangle indicator (▼) at bottom-right of the panel.
     const indicator = new Graphics();
-    const tx = PANEL_X + PANEL_W - 18;
-    const ty = PANEL_Y + PANEL_H - 14;
-    const w = 8;
-    const h = 6;
-    indicator.poly([tx - w / 2, ty - h / 2, tx + w / 2, ty - h / 2, tx, ty + h / 2]);
-    indicator.fill({ color: TEXT_COLOR, alpha: 0.7 });
+    const tx = PANEL_X + PANEL_W - CONTINUE_TRI_OFFSET_X;
+    const ty = PANEL_Y + PANEL_H - CONTINUE_TRI_OFFSET_Y;
+    indicator.poly([
+      tx - CONTINUE_TRI_W / 2,
+      ty - CONTINUE_TRI_H / 2,
+      tx + CONTINUE_TRI_W / 2,
+      ty - CONTINUE_TRI_H / 2,
+      tx,
+      ty + CONTINUE_TRI_H / 2,
+    ]);
+    indicator.fill({ color: HEADER_LABEL_COLOR, alpha: 0.7 });
     container.addChild(indicator);
 
-    // Invisible click hit-rect spanning the entire panel.
     const hit = new Graphics();
     hit.rect(PANEL_X, PANEL_Y, PANEL_W, PANEL_H);
     hit.fill({ color: 0xffffff, alpha: 0 });
@@ -297,8 +265,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     };
   };
 
-  /** Render the workstation sticky-note rack for the current choices. */
-  const renderStickyChoices = (choices: Array<{ index: number; text: string }>) => {
+  const renderStickyChoices = (choices: ReadonlyArray<{ index: number; text: string }>) => {
     if (choices.length === 0) return;
     const stickyChoices = choices.map((c) => ({
       index: c.index,
@@ -310,100 +277,14 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     });
   };
 
-  const hidePanel = () => {
-    panelBg.clear();
-    text.text = '';
-  };
-
-  /** Set the panel's text node AND publish the visible text to
-   * `dialogState.lastNarrationText` so the save layer can persist it
-   * (Bug #11). The placeholder `...` and empty strings are filtered
-   * — only meaningful narration text reaches dialogState. */
-  const setPanelText = (raw: string): void => {
-    text.text = raw;
-    const trimmed = raw.trim();
-    if (trimmed.length > 0 && trimmed !== '...') {
-      dialogState.setLastNarrationText(raw);
-    }
-  };
-
-  /** Paint a given step (text + choices) into the dialog UI. Pure render. */
+  /** Stateless paint per avg-architecture.md §1.7. Top of every paint
+   * is unconditional teardown of all transient layers; bottom is mount-
+   * fresh-by-phase. No surface state leaks across paints. */
   const paintStep = (step: ReturnType<typeof ink.step>) => {
-    clearBubble();
-    clearMonologue();
+    clearStickies();
     clearContinue();
 
-    // Layer 1: NPC speaker → bubble at the speaker's anchor.
-    //
-    // Q-1 contract: prefer the `# speaker: <id>` tag when present (id
-    // resolves to a stable sprite slot). Fall back to the legacy
-    // `parseSpeaker` regex on the dialog text for un-migrated `.ink`
-    // content. `protagonist` id deliberately doesn't render a bubble
-    // — the line falls through to the panel / monologue layers below.
-    //
-    // Bug #18-regression (2026-05-06): only mount the bubble when the
-    // speaker line is the *dominant* content of this step. If the rest
-    // (parsed.remainder) is long, we're inside a multi-paragraph blob
-    // that spans multiple events — showing the bubble lets it linger
-    // visually next to narration that's no longer the speaker's. In
-    // that case the speaker line stays inline in the panel as
-    // `Lisa："…"` (markdown stripped) and no bubble mounts.
-    const speakerId = sceneState.get('speaker');
-    const idAnchor = speakerId && speakerId !== 'protagonist' ? getNpcAnchorById(speakerId) : null;
-    const parsed = parseSpeaker(step.text);
-    const speakerLineDominates =
-      parsed !== null && parsed.remainder.trim().length <= BUBBLE_REMAINDER_THRESHOLD;
-    let working = step.text;
-    if (idAnchor && parsed && speakerLineDominates) {
-      currentBubble = mountSpeechBubble(container, {
-        anchor: idAnchor,
-        text: stripMarkdown(parsed.dialog),
-      });
-      working = parsed.remainder;
-    } else if (idAnchor && !parsed && step.text.trim().length <= BUBBLE_REMAINDER_THRESHOLD) {
-      // Tag fired and the body is short — render whole step as bubble
-      // body. Long-text path falls through to panel rendering.
-      currentBubble = mountSpeechBubble(container, {
-        anchor: idAnchor,
-        text: stripMarkdown(step.text),
-      });
-      working = '';
-    } else if (parsed && speakerLineDominates) {
-      const legacyAnchor = getNpcAnchor(parsed.speaker);
-      if (legacyAnchor) {
-        currentBubble = mountSpeechBubble(container, {
-          anchor: legacyAnchor,
-          text: stripMarkdown(parsed.dialog),
-        });
-        working = parsed.remainder;
-      }
-    }
-    // (else: long multi-paragraph blob — speaker stays inline in panel)
-
-    // Layer 2: whole-italic paragraphs → internal monologue overlay.
-    // Bug #22 fix: at ink-end, recap text often appears wrapped in
-    // `_..._` (e.g. `_今日 KPI: +0_`). That's NOT internal voice — it's
-    // the closing recap and belongs in the panel for visibility. Skip
-    // the monologue split when step.ended so the recap stays put.
-    const split = step.ended
-      ? { monologue: '', remainder: working }
-      : extractInternalMonologue(working);
-    if (split.monologue.length > 0) {
-      currentMonologue = mountInternalMonologue(container, {
-        text: split.monologue,
-      });
-    }
-
-    // Layer 3 (bottom panel + sticky rack + ▼ continue): pick a phase
-    // per QA Bug #13 fix and mount the appropriate widgets. The pure
-    // helper picks one of: empty / ended / paged / deferred-choices /
-    // header-band / choices-only / narration-only.
-    const trimmedPanel = split.remainder.trim();
-    clearChoices();
-    clearHeaderBand();
-
     const phase = decideDialogPhase({
-      remainingTextTrimmed: trimmedPanel,
       step: {
         text: step.text,
         choices: step.choices,
@@ -413,109 +294,74 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       },
     });
 
+    const trimmed = step.text.trim();
+    const source = detectSource(step.text, step.tags);
+
     switch (phase) {
       case 'ended': {
-        // Bug #21 + #22 fix: story reached `-> END`. Render the final
-        // recap text in the panel as usual, then mount a single
-        // sticky `[新游戏]` at desk surface (matches T11 visual idiom)
-        // wired to a hard-restart that clears the save and reloads
-        // the page so boot starts fresh.
-        const endText = trimmedPanel.length > 0 ? trimmedPanel : '剧本结束。';
-        setPanelText(stripMarkdown(endText));
-        drawPanelBg();
+        // Final recap line + a single sticky `[新游戏]` for restart.
+        const endText = trimmed.length > 0 ? trimmed : '剧本结束。';
+        drawPanel(source, endText);
         currentStickies = mountStickyNotes(container, {
           choices: [{ index: 0, text: '新游戏' }],
           onSelect: () => triggerNewGame(),
         });
         break;
       }
-      case 'paged': {
-        // `# pagebreak` arrived — accumulated text + ▼ tap-to-continue.
-        setPanelText(stripMarkdown(trimmedPanel || ''));
-        drawPanelBg();
-        continueTeardown = renderContinueAffordance();
-        break;
-      }
-      case 'deferred-choices': {
-        // Bug #25 (Bug #13 reversed): panel + sticky coexist. Panel
-        // shrinks to 96 px so the sticky rack at desk-surface (y≈210)
-        // sits above it without overlap. No ▼ defer — player reads
-        // the panel and picks a sticky directly. Long narration is
-        // expected to use `# pagebreak` (handled by `paged` phase)
-        // for multi-page reads; the trailing page lands here with
-        // both surfaces visible at once.
-        setPanelText(stripMarkdown(trimmedPanel));
-        drawPanelBg();
-        renderStickyChoices(step.choices);
-        break;
-      }
-      case 'header-band': {
-        // Short prompt + choices: narration as header band ABOVE the
-        // sticky rack, no bottom panel BG, no ▼ gate. Decision-Moment
-        // style — keeps prompt and choices together.
-        hidePanel();
-        const headerText = stripMarkdown(trimmedPanel);
-        renderHeaderBand(headerText);
-        // Publish header content to dialogState too so a save mid-
-        // header-band restores correctly.
-        dialogState.setLastNarrationText(headerText);
-        renderStickyChoices(step.choices);
-        break;
-      }
-      case 'choices-only': {
-        // QA Bug #11 (T16 follow-up): if this is the FIRST paint after
-        // a fresh mount AND we have a saved last-narration string, the
-        // player just refreshed mid-flow — ink emitted choices with no
-        // text because the prior narration was already drained pre-
-        // save. Render the saved narration in the panel for context.
-        // Bug #25: panel + sticky now coexist, so the rack mounts
-        // alongside the restored panel rather than behind a ▼ defer.
-        const restoredNarration = firstPaintAfterMount ? dialogState.lastNarrationText.trim() : '';
-        if (restoredNarration.length > 0) {
-          setPanelText(stripMarkdown(restoredNarration));
-          drawPanelBg();
+      case 'choice': {
+        // Step has choices. If text is present, paint it; if not, fall
+        // back to the saved narration on first paint after mount (the
+        // refresh-mid-flow case where ink resumed at a choice point
+        // and the prior chunk was already drained pre-save).
+        let displayText = trimmed;
+        let displaySource = source;
+        if (displayText.length === 0 && firstPaintAfterMount) {
+          const restored = dialogState.lastNarrationText.trim();
+          if (restored.length > 0) {
+            displayText = restored;
+            displaySource = NARRATION; // original source is lost
+          }
+        }
+        if (displayText.length > 0) {
+          drawPanel(displaySource, displayText);
         } else {
           hidePanel();
         }
         renderStickyChoices(step.choices);
         break;
       }
-      case 'narration-only': {
-        // Just text, no choices, not paused — panel only.
-        setPanelText(stripMarkdown(trimmedPanel));
-        drawPanelBg();
-        break;
-      }
-      case 'empty': {
-        // Step was wholly consumed by upper layers, OR canContinue
-        // with no emit; auto-step in the latter case.
-        if (currentBubble || currentMonologue) {
-          hidePanel();
+      case 'narration': {
+        const body = trimmed.length > 0 ? trimmed : '...';
+        drawPanel(source, body);
+        // ▼ shows when more content is pending — explicit pagebreak
+        // (paused), virtual pagebreak (paused on source-split), or
+        // canContinue-with-more-chunks. Player taps to drive step()
+        // again. Empty text + canContinue auto-advances inline below.
+        if (step.paused) {
+          continueTeardown = renderContinueAffordance();
         } else if (step.canContinue) {
-          const nextStep = ink.step();
-          tagDispatcher.dispatchAll(nextStep.tags);
-          queueMicrotask(() => paintStep(nextStep));
-          return;
-        } else {
-          text.text = '...';
-          drawPanelBg();
+          if (trimmed.length === 0) {
+            // Edge: paused yielded no body (rare). Skip the panel
+            // placeholder and step again immediately so the player
+            // doesn't see a stuck `...`.
+            const nextStep = ink.step();
+            tagDispatcher.dispatchAll(nextStep.tags);
+            queueMicrotask(() => paintStep(nextStep));
+            return;
+          }
+          continueTeardown = renderContinueAffordance();
         }
         break;
       }
     }
 
-    // Flip the first-paint flag now that we've completed one paint
-    // cycle. Subsequent paints follow normal flow; the saved-
-    // narration fallback in `choices-only` won't fire again.
     firstPaintAfterMount = false;
   };
 
-  /** Step the story from current position and paint result. */
   const refresh = () => {
     if (!ink.isLoaded) {
-      text.text = '(no story loaded)';
-      drawPanelBg();
-      clearChoices();
+      drawPanel(NARRATION, '(no story loaded)');
+      clearStickies();
       return;
     }
     const step = ink.step();
@@ -526,15 +372,10 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
   const start = () => refresh();
 
   const destroy = () => {
-    clearBubble();
-    clearMonologue();
     clearContinue();
-    clearHeaderBand();
-    clearChoices();
+    clearStickies();
     container.destroy({ children: true });
   };
 
   return { container, destroy, refresh, start };
 }
-
-void CANVAS_H; // silence unused — kept for future centering math
