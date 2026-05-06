@@ -303,6 +303,28 @@ QA Bug #11 ✓ resolved. Reload mid-flow now restores the last narration in pane
 
 (next /loop tick: pick Bug #12 — pure status update acknowledging Bug #3 fix addresses the multi-event blob root cause. After that, output "no task, idle" unless QA files new bugs.)
 
+---
+
+## 2026-05-06 · batch 14 — /loop tick 7 — Bug #12 close-by-dependency (no engine change)
+
+W1 (engine) /loop tick 7. Picked Bug #12 (sceneState single-slot during multi-event step blob). Per its severity rationale, the bug was gated on Bug #3 — and Bug #3 is now resolved via `# pagebreak`. With pagebreak between events, each `step()` carries at most one event's worth of `# scene:` / `# npc:` / `# prop:` tags, so the single-slot mirror's "latest tag wins" rule reflects "current event" correctly. No engine change needed.
+
+- **p5-qa-bug-reports.md** Bug #12 status updated to ✓ resolved (by gating dependency).
+- Documented the GM tagging policy table from Q-2 as the designer-side ongoing concern: if a sweep misses an event boundary in episodes 1-4, the mirror still drifts through that blob — but the fix is content-side, not engine.
+- Engineering note: a multi-slot mirror (e.g. `npc: Set<string>`) was considered but rejected — it pushes "which NPC is currently visible" decisions to the consumer with per-layer policy. Single-slot + designer pagebreak coverage gives a clean contract.
+
+No code change. Tests still 293/293.
+
+**Open after this tick**:
+- Bug #7 discussion (designer scope)
+- Bug #10 paint desync (low priority — only headless screenshot timing)
+- Bug #15 sprite label leakage (W5 owns Option A first)
+
+All W1-scope tasks closed. Next /loop tick will likely output "no task, idle" unless QA Round 6+ files new bugs or GM lands new questions.
+
+(next /loop tick: re-read both docs; if no new W1-scope task, output "no task, idle".)
+
+
 
 
 

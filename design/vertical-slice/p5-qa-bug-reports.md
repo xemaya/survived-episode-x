@@ -373,7 +373,22 @@ Player-side validation: refresh mid-flow → reload restores last narration in p
 
 **Severity rationale**: this is intrinsically tied to Bug #3 (multi-event step blob). If Bug #3 is fixed (Option A: ink-side choice gate per event, OR Option B: renderer-side page break), then each event renders alone and the single-slot mirror is correct. Until then, the mirror is "best effort" and downstream UI may not reflect the player's mental model of "who's in this scene".
 
-**Status**: ⏳ open — gated on Bug #3 resolution.
+**Status**: ✓ resolved (by gating dependency) — Bug #3 was resolved via Q-2 Option B (`# pagebreak` tag, see `feat(p5-pagebreak)+fix(qa-bug-3)` `fb3b4df`). With `# pagebreak` between events, each `step()` contains at most one event's worth of `# scene:` / `# npc:` / `# prop:` tags, so the mirror's single-slot value reflects the "current event" correctly. No engine change needed — single-slot is the right abstraction once content respects the pagebreak boundary.
+
+**Caveat — designer-side ongoing concern**: the resolution depends on `# pagebreak` coverage in `episode-1/2/3/4.ink` per the GM tagging policy table in `p5-phase2-engine-questions.md` Q-2:
+
+| 场景 | 加 `# pagebreak`? |
+|---|---|
+| `day_N_after_work` 选项后 → daily_recap 之间 | ✅ |
+| `day_N_daily_recap` 末 → next morning_briefing 之间 | ✅ |
+| 周五 daily_recap → weekly_recap → next 周一 morning 之间 | ✅ × 2 |
+| 长 internal monologue 块 (≥ 4 段) 后 → 下一 NPC 出场前 | ✅ |
+| KPI Review screen 触发前 | ✅ (if ink-internal) |
+| episode finale → cliffhanger 前 | ✅ |
+
+If a designer sweep misses an event boundary, the single-slot mirror will still drift through that boundary's blob. The fix in those cases is content-side (add the missing pagebreak), NOT engine-side. Engine has done its part.
+
+**Engineering note**: a "multi-slot" mirror was considered (e.g. `npc: Set<string>` instead of `npc: string`) but rejected — it pushes the "which NPC is currently visible" question to the consumer, who would need policy logic ("show last", "show all", "show speakers") that varies per layer (sprite slot vs. dialog vs. recap). Single-slot + designer pagebreak coverage gives a clean contract: "the latest tag wins, designer ensures one event per step". Re-evaluate if a future use case actually needs multi-NPC concurrency within one step.
 
 ---
 
@@ -701,3 +716,29 @@ W2 QA Round 8 (2026-05-06). Latest commit: `f900968 feat(p5-path-interceptor): c
 ### Next round target (R9)
 
 Bug #15 still open. Will verify when fix lands. Otherwise R9 extends to Day 3-7 full traversal: pick all 3 day_3_after_work options across separate test runs to verify branching, reach Day 7 cliffhanger ("周一晨会王总监会问 KPI 吧?" line 1898).
+
+---
+
+## Round 9 — verify Bug #11 fix (`qa/p5-demo-r9.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 9 (2026-05-06). Latest commit: `a81da37 fix(qa-bug-11): persist last narration text across reload (T16 follow-up)`. Smoke 293/293 (was 285 — 8 new tests for `dialog-state.ts` + paintStep fallback).
+
+### Verifies
+
+- ✓ **Bug #11 (placeholder `...` on reload)** — RESOLVED in `a81da37`. Driver path: progress past intro screen 1 + 2 + 3 (panel painted with "游戏从 2026 年 5 月开始 / 52 周") → reload → panel shows intro screen 2 content ("我每天有 8 个时间槽 / 不可能三角 / 钱多事少离家近"), NOT `...` or empty. Fallback chain works: post-reload, ink at intro 3's choice point with no text to drain → paintStep falls back to `dialogState.lastNarrationText` (captured by autosave at the previous step boundary) → panel renders meaningful content.
+- ✓ **Re-verify R6/R7/R8 path no regressions**: deferred-choices flush still works (Bug #13), no stale Lisa bubble at Event 2.3 (Bug #18), props hidden during scene transitions (Bug #14, both `prop:fruit_bowl` + `prop:phone` visible=false at Event 2.3 sticky phase), long sticky still ellipsised (Bug #6).
+
+### Round 9 observation: lastNarrationText capture is one step behind
+
+Autosave fires AFTER `ink.selectChoice()` returns, so save captures the panel content from the PREVIOUS step (e.g. saving after 听懂了 click captures intro 2 text, not intro 3 — even though player visually saw intro 3 before clicking). After reload, panel shows intro 2 instead of intro 3. Player can still recover via the choice button (1 click 我懂了 → Day 1 morning) but the panel state is one beat behind their last visual.
+
+**Severity**: minor (cosmetic inconsistency). Not filing as a separate bug — the fix delivers on the primary intent ("no more `...` placeholder"). A future polish could capture lastNarrationText on EVERY paintStep (not just save-time).
+
+### Round 9 tooling notes
+
+- **N26 — Smoke baseline**: `pnpm test` = 293/293 (was 285).
+- **N27 — Driver pattern**: for testing post-reload panel state, use raw `clickChoiceByIndex` (no `advanceToChoices`) on the LAST click before reload — captures the intermediate deferred-choices state so the panel hasn't been flushed by ▼.
+
+### Next round target (R10)
+
+Bug #15 (sprite-sheet label leakage) still open. R10 will check for fix; otherwise extend Day 4-7 driver coverage (Day 4 weekly_report 3-choice, Day 5 events, Day 6 weekend lisa wechat, Day 7 cliffhanger).
