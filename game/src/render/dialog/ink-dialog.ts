@@ -277,6 +277,15 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       const step = deferredChoicesStep;
       deferredChoicesStep = null;
       clearContinue();
+      // QA Bug #18: bubble + monologue mounted by paintStep for the
+      // SAME step's earlier paragraphs are bound to the narration that
+      // is about to disappear. Tear them down alongside the panel so
+      // a stale "Lisa: 你喝什么?" doesn't linger over an Event 2.3
+      // 老周 sticky rack. (Pagebreak resume in case 2 doesn't need this
+      // because paintStep starts with clearBubble/Monologue/HeaderBand.)
+      clearBubble();
+      clearMonologue();
+      clearHeaderBand();
       hidePanel();
       renderStickyChoices(step.choices);
       return;

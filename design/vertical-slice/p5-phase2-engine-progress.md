@@ -214,6 +214,24 @@ Tests: 12 new vitest cases in `tests/render/dialog/dialog-phase.test.ts` coverin
 
 (next /loop tick: pick up Bug #14 — implement PropRegistry scene-bound teardown so phone/fruit_bowl unmount when `# scene` tag changes. Probably adds `scope: 'scene' | 'permanent'` field to PropEntity + a `sceneState.scene` listener that destroys non-permanent props on change.)
 
+---
+
+## 2026-05-06 · batch 10 — /loop tick 3 — Bug #18 stale-bubble flush
+
+W1 (engine) /loop dynamic-paced tick 3. QA Round 5 surfaced Bug #18: when a step blob spans multiple events (Lisa speaks at Event 2.1 → narration through 2.2 → 老周 choices at 2.3), Lisa's bubble mounts at paintStep start but lingers when the deferred-choices flush dismisses the panel and mounts the 老周 sticky rack.
+
+- **ink-dialog.ts advanceContinue (case 1, deferred-choices flush)**: now also calls `clearBubble()` + `clearMonologue()` + `clearHeaderBand()` before mounting the sticky rack. Narration-bound overlays unmount with the panel they belonged to. One-line fix (3 calls) at the dismiss boundary.
+- Pagebreak resume (case 2) didn't need the same fix — `paintStep` already starts with those three clears, so the next paint after a pagebreak naturally rebuilds bubble/monologue from the new step.
+
+QA Bug #18 ✓ resolved. Note: with QA Bug #3 (recap blob) ✓ resolved via `# pagebreak` policy, multi-speaker step blobs should be rare (each pagebreak carves one speaker per paint), so this fix is mostly for residual transitions where pagebreak hasn't been added.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 266/266 (no new tests needed — behavior change is exercised end-to-end by the existing dialog-phase suite + the deferred-flush callsite is dispatch-only).
+
+**Open major bugs after this tick**: #14 (phone prop persists across scenes — meatier than initially scoped; needs PropEntity `scope` field + scene-mirror teardown listener + workstation re-mount semantics, last bit gated on T04 scene registry), #15 (sprite sheet label leakage — W5 owns Option A first).
+
+(next /loop tick: still Bug #14, but scoped down — add `scope: 'scene' | 'permanent'` to PropEntitySpec + a `propRegistry.destroyScopedTo(scope)` method + a `sceneState.on('scene', …)` listener that fires the destroy. Accept the "won't re-mount on return-to-workstation" limitation until T04 lands; designer can use `# prop: phone_face_down` to bring it back if needed.)
+
+
 
 
 

@@ -534,3 +534,65 @@ Driver gained `advanceToChoices(page)` + `pickChoiceAndAdvance(page, idx)` helpe
 ### Next round target (R5)
 
 Verify GM-filed Bug #13 (sticky overlay/narration overlap) + Bug #14 (phone prop persists across scenes) + Bug #15 (sprite sheet label leak) + Bug #16 (speech bubble anchor) + Bug #17 (narration outside panel BG) — all from 2026-05-06 GM playtest. Plus extend driver to Day 3-7 paths since Day 1+2 stable.
+
+---
+
+## Round 5 — verify Bug #16 + visual checks #13/#14/#15 (`qa/p5-demo-r5.spec.ts`, 5 tests, 4 pass + 1 reveals new Bug #18)
+
+W2 QA Round 5 (2026-05-06). Latest commits seen:
+- `cfcc902 fix(qa-bug-16): re-tune NPC anchor stubs to narrative geometry`
+- `7ded1bd fix(qa-bug-1,2): commit episode-1.ink content fixes verified by QA Round 3`
+
+Working tree has uncommitted batch-9 Bug #13 fix (`game/src/render/dialog/dialog-phase.ts` + `ink-dialog.ts` panel-hide-when-sticky logic).
+
+### Verifies
+
+- ✓ **Bug #13 (sticky overlap narration)** — RESOLVED visually. Driver at Event 1.2 (3 sticky choices) sees: dialog text node with empty content (`text=""`), 4 sticky labels (sticky-notes container + 3 sticky-N children), no panel overlap. The deferred-choices phase shows panel + ▼ first; after tap the panel clears and sticky rack appears alone. Header-band/choices-only phases also kick in correctly. No regressions in the narration-only phase.
+- ✓ **Bug #16 anchor table** — VERIFIED (via code read). `npc-anchors.ts` has 老周=(540,160), Lisa=(480,130), David=(180,160), 王总监=(320,80), Vivian=(440,80), 李阿姨=(120,250), IT 小马=(140,210), Zoe=(260,80), 林姐=(200,130), 妈妈=(320,180) — both `NPC_ANCHORS` (Chinese name fallback) and `NPC_ANCHORS_BY_ID` (Q-1 id primary) updated. Lisa's bubble visually anchors at right-near top (matches new (480,130) coords). Bug #16 itself is closed; Round 5 surfaced a SEPARATE stale-bubble issue (see Bug #18 below).
+- ✓ **Bug #14 still open** (visual confirmation) — phone prop label persists in stage tree at Day 1 daily_recap pagebreak AND Day 2 morning. `prop:phone` mounted alongside `prop:fruit_bowl` across scene boundaries. Matches GM playtest report.
+- ✓ **Bug #15 still open** (visual screenshot captured) — `qa/output/r5-04-day1-morning-fruit-phone.png` shows the fruit_bowl + phone props on the workstation BG. Sprite-sheet label leakage requires manual visual review (small text artifacts at sprite cell edges) — file inspection rather than driver assertion.
+- ✓ **Bug #3 + Bug #6 no regressions**: Day 2 Event 2.3 long-sentence choice still renders as `主动跟老周说"对不起，您…` (truncated + ellipsis). Pagebreak still gates Day 1 → Day 2.
+
+### NEW bug found in Round 5
+
+---
+
+## Bug #18 — major — speech bubble persists across step-blob event boundaries; stale bubble from earlier event shows during later event
+
+**Reported by**: QA (Round 5, 2026-05-06)
+**Severity**: major UX — when a step blob crosses multiple events (e.g. Day 2 Event 2.1 → 2.2 → 2.3), a speech bubble mounted for an earlier event's speaker remains on screen during the later event where the speaker isn't present.
+
+**Repro**:
+1. New game → 开始今日 → intro 1/2/3 → Day 1 events → after_work `[按时下班]` → Day 2 morning → Day 2 Event 2.1 (Lisa milk tea), pick `[一起]`
+2. `[一起]` choice body emits Lisa narration `Lisa："你喝什么？"` (episode-1.ink:614) → speech bubble mounts for Lisa at her tuned anchor (x=480, y=130)
+3. ink continues through Event 2.2 (David PPT setup, no choices, narration but no Lisa speech) → Event 2.3 (老周凉茶, presents 3 choices)
+4. **Visual at Event 2.3 choice phase**: Lisa's "你喝什么?" bubble is STILL ON SCREEN at her right-near anchor, alongside Event 2.3's narration "你站在他工位侧后方…" and 3 老周 sticky choices
+
+**Expected**: speech bubble lifecycle is bounded to the speaker's narration moment. When step advances past the line that mounted the bubble, the bubble unmounts.
+
+**Actual**: bubble persists across step-internal event boundaries until the NEXT bubble mounts (which only happens if a new speaker emits a `**X**：` line). At Event 2.3 nobody speaks (all narration is description), so Lisa's bubble lingers indefinitely.
+
+**Files involved**: `game/src/render/dialog/ink-dialog.ts` (speech-bubble lifecycle), `game/src/render/dialog/speech-bubble.ts` (mount/destroy).
+
+**Suggested fix path**:
+- (A) Tear down speech bubble at start of every paintStep cycle (forces bubble to re-mount only if current step has speaker text). Aligns with prop-registry future scene-bound destroy.
+- (B) Track speaker tag changes via sceneState mirror — when `speaker` changes, destroy old bubble. Won't work for parseSpeaker fallback path though.
+- (C) Listen for `# scene:` change → tear down all transient overlays (bubbles + non-permanent props). Cleanest but couples to T04 scene transitions.
+
+**GM call needed**: which lifecycle policy? My read: (A) is shortest-path fix — bubble shows ONLY for the step whose narration mounted it.
+
+**Severity rationale**: not visually disorienting in isolation but compounds with Bug #14 (phone prop persists). Same root pattern: stage objects don't unmount on event boundaries within a step blob.
+
+**Status**: ✓ resolved — `fix(qa-bug-18)` (batch 10 W1 pickup, 2026-05-06). `advanceContinue()` case 1 (deferred-choices flush) now also calls `clearBubble()` + `clearMonologue()` + `clearHeaderBand()` before mounting the sticky rack. Narration-bound overlays (bubble = "who is speaking", monologue = "internal voice") were tied to the panel narration that gets dismissed; they unmount alongside it. Pagebreak resume (case 2) doesn't need this fix because `paintStep` starts with the same three clears.
+
+Fix is option (A) per the suggested-fix table: tear bubble down at the dismiss boundary. Doesn't help when the SAME step's first paragraph is by Lisa and a later paragraph is by 老周 — that's a multi-speaker-blob issue separate from this fix. With Bug #3 ✓ resolved (each event gated by `# pagebreak`), each paint cycle should now contain at most one speaker, so the multi-speaker case no longer occurs in episodes where designer applied the policy table.
+
+### Round 5 tooling notes
+
+- **N17 — `npx playwright` triggered fresh install**: in this round `npx playwright test` warned `package not found and will be installed: playwright@1.59.1` then failed with "two different versions of @playwright/test". Fix: use `pnpm exec playwright test` instead of `npx`. Updated muscle memory; future rounds use pnpm exec.
+- **N18 — Stage tree dump still useful**: at Event 1.2 sticky phase, full label list = `world / workstation-bg / sticky / monitor / Sprite / calendar / Sprite / mug / Sprite / prop:fruit_bowl / prop:phone / ink-dialog / Graphics / Graphics / choices / internal-monologue / sticky-notes / sticky-0 / Graphics / Graphics / sticky-1 / Graphics / Graphics / sticky-2 / Graphics / Graphics`. Note `internal-monologue` label persists empty-ish; not yet investigated.
+- **N19 — Smoke tests post-fix**: 266/266 pass per dev's batch 9 description (12 new dialog-phase tests). Re-confirmed via `pnpm test`.
+
+### Next round target (R6)
+
+Verify Bug #18 fix when it lands. Verify Bug #14 (phone unmount on scene change) when fix lands. Verify Bug #15 (sprite label leak) Option A or C fix when it lands. Extend driver to Day 3-7 paths now that Day 1-2 are clean.
