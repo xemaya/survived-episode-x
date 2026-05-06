@@ -216,3 +216,77 @@ Engine batch-2 实测的 wrap-to-2-lines 还要确认：
 - P6 follow-up — designer-driven content sweep on choice labels: `[申报加班 -10 状态 +2 AP 等价]` → `[申报加班]` (mechanism-disclosure violates Pillar-3 subject inversion). Tracked separately, NOT in engine scope.
 
 ---
+
+### Q-4 — path interceptor for E8 / E12 finale runtime branching
+
+**Context (from W3 round-2 §1.4 + S3 outline §6 priority logic)**: E8 D56 + E12 D56 finale 都需要 ink runtime 在进入特定 stitch（`day_56_event_3_lisa_finale_message` / E12 finale recap）**之前**根据 game state 强制跳到 path-D 或 path-E stitch。当前 ink 内的 5 路径选择是 `* [...]` 玩家选 path A/B/C，path D/E 必须由 TS runtime 拦截。
+
+W1 batch 5 已 land scene-state mirror + speaker tag interceptor，但 **path-string ChoosePathString 拦截没实现**。
+
+**GM ask**: W1 batch 8 (或 future batch) 实现 `path-interceptor.ts` (T20)，pattern:
+
+```ts
+// game/src/ink/path-interceptor.ts
+// 注册条件 → ChoosePathString 跳转 mapping。在每次 step() 之前 check
+// 注册的 conditions；如 condition true 且 next-stitch == registered
+// beforeStitch，则 ink.story.ChoosePathString(target) 强制跳转。
+
+pathInterceptor.register({
+  beforeStitch: 'day_56_event_3_lisa_finale_message',
+  condition: (ink) => ink.variablesState['sick_count'] >= 4,
+  target: 'day_56_path_d_unread',
+});
+pathInterceptor.register({
+  beforeStitch: 'day_56_event_3_lisa_finale_message',
+  condition: (ink) => ink.variablesState['lisa_score'] < -5,
+  target: 'day_56_path_e_no_message',
+});
+
+// E12 同 pattern (S3 ink writer 写 episode-12.ink 后 register):
+// - beforeStitch 'day_84_finale_recap_branch'
+// - sick_count >= 4 → path D / hero_count >= 5 + lisa_score >= 25 → path A / etc.
+```
+
+W3 / S3 ink writer 在 episode-N.ink 内 declare 5 path stitches + register conditions in TS layer。Engine 给 register API。
+
+**Engine recommendation**: implement as part of T20 (final ink-side runtime helpers)。runtime.ts 在 step() 顶部加 1-pass loop check pathInterceptor.shouldRedirect() 即可。~30 lines。
+
+**Status**: ✓ closed — `feat(p5-path-interceptor)` (batch 12 W1 pickup, 2026-05-06).
+
+**Implementation note (deviates from initial spec — read before authoring rules)**: the GM ask suggested polling `story.state.currentPathString` at the top of `step()`. Empirical trace showed `currentPathString` is an inkjs internal program-counter index (e.g. `"0"` at flow start, `"day_56_event_3.2"` mid-paragraph), NOT the stitch name. A pre-pass before `Continue()` doesn't see the stitch the runtime is about to enter. So the hook moved to a designer-emitted **`# checkpoint: <stitch_name>`** tag at the top of each interceptable stitch. The runtime sees the tag inside the `Continue()` loop, looks up `pathInterceptor.shouldRedirect(stitch_name, this)`, and if a registered rule's condition resolves true, calls `story.ChoosePathString(target)` and discards the chunk that emitted the checkpoint tag (so default-path text never reaches the player).
+
+W3 / S3 ink writer authoring guide:
+
+```ink
+// E8 D56 finale stitch — needs runtime branching on sick_count + lisa_score
+=== day_56_event_3_lisa_finale_message ===
+# checkpoint: day_56_event_3_lisa_finale_message
+[default path A/B/C content — only emits if no redirect fired]
+* [...]  // player choice between A/B/C
+* [...]
+```
+
+W1 / TS layer registers the rules:
+
+```ts
+pathInterceptor.register({
+  beforeStitch: 'day_56_event_3_lisa_finale_message',
+  condition: (ink) => (ink.getVar<number>('sick_count') ?? 0) >= 4,
+  target: 'day_56_path_d_unread',
+});
+pathInterceptor.register({
+  beforeStitch: 'day_56_event_3_lisa_finale_message',
+  condition: (ink) => (ink.getVar<number>('lisa_score') ?? 0) < -5,
+  target: 'day_56_path_e_no_message',
+});
+```
+
+Files: `game/src/ink/path-interceptor.ts` (~95 lines), `runtime.ts` Continue loop (+13 lines), `tests/ink/path-interceptor.test.ts` (13 cases — pure helper unit + 4 InkRuntime integration). 285/285 total.
+
+Caveats:
+- First-rule-wins on overlapping registrations.
+- Tag tag value must EXACTLY equal `beforeStitch` (no prefix matching — designer is canonical).
+- Redirect chains work (target stitch can itself have a `# checkpoint:` that redirects further). Tested.
+- The chunk that emitted the checkpoint tag is silently dropped — designer should put `# checkpoint:` on its own line OR as the first emission of the stitch so dropped content is intentional default-path content.
+
+---

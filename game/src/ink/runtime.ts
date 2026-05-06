@@ -8,6 +8,7 @@
 // stored alongside the rest of the game save (see save/system.ts P5 extension).
 
 import { Story } from 'inkjs';
+import { pathInterceptor } from './path-interceptor';
 
 export interface ParsedTag {
   /** raw tag without leading `#`, e.g. "scene: workstation" */
@@ -122,6 +123,22 @@ export class InkRuntime {
       while (story.canContinue) {
         const chunk = story.Continue() ?? '';
         const newTags = (story.currentTags ?? []).map((t) => parseTag(t));
+
+        // Path interceptor (Q-4 / T20): when a stitch emits
+        // `# checkpoint: <name>`, look up a registered redirect; if
+        // its condition is true, divert to target and discard the
+        // current chunk so the default-path text never reaches the
+        // player. The runtime continues from the new path on the
+        // next loop iteration.
+        const checkpointTag = newTags.find((t) => t.key === 'checkpoint');
+        if (checkpointTag) {
+          const target = pathInterceptor.shouldRedirect(checkpointTag.value, this);
+          if (target !== null) {
+            story.ChoosePathString(target);
+            continue;
+          }
+        }
+
         const hasPagebreak = newTags.some((t) => t.key === 'pagebreak');
         if (hasPagebreak) {
           // Stash for next step() — current step ends *before* this

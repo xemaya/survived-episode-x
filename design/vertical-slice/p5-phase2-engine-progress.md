@@ -253,6 +253,31 @@ QA Bug #14 ✓ resolved. The recap reproducer no longer collides because phone i
 
 (next /loop tick: pick from Q-4 path-interceptor.ts (T20 prep, ~30 lines) OR Bug #11 T16 follow-up (persist last-rendered narration text in save). Q-4 cleaner architectural work, Bug #11 smaller. Will pick whichever is most context-fresh on next tick.)
 
+---
+
+## 2026-05-06 · batch 12 — /loop tick 5 — Q-4 path-interceptor (T20 prep)
+
+W1 (engine) /loop tick 5. Picked Q-4 since all W1 majors are now closed (#15 stays W5-first). Implements the registry that lets E8/E12 finale stitches redirect to path-D/path-E branches based on accumulated game state, without the player seeing those branches as `* [...]` choices.
+
+- **path-interceptor.ts** (~95 lines, NEW): `PathInterceptor` class + `pathInterceptor` singleton. `register({ beforeStitch, condition, target, label? })` returns an unregister fn. `shouldRedirect(stitchName, ctx)` is a pure dispatch — first-rule-wins, no prefix matching, exact stitch name equality.
+- **runtime.ts** Continue loop: when a chunk's tags include `# checkpoint: <stitch>`, the runtime looks up the redirect; if condition resolves true, calls `story.ChoosePathString(target)` and discards the chunk so default-path text never reaches the player. Continue from new path on next iteration.
+- **Pivot from initial spec**: GM ask suggested polling `story.state.currentPathString` at step() top. Empirical trace showed that's an internal program-counter index (`"0"` / `"day_56_event_3.2"`), not the stitch name. Tag-based hook (designer emits `# checkpoint: <stitch_name>`) is reliable and explicit. Updated the Q-4 doc with the new authoring pattern.
+- **Tests**: 13 new vitest cases in `tests/ink/path-interceptor.test.ts` — 9 pure helper unit cases (register/unregister, condition true/false, exact match, var read, multiple rules, clear/list) + 4 InkRuntime integration cases (redirect on checkpoint match, no-op on condition fail, no-op on unknown stitch tag, chained redirects). Total 285/285 (was 272 — +13).
+
+Q-4 ✓ closed. Engine API ready for W3 / S3 ink writer to use when they author E8 D56 / E12 finale stitches with `# checkpoint:` markers.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 285/285.
+
+**Open after this tick** — only minors remain:
+- Bug #7 discussion (designer scope)
+- Bug #10 paint desync (low priority)
+- Bug #11 reload `…` placeholder (T16 follow-up)
+- Bug #12 sceneState single-slot (was gated on Bug #3, which is now resolved — re-evaluate next tick)
+- Bug #15 sprite label leakage (W5 owns Option A first)
+
+(next /loop tick: re-read bugs to see if any new ones land; if not, pick Bug #11 small fix (persist last-rendered narration text in `inkStateJson` companion field) OR Bug #12 status-update (pure doc edit acknowledging Bug #3 fix already addresses it). If still no new majors, output "no task, idle".)
+
+
 
 
 
