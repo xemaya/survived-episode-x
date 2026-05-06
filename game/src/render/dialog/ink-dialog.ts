@@ -25,6 +25,7 @@ import { autosave } from '@/save/autosave';
 import { sceneState } from '@/scene/scene-state-mirror';
 import { Container, Graphics, Text } from 'pixi.js';
 import { decideDialogPhase } from './dialog-phase';
+import { dialogState } from './dialog-state';
 import { type InternalMonologueHandle, mountInternalMonologue } from './internal-monologue';
 import { extractInternalMonologue } from './internal-monologue-parser';
 import { getNpcAnchor, getNpcAnchorById } from './npc-anchors';
@@ -126,6 +127,14 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
    * sit ABOVE the sticky rack instead of in the bottom panel, so
    * narration + choices render together without overlap. */
   let headerBand: Text | null = null;
+  /** QA Bug #11: only the FIRST paintStep after a fresh mount is
+   * eligible to use `dialogState.lastNarrationText` as a fallback
+   * when ink emits an empty-text + choices step (i.e. the player
+   * just refreshed mid-flow and ink is sitting at a choice point
+   * with the prior narration already drained). After that first
+   * paint, normal flow takes over and lastNarrationText updates
+   * naturally from each panel render. */
+  let firstPaintAfterMount = true;
 
   const clearChoices = () => {
     for (const t of choiceTeardowns) t();
@@ -345,6 +354,18 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     text.text = '';
   };
 
+  /** Set the panel's text node AND publish the visible text to
+   * `dialogState.lastNarrationText` so the save layer can persist it
+   * (Bug #11). The placeholder `...` and empty strings are filtered
+   * — only meaningful narration text reaches dialogState. */
+  const setPanelText = (raw: string): void => {
+    text.text = raw;
+    const trimmed = raw.trim();
+    if (trimmed.length > 0 && trimmed !== '...') {
+      dialogState.setLastNarrationText(raw);
+    }
+  };
+
   /** Paint a given step (text + choices) into the dialog UI. Pure render. */
   const paintStep = (step: ReturnType<typeof ink.step>) => {
     clearBubble();
@@ -419,7 +440,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       case 'ended': {
         // Story reached `-> END` — show "（剧本结束）" placeholder.
         if (trimmedPanel.length > 0 || !(currentBubble || currentMonologue)) {
-          text.text = stripMarkdown(trimmedPanel || '...');
+          setPanelText(stripMarkdown(trimmedPanel || '...'));
           drawPanelBg();
         } else {
           hidePanel();
@@ -430,7 +451,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
       }
       case 'paged': {
         // `# pagebreak` arrived — accumulated text + ▼ tap-to-continue.
-        text.text = stripMarkdown(trimmedPanel || '');
+        setPanelText(stripMarkdown(trimmedPanel || ''));
         drawPanelBg();
         continueTeardown = renderContinueAffordance();
         break;
@@ -440,7 +461,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
         // park the step on `deferredChoicesStep`. Click ▼ flushes panel
         // and mounts sticky rack alone (advanceContinue handles it).
         deferredChoicesStep = step;
-        text.text = stripMarkdown(trimmedPanel);
+        setPanelText(stripMarkdown(trimmedPanel));
         drawPanelBg();
         continueTeardown = renderContinueAffordance();
         break;
@@ -450,19 +471,37 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
         // sticky rack, no bottom panel BG, no ▼ gate. Decision-Moment
         // style — keeps prompt and choices together.
         hidePanel();
-        renderHeaderBand(stripMarkdown(trimmedPanel));
+        const headerText = stripMarkdown(trimmedPanel);
+        renderHeaderBand(headerText);
+        // Publish header content to dialogState too so a save mid-
+        // header-band restores correctly.
+        dialogState.setLastNarrationText(headerText);
         renderStickyChoices(step.choices);
         break;
       }
       case 'choices-only': {
-        // Empty narration text → sticky rack alone at desk surface.
-        hidePanel();
-        renderStickyChoices(step.choices);
+        // QA Bug #11 (T16 follow-up): if this is the FIRST paint after
+        // a fresh mount AND we have a saved last-narration string, the
+        // player just refreshed mid-flow — ink emitted choices with no
+        // text because the prior narration was already drained pre-
+        // save. Render the saved narration in the panel + ▼ so the
+        // player gets context, then click reveals the sticky rack.
+        const restoredNarration = firstPaintAfterMount ? dialogState.lastNarrationText.trim() : '';
+        if (restoredNarration.length > 0) {
+          deferredChoicesStep = step;
+          setPanelText(stripMarkdown(restoredNarration));
+          drawPanelBg();
+          continueTeardown = renderContinueAffordance();
+        } else {
+          // Empty narration text → sticky rack alone at desk surface.
+          hidePanel();
+          renderStickyChoices(step.choices);
+        }
         break;
       }
       case 'narration-only': {
         // Just text, no choices, not paused — panel only.
-        text.text = stripMarkdown(trimmedPanel);
+        setPanelText(stripMarkdown(trimmedPanel));
         drawPanelBg();
         break;
       }
@@ -483,6 +522,11 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
         break;
       }
     }
+
+    // Flip the first-paint flag now that we've completed one paint
+    // cycle. Subsequent paints follow normal flow; the saved-
+    // narration fallback in `choices-only` won't fire again.
+    firstPaintAfterMount = false;
   };
 
   /** Step the story from current position and paint result. */

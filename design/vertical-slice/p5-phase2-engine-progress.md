@@ -277,6 +277,33 @@ Q-4 ✓ closed. Engine API ready for W3 / S3 ink writer to use when they author 
 
 (next /loop tick: re-read bugs to see if any new ones land; if not, pick Bug #11 small fix (persist last-rendered narration text in `inkStateJson` companion field) OR Bug #12 status-update (pure doc edit acknowledging Bug #3 fix already addresses it). If still no new majors, output "no task, idle".)
 
+---
+
+## 2026-05-06 · batch 13 — /loop tick 6 — Bug #11 reload narration restore (T16 follow-up)
+
+W1 (engine) /loop tick 6. All majors closed; picking minor Bug #11 (T16 follow-up). Implements the "store last-rendered text" approach so reload doesn't show `...` when ink has nothing left to drain.
+
+- **dialog-state.ts** (~30 lines, NEW): `dialogState` singleton with `lastNarrationText` getter / `setLastNarrationText(text)` / `reset()`. Lives outside ink-dialog's mount closure so the save layer can read it.
+- **ink-dialog.ts**: new `setPanelText(raw)` helper that sets `text.text = raw` AND publishes to `dialogState.lastNarrationText` (filtering empty strings + the `'...'` placeholder). All paintStep branches that paint real panel content (`'ended'`, `'paged'`, `'deferred-choices'`, `'narration-only'`) use it. `'header-band'` publishes the header content directly. New `firstPaintAfterMount` closure flag gates the restore-fallback in the `'choices-only'` branch — synthetic `'deferred-choices'` path renders the saved narration + ▼ when present.
+- **schema.ts**: `lastNarrationText: z.string().optional()` field. Optional so older T16 saves stay valid.
+- **snapshot.ts**: imports `dialogState`, captures `lastNarrationText` when non-empty.
+- **main.ts**: after `ink.loadState`, calls `dialogState.setLastNarrationText(restored.lastNarrationText)` so the ink-dialog mount sees it on first paint.
+
+Tests: +8 vitest cases (`dialog-state.test.ts` 6 unit + 2 new save round-trip cases). Total 293/293 (was 285).
+
+QA Bug #11 ✓ resolved. Reload mid-flow now restores the last narration in panel + ▼ instead of `...`. Click ▼ reveals the still-pending choices via the existing `advanceContinue` deferred-flush path.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 293/293.
+
+**Open after this tick**:
+- Bug #7 discussion (designer scope)
+- Bug #10 paint desync (low priority — only headless screenshot)
+- Bug #12 sceneState single-slot (was gated on Bug #3, NOW resolvable as a doc-only status update)
+- Bug #15 sprite label leakage (W5 first)
+
+(next /loop tick: pick Bug #12 — pure status update acknowledging Bug #3 fix addresses the multi-event blob root cause. After that, output "no task, idle" unless QA files new bugs.)
+
+
 
 
 

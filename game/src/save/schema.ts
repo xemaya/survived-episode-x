@@ -75,6 +75,13 @@ export const runStateSchema = z.object({
   // Optional — saves predating T16 simply lack this field and fall
   // back to a fresh `intro` divert on resume (graceful migration).
   inkStateJson: z.string().optional(),
+  // P5 T16 follow-up (QA Bug #11): last narration text shown in the
+  // dialog panel before save. Used to pre-fill the panel on restore
+  // when ink's `Continue()` has nothing more to drain (because the
+  // text was already consumed by the pre-save selectChoice). Optional
+  // — older saves omit it and the panel falls back to its `...`
+  // placeholder until the next ink advance.
+  lastNarrationText: z.string().optional(),
 });
 
 export type RunState = z.infer<typeof runStateSchema>;

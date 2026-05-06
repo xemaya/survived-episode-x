@@ -3,6 +3,7 @@ import { flow } from '@/flow/dispatcher';
 import { loadEpisode } from '@/ink/loader';
 import { ink } from '@/ink/runtime';
 import { installKeyboardHandler } from '@/input/keyboard';
+import { dialogState } from '@/render/dialog/dialog-state';
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
 import { mountOverlay } from '@/render/ui-overlay';
@@ -51,6 +52,12 @@ async function main(): Promise<void> {
     if (restored?.inkStateJson) {
       try {
         ink.loadState(restored.inkStateJson);
+        // QA Bug #11: also restore the last visible narration so the
+        // dialog can pre-fill the panel on first paint instead of
+        // rendering `...` when ink has nothing to drain.
+        if (restored.lastNarrationText) {
+          dialogState.setLastNarrationText(restored.lastNarrationText);
+        }
         console.info('[boot] ink: loaded episode-1 + restored ink state');
       } catch (e) {
         console.warn('[boot] ink loadState failed; falling back to intro:', e);
@@ -70,7 +77,16 @@ async function main(): Promise<void> {
   // inspect ink state + drive selectChoice without clicking through canvas.
   // Stripped from production via import.meta.env.DEV check.
   if (import.meta.env.DEV) {
-    (globalThis as { __qa?: unknown }).__qa = { ink, flow, save, app };
+    const { sceneState } = await import('@/scene/scene-state-mirror');
+    const { propRegistry } = await import('@/render/diegetic/prop-registry');
+    (globalThis as { __qa?: unknown }).__qa = {
+      ink,
+      flow,
+      save,
+      app,
+      sceneState,
+      propRegistry,
+    };
   }
 }
 

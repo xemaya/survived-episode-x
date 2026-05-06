@@ -340,7 +340,13 @@ Driver enhancements: walks stage tree to find `sticky-N` / `choice-N` buttons (T
 
 **Suggested triage**: store the most-recently-rendered `step.text` in the save (alongside `inkStateJson`) so paintStep can pre-fill on restore. OR re-divert to a sub-stitch boundary that re-emits the text — but most events can't be re-entered without repeating side effects.
 
-**Status**: ⏳ open — minor follow-up to T16.
+**Status**: ✓ resolved — `fix(qa-bug-11)` (batch 13 W1 pickup, 2026-05-06). "Store last-rendered text" approach.
+
+- `dialog-state.ts` (NEW): singleton `dialogState` tracking `lastNarrationText`. `ink-dialog.ts setPanelText()` helper + header-band path publish to it whenever real (non-`...`) panel content renders. `snapshot.ts` reads it; `runStateSchema.lastNarrationText: z.string().optional()` persists it; `main.ts` boot path calls `dialogState.setLastNarrationText(restored.lastNarrationText)` after `ink.loadState`.
+- ink-dialog tracks `firstPaintAfterMount` flag. On the FIRST paintStep after a fresh mount, when `decideDialogPhase()` returns `'choices-only'` (empty text + choices) AND `dialogState.lastNarrationText` is non-empty, the renderer treats it as a synthetic `'deferred-choices'`: panel + ▼ with the saved narration. Click ▼ flushes panel + mounts sticky rack (existing `advanceContinue` case 1 path). Flag flips false after the first paint so subsequent `'choices-only'` paints fall through to sticky-alone normally.
+- Tests: 6 new vitest cases in `tests/render/dialog/dialog-state.test.ts` (set/get/reset/overwrite/CJK/empty) + 2 new save round-trip cases. Total 293/293.
+
+Player-side validation: refresh mid-flow → reload restores last narration in panel + ▼ (no more `...`) → click ▼ reveals the still-pending choices.
 
 ---
 
@@ -626,3 +632,72 @@ W2 QA Round 6 (2026-05-06). Latest commits:
 ### Next round target (R7)
 
 Bug #14 (phone prop persistence across scenes) + Bug #15 (sprite-sheet label leakage) still open per W1 backlog. Will verify when fixes land. Meanwhile R7 should extend driver into Day 3-7 paths (sticky-rack 3-choice variants, 申报加班 path, 提前下班 path, KPI weekly recap, weekend regen).
+
+---
+
+## Round 7 — verify Bug #14 fix (`qa/p5-demo-r7.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 7 (2026-05-06). Latest commit: `bcd2fb0 fix(qa-bug-14): PropEntity scope + scene-aware hide/show`. Smoke 272/272 (was 266 — 6 new tests for Bug #14 fix).
+
+### Verifies
+
+- ✓ **Bug #14 (phone prop persistence)** — RESOLVED in `bcd2fb0`. Approach: "hide-not-destroy" with scene-aware bulk-hide. Driver verifies: at Day 1 daily_recap pagebreak (where Bug #14 was reported), `prop:phone visible=false` (was `visible=true` covering recap text in R5 GM playtest). Fix applies cleanly: both `prop:fruit_bowl` and `prop:phone` are scene-scoped — when ink emits a `# scene:` change, all scene-scoped props bulk-hide. Then the next `# prop:` tag re-shows the specific prop. Effect: at any given beat, only the prop tags from the CURRENT/most-recent scene block are visible.
+- ✓ **Re-verify #6 / #13 / #18 (no regressions)** — Day 2 Event 2.3 long sticky still ellipsised, deferred-choices flush still works (panel + ▼ → sticky alone), no stale Lisa bubble at 老周 scene.
+- ✓ **No `pageerror` / console errors** during full Day 1 → Day 2 walkthrough.
+
+### Round 7 observation
+
+- **Visibility-vs-correctness**: my Round 5 reproducer was specifically about phone covering recap text. The fix is broader — hides ALL scene-scoped props during scene transitions, including ones that should logically still be there (e.g. fruit_bowl during a quick visit to the break_room). For the demo this is fine since props re-emit on each scene's first beat. Worth noting in case future events expect props to "stick" across short scene blips.
+
+### Round 7 tooling notes
+
+- **N23 — Smoke tests post-fix**: 272/272 (was 266). 6 new tests for PropEntity scope + scene-aware hide/show.
+
+### Next round target (R8)
+
+Bug #15 (sprite-sheet label leakage) still open. Either Option A (re-cut with bigger label_band) or Option C (PixiJS Sprite-side crop mask) — neither in commit log yet. Will verify when fix lands. Meanwhile R8 should attempt Day 3-7 driver coverage (申报加班 path needs energy-sufficient state, 提前下班 path tests AP-leftover behavior, weekly recap at Day 7).
+
+---
+
+## Round 8 — Day 3 reach + cross-day smoke + path-interceptor sanity (`qa/p5-demo-r8.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 8 (2026-05-06). Latest commit: `f900968 feat(p5-path-interceptor): close Q-4 — checkpoint-tag-based finale branching`. Smoke 285/285 (was 272 — 13 new tests for path-interceptor). Not a `fix(qa-bug-N)` so this round = regression smoke + extend coverage.
+
+### Verifies
+
+- ✓ **No regressions** on R6 + R7 — both run clean against new tree (5/5 pass).
+- ✓ **Day 3 reach**: driver successfully drives boot → intro → Day 1 (4 choice points) → Day 2 (2 choice points) → Day 3 first choice (Event 3.2 Lisa after meeting: `[看大家吧 / 我不去 / 我也不知道]`). All pagebreaks work. Final VAR snapshot at Day 3 first choice phase: `lisa_score=4, lao_zhou_score=0, state=88, money=5491`.
+- ✓ **Path interceptor sanity** — Day 1 walkthrough fires zero checkpoint tags (none exist in episode-1 Day 1-2; checkpoint mechanism is for E8/E12 finale per Q-4 spec). No `pageerror` from unrelated path-interceptor module load.
+
+### NEW finding: Day 2 after_work + Day 2 daily_recap are STUBS in episode-1.ink
+
+**Severity**: discussion (content gap, not a code bug)
+
+`design/vertical-slice/episode-1.ink:738-746` — both `day_2_after_work` and `day_2_daily_recap` are 1-line comment placeholders with `# pagebreak` + divert, no narration content + no 申报加班/按时下班/提前下班 3-choice rack.
+
+```ink
+= day_2_after_work
+// 同 Day 1 模板 - 申报加班 / 按时下班 / 提前下班 三选 1
+// (省略以避免重复 - 分身写时按 day_1_after_work 模板, 文案微调)
+~ check_state_after_choice()
+# pagebreak
+-> day_2_daily_recap
+
+= day_2_daily_recap
+// 同 Day 1 模板 - 关键时刻 today
+# pagebreak
+-> day_3_morning_briefing
+```
+
+**Effect**: after picking any Day 2 Event 2.3 choice, player taps through 2 empty pagebreaks and lands at Day 3 morning briefing. No way to choose 申报加班 / 按时下班 / 提前下班 on Day 2; no Day 2 recap stats visible. Day 3-7 have full content per `grep '= day_N_after_work / = day_N_daily_recap'` (lines 959, 996, 1237, 1273, 1488, 1533, 1715, 1955).
+
+**Suggested action**: designer fills in Day 2 stubs (comments mark them as "分身写时按 day_1_after_work 模板, 文案微调" — flagged as designer/clone task). Not a bug per se but worth surfacing.
+
+### Round 8 tooling notes
+
+- **N24 — Smoke baseline**: `pnpm test` = 285/285 (was 272). 13 new tests for path-interceptor module.
+- **N25 — Day 3 first event = Event 3.2 (Lisa after meeting)**: not Event 3.1 (晨会 fakeout) since 3.1 has no choices and folds into the same step blob as 3.2's choices. Per `grep '* \[' episode-1.ink` Day 3 has choices at: 3.2 (3 choices), 3.4 (none), day_3_after_work (3 choices: 申报加班/按时下班/提前下班 — line 955-967).
+
+### Next round target (R9)
+
+Bug #15 still open. Will verify when fix lands. Otherwise R9 extends to Day 3-7 full traversal: pick all 3 day_3_after_work options across separate test runs to verify branching, reach Day 7 cliffhanger ("周一晨会王总监会问 KPI 吧?" line 1898).

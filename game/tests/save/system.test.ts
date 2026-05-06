@@ -126,5 +126,24 @@ describe('SaveSystem', () => {
       expect(loaded).not.toBeNull();
       expect(loaded?.inkStateJson).toBeUndefined();
     });
+
+    it('round-trips the lastNarrationText field (Bug #11 / T16 follow-up)', async () => {
+      const state = defaultRunState();
+      state.lastNarrationText =
+        '游戏从 2026 年 5 月开始。\n\n活过这一年(52 周)就赢——是"熬过去"那种赢。';
+      await save.writeCurrentRun(state);
+      const loaded = await save.loadCurrentRun();
+      expect(loaded?.lastNarrationText).toBe(state.lastNarrationText);
+    });
+
+    it('parses saves missing lastNarrationText (older T16 saves stay valid)', async () => {
+      const partial = { ...defaultRunState() };
+      // biome-ignore lint/performance/noDelete: simulate older T16 save
+      delete (partial as Partial<typeof partial>).lastNarrationText;
+      await fs.writeAtomic('saves/current_run.save', JSON.stringify(partial));
+      const loaded = await save.loadCurrentRun();
+      expect(loaded).not.toBeNull();
+      expect(loaded?.lastNarrationText).toBeUndefined();
+    });
   });
 });
