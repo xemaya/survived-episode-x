@@ -7,6 +7,7 @@ import { mountCalendarWidget } from '@/render/diegetic/calendar-widget';
 import { createPropEntity } from '@/render/diegetic/prop-entity';
 import { propRegistry } from '@/render/diegetic/prop-registry';
 import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
+import { mountStatusHud } from '@/render/hud/status-hud';
 import { installSceneStateTagHandler, sceneState } from '@/scene/scene-state-mirror';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
@@ -278,21 +279,28 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   // Mounts a center-screen text panel + choice buttons that read from the
   // ink runtime singleton. Production will replace with NPC-anchored speech
   // bubbles + diegetic choice props.
-  const inkDialog = mountInkDialog(ctx.worldLayer);
+  // ── Q-N (Bug #29) — Status HUD top-right (KPI / 钱 / 状态) ──────────────
+  // Mounted BEFORE ink dialog so its refresh() can be passed into
+  // mountInkDialog as `onAfterAdvance`. Reads ink VARs `kpi/money/state`.
+  const statusHud = mountStatusHud(ctx.worldLayer, { app: ctx.app, x: 540, y: 16 });
+  teardowns.push(statusHud.destroy);
+
+  const inkDialog = mountInkDialog(ctx.worldLayer, {
+    onAfterAdvance: () => statusHud.refresh(),
+  });
   inkDialog.start();
   teardowns.push(inkDialog.destroy);
 
   // ── Q-Y (Bug #38) — pause hamburger button (top-right) ──────────────────
   // Always-visible 16×16 menu button so the player can return to main
   // menu without hitting Esc. Click → triggers the same pause SceneState
-  // transition as the keyboard handler. Position top-right (614, 8) →
-  // span (614-630, 8-24) so it doesn't collide with calendar widget
-  // (left side, x≤110) and stays out of the panel/sticky region. Future
-  // Q-N Status HUD will land at (540, 16) and may need to shift left
-  // by ~40 px to clear; that retune is part of Q-N's scope.
+  // transition as the keyboard handler. Position (516, 8) — top-right
+  // strip just LEFT of the Status HUD (which spans x=540-620, y=16-88).
+  // Calendar widget on the left (x≤110) and the bottom panel/sticky
+  // region (y≥175) are both clear.
   const hamburger = new Container();
   hamburger.label = 'pause-button';
-  hamburger.x = 614;
+  hamburger.x = 516;
   hamburger.y = 8;
   hamburger.eventMode = 'static';
   hamburger.cursor = 'pointer';

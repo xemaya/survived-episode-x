@@ -88,7 +88,14 @@ export interface InkDialogHandles {
   start: () => void;
 }
 
-export function mountInkDialog(parent: Container): InkDialogHandles {
+export interface MountInkDialogOpts {
+  /** Q-N (Bug #29): hook fired after every step()/selectChoice() so
+   * the Status HUD can re-read ink VARs (kpi/money/state) and animate
+   * the delta. Optional — workstation supplies it; tests omit it. */
+  onAfterAdvance?: () => void;
+}
+
+export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {}): InkDialogHandles {
   const container = new Container();
   container.label = 'ink-dialog';
   parent.addChild(container);
@@ -239,7 +246,10 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     const nextStep = ink.selectChoice(idx);
     tagDispatcher.dispatchAll(nextStep.tags);
     void autosave();
-    queueMicrotask(() => paintStep(nextStep));
+    queueMicrotask(() => {
+      paintStep(nextStep);
+      opts.onAfterAdvance?.();
+    });
   };
 
   /** Hard-restart: clear save, reset dialog cache, reload page. Brutal
@@ -266,7 +276,10 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     if (!ink.isLoaded) return;
     const nextStep = ink.step();
     tagDispatcher.dispatchAll(nextStep.tags);
-    queueMicrotask(() => paintStep(nextStep));
+    queueMicrotask(() => {
+      paintStep(nextStep);
+      opts.onAfterAdvance?.();
+    });
   };
 
   /** Mount the ▼ indicator at the panel's bottom-right corner AND make
@@ -403,6 +416,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     const step = ink.step();
     tagDispatcher.dispatchAll(step.tags);
     paintStep(step);
+    opts.onAfterAdvance?.();
   };
 
   const start = () => refresh();
