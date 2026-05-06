@@ -97,7 +97,7 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 
 **Estimate**: 1-2h
 
-**Status**: ✅ done in commit `<pending>` (batch 23, 2026-05-06). New `calendar-widget.ts` with 80×80 desk-calendar visual: paper BG + 装订红 banner with month label + 7×5 date grid (past gray / current red ring / weekend red / weekday ink); self-binds to onDateChanged. workstation.ts swapped from sprite path to `mountCalendarWidget()`.
+**Status**: ✅ done in commit `70a4b95` (batch 23, 2026-05-06). New `calendar-widget.ts` with 80×80 desk-calendar visual: paper BG + 装订红 banner with month label + 7×5 date grid (past gray / current red ring / weekend red / weekday ink); self-binds to onDateChanged. workstation.ts swapped from sprite path to `mountCalendarWidget()`.
 
 ---
 
