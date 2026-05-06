@@ -66,20 +66,30 @@ describe('extractInternalMonologue', () => {
   });
 });
 
-describe('internal-monologue style + anchor', () => {
-  it('exposes muted alpha for italic narration (concept 02 reference)', () => {
-    expect(INTERNAL_MONOLOGUE_STYLE.TEXT_ALPHA).toBeLessThan(1);
-    expect(INTERNAL_MONOLOGUE_STYLE.TEXT_ALPHA).toBeGreaterThan(0);
+describe('internal-monologue style + anchor (Bug #19 retune)', () => {
+  it('uses opaque alpha — dimming is now intrinsic to the cool-gray color', () => {
+    // Pre-Bug-#19: alpha=0.6 over cream fill. Post-fix: cool-gray
+    // #A8B0C0 carries the visual dim, alpha stays 1.0 for crispness.
+    expect(INTERNAL_MONOLOGUE_STYLE.TEXT_ALPHA).toBe(1);
   });
 
-  it('uses the cream incandescent fill (matches bubble/panel palette)', () => {
-    expect(INTERNAL_MONOLOGUE_STYLE.TEXT_COLOR).toBe(0xe8e0cc);
+  it('uses the cool-gray fill #A8B0C0 (GM ✅ Bug #19 spec)', () => {
+    expect(INTERNAL_MONOLOGUE_STYLE.TEXT_COLOR).toBe(0xa8b0c0);
   });
 
-  it('protagonist head anchor sits above the bottom panel area', () => {
-    // Panel y starts at 222; monologue should be above that so it
-    // doesn't collide with narration panel BG.
-    expect(PROTAGONIST_HEAD_ANCHOR.y).toBeLessThan(360);
+  it('uses the smaller 10pt font for clear distinction from panel narration (12pt)', () => {
+    expect(INTERNAL_MONOLOGUE_STYLE.FONT_SIZE).toBe(10);
+  });
+
+  it('caps wrap to 4 lines so a long monologue truncates with ellipsis', () => {
+    expect(INTERNAL_MONOLOGUE_STYLE.MAX_LINES).toBe(4);
+    expect(INTERNAL_MONOLOGUE_STYLE.ELLIPSIS).toBe('…');
+  });
+
+  it('protagonist anchor moves to TOP region (Bug #19 — away from bottom panel y=180-336)', () => {
+    expect(PROTAGONIST_HEAD_ANCHOR.y).toBeLessThan(80);
     expect(PROTAGONIST_HEAD_ANCHOR.x).toBeGreaterThan(0);
+    // Anchor must NOT overlap the bottom panel range (y=180-336)
+    expect(PROTAGONIST_HEAD_ANCHOR.y).toBeLessThan(180);
   });
 });

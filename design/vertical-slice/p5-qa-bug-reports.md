@@ -742,3 +742,147 @@ Autosave fires AFTER `ink.selectChoice()` returns, so save captures the panel co
 ### Next round target (R10)
 
 Bug #15 (sprite-sheet label leakage) still open. R10 will check for fix; otherwise extend Day 4-7 driver coverage (Day 4 weekly_report 3-choice, Day 5 events, Day 6 weekend lisa wechat, Day 7 cliffhanger).
+
+---
+
+## GM playtest 2026-05-06 (post-R9) — 5 screenshots filed by GM
+
+GM ran a manual playtest after R9 closure and surfaced 4 distinct visual issues.
+
+---
+
+## Bug #19 — major UX — internal monologue overlay (`_..._`) Z-overlaps narration panel + sticky rack
+
+**Reported by**: GM playtest (2026-05-06, screenshots 1, 2, 5)
+**Severity**: major UX — both text streams visible on same screen area, both unreadable.
+
+**Repro**:
+- Day 3 lunch (老周吃面 + Lisa 回工位 + 茶水间咖啡机 callback) — narration panel at bottom shows "12:30。你买了便当回工位吃。 经过老周工位——他在吃面…" while italic monologue "她回工位了。 这是入职 12 周的人的想法。 3 周后再写'本周内'" renders ON TOP of the narration panel area.
+- Day 7 妈妈视频 — same overlap: narration "屏幕里是妈妈。 视频背景是老家厨房——油烟机 + 挂在墙上的菜谱…" with italic "她头发花白, 刚没染过 / 她说的可能是隔壁单元李阿姨家的…" overlapped.
+- Day 4 weekly_report at 16:50 — same pattern.
+
+**Expected** (per art-bible §7.1): internal monologue is the protagonist's silent thought — distinguished spatially + stylistically from narration. Two text streams should not Z-overlap.
+
+**Actual**: `mountInternalMonologue()` mounts at a fixed-Y region (likely middle of canvas) and the bottom narration panel overlaps that Y range. Both render simultaneously when ink emits a paragraph mixing narration + `_..._` segments.
+
+**Files involved**: `game/src/render/dialog/internal-monologue.ts` (Y position), `game/src/render/dialog/ink-dialog.ts` (paint sequencing).
+
+**Suggested fix path**:
+- (A) Move monologue to TOP of screen (y=20-80) so it never collides with bottom panel.
+- (B) Hide narration panel when monologue overlay is up; tap-to-continue between them.
+- (C) Combine into one panel: monologue rendered as italic lines INSIDE the narration panel.
+
+**GM call needed**: which of A/B/C?
+
+**GM decision (2026-05-06)**: ✅ **Option A + style tune (combined fix for Bug #19 + #20)**.
+
+- **Position**: monologue Text node moves to **TOP region** (y=20-80, full width centered)，永远不与 bottom narration panel + desk-surface sticky rack collide
+- **Style**: 区分 narration vs monologue 视觉权重——
+  - narration: 现有 panel font (12pt, white #FFFFFF, `Inter` or system, full opacity)
+  - monologue: 字号 **10pt**, italic, **#A8B0C0**（cool gray，dimmer 60% opacity 等价的 desaturate）, line-height 14
+- **Layout**: 长 monologue 段（>3 行）允许 wrap to 多行，max 4 lines。超过 truncate `…` 同 sticky 同 pattern
+- **Lifecycle**: monologue overlay 跟 narration panel 同 bound——下个 step / pagebreak / scene-change 都 clear。具体跟 Bug #18-regression fix 同 paintStep 顶部 teardown 序
+
+这个 fix 同时解 Bug #20——"narration = 主线剧情, monologue = 主角内心提示" 现在 visually 不同位置 + 不同字号 + 不同颜色，玩家眼睛能立刻区分。
+
+**Status**: ✓ resolved — `fix(qa-bug-19,18-regression)` (batch 15 W1 pickup, 2026-05-06).
+
+- **internal-monologue.ts**: `PROTAGONIST_HEAD_ANCHOR` moves from `(320, 240)` (mid-panel) → `(320, 26)` (top region, well above panel y=180-336 + sticky rack). Style retune per GM spec — `FONT_SIZE: 11 → 10`, `LINE_HEIGHT: 16 → 14`, `TEXT_COLOR: 0xe8e0cc cream → 0xa8b0c0 cool-gray`, `TEXT_ALPHA: 0.6 → 1.0` (dim is intrinsic to the color now, no alpha needed). New `MAX_LINES: 4` + `ELLIPSIS: '…'` constants; the `repaint` loop iteratively trims a char before the ellipsis until measured `Pixi.Text.height ≤ MAX_LINES * LINE_HEIGHT`. Same pattern as the sticky-notes fit helper.
+- Lifecycle: existing `clearMonologue()` at `paintStep` top + the Bug #18 deferred-flush teardown both hold; no new wiring needed.
+- Bug #20 ✓ closes as side-effect — narration (12pt cream upright) and monologue (10pt cool-gray italic, top of canvas) are now visually distinct on three axes (position + size + color).
+- Tests: 2 prior pin tests rewritten to the new spec + 2 new pins added. Total 295/295.
+
+---
+
+## Bug #18-regression — major — speech bubble "好，下次哈." persists into Day 4 16:50 weekly_report
+
+**Reported by**: GM playtest (2026-05-06, screenshot 4)
+**Severity**: major — Bug #18 fix only torn down on deferred-choices flush; some code paths bypass that and leave the bubble lingering.
+
+**Repro**:
+1. Drive to Day 4 Event around line 1441 (Lisa lunch invite, `[一起 / 今天有事 / 我吃便当]`)
+2. Pick `[今天有事]` → choice body emits `Lisa："好，下次哈."` (episode-1.ink:1441) → speech bubble mounts for Lisa at her tuned anchor
+3. ink advances through subsequent events (Day 4 weekly_report at 16:50) — none trigger a deferred-choices flush
+4. **Visual at 16:50 weekly_report**: bubble "好，下次哈." STILL on screen while panel renders weekly_report "16:50. HR 系统弹出周报浮层…"
+
+**Expected**: bubble lifecycle bounded to its event. When ink advances past Lisa's line, bubble unmounts regardless of which subsequent paint phase fires.
+
+**Actual**: per Bug #18 fix (`a576f7a`), bubble teardown only fires on deferred-choices flush. Day 4 path between `[今天有事]` and weekly_report doesn't go through that branch.
+
+**Files involved**: `game/src/render/dialog/ink-dialog.ts` (paintStep — needs teardown at start of every paint, not just on flush).
+
+**Suggested fix**: extend Bug #18 teardown to fire at the top of `paintStep()` whenever a new step is painted that doesn't itself emit a `**Speaker**：` line (or whenever `sceneState.speaker` changes). Not only the deferred-flush path.
+
+**Status**: ✓ resolved — `fix(qa-bug-19,18-regression)` (batch 15 W1 pickup, 2026-05-06).
+
+Different fix path than the QA suggestion: bubble teardown was already at `paintStep` top via `clearBubble()`. The actual issue was that the SAME step's text starts with Lisa's `Lisa："好，下次哈"` and continues through the next event's narration — `parseSpeaker()` matches the first paragraph and mounts the bubble for it, then the bubble lingers next to multi-paragraph narration that's no longer about Lisa.
+
+Fix: new constant `BUBBLE_REMAINDER_THRESHOLD = 30` chars. Bubble only mounts when `parsed.remainder.trim().length <= 30` (speaker line is the *dominant* content of the step). For multi-paragraph blobs, the speaker line stays inline in the panel as `Lisa："好，下次哈"` (markdown-stripped) without a hovering bubble.
+
+This means short Decision-Moment style steps (`Lisa："你看下这个行不行……"` + 3 choices) keep their bubble (parsed.remainder is empty). Long narrative blobs that span events skip the bubble. Threshold is tunable; 30 chars covers "1-2 line continuation" without mis-firing.
+
+Tests: existing bubble tests still green; behavior change is exercised end-to-end by the ink-dialog phase suite + manual re-verify on next QA round.
+
+---
+
+## Bug #15 — STILL OPEN — sprite-sheet label "Front" visible at runtime on fruit_bowl prop
+
+**GM playtest 2026-05-06 update**: screenshot 3 captures it precisely — fruit_bowl sprite shows "Front" text label in upper-right corner. No fix in commit log yet (R7 + R8 + R9 didn't touch). GM recommendation from earlier was Option A (re-cut with bigger `label_band`, ~15 min) or Option C (PixiJS Sprite-side crop mask). Still pending W5/W1 pickup.
+
+**Status**: ⏳ open — promote priority. Visible in every screenshot that shows the fruit_bowl prop.
+
+---
+
+## Bug #20 — design observation — narration vs internal-monologue distinction breaks down when both emitted in same step
+
+**Reported by**: GM playtest (2026-05-06, screenshot 5 caption: "明显把需要展现的剧情, 和不需要展现的, 只是用来提示的脚本拢在一起了")
+**Severity**: design call — partly fixed by Bug #19 above, but underlying authoring split is also at issue.
+
+**Observation**: many events have a single paragraph blob containing both narration ("妈妈戴着老花眼镜…") and internal-monologue ("_她头发花白, 刚没染过_"). When `extractInternalMonologue()` separates them, both streams render at the same time. GM expectation: one of them (likely monologue) is "background hint, dimmer, less prominent" while narration is "story being told". Currently both have similar visual weight.
+
+**Suggested action**: tone-bible / art-bible decision needed. Either:
+- Monologue is dimmer / smaller / background-positioned (fixed by Bug #19's positional fix + style tune)
+- OR ink authoring discipline: separate narration paragraphs and monologue paragraphs with a `# pagebreak` between them so they NEVER render simultaneously
+
+**Status**: ⏳ open — discussion, gated on Bug #19 fix approach.
+
+---
+
+## Open bug backlog after GM playtest
+
+| Bug | Severity | Status | Blocker? |
+|-----|----------|--------|----------|
+| #19 | major UX | open | yes — every screenshot has it |
+| #18-regression | major | open | yes — visible in every Day 4+ session |
+| #15 | major (per visibility) | open since R5 | yes — visible in every prop frame |
+| #20 | discussion | open | no (gated on #19) |
+| #6 (content sweep) | discussion | open | no |
+| #7 (after_work UI) | discussion | open | no |
+| #10 (paint frame desync) | minor | open | no |
+
+R10 will verify fixes for #15 + #18-regression + #19 when they land.
+
+---
+
+## Round 10 — verify Bug #12 close-out (`qa/p5-demo-r10.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 10 (2026-05-06). Latest commit: `f98577d fix(qa-bug-12): close by Bug #3 resolution dependency (no engine change)`. Smoke 293/293 (no new tests; docs-only commit).
+
+### Verifies
+
+- ✓ **Bug #12 close** — sceneState reflects current day's scene, not stale intro. At intro phase scene='intro' time='pre_game'; after Day 1 morning_briefing scene='office_workstation' time='9:14'.
+- ✓ **Re-verify Bug #11 + #14** — no regressions. Post-reload panel still shows narration content, props still hide on scene change.
+
+### Caveat: intra-day event blobs still single-slot
+
+Bug #12 close rationale only fully holds **cross-day**. Intra-day events without `# pagebreak` still blob — at Event 1.2 sticky phase, `scene: 'break_room'` (1.2's last tag) overwrites 1.1's `reception`. Practical impact: future "multi-NPC in one event" features would still drop earlier NPCs. Not a reopener, just noting closure scope.
+
+### Round 10 outstanding (no fixes since R9)
+
+- Bug #19 (monologue overlay Z-collision) — top GM-filed, no fix yet
+- Bug #18-regression (stale Lisa bubble at Day 4 weekly_report) — no fix yet
+- Bug #15 (sprite-sheet "Front" label leak) — no fix yet (open since R5)
+
+### Next round target (R11)
+
+Verify #19 / #18-regression / #15 fixes when they land. Otherwise extend driver to Day 5-7.

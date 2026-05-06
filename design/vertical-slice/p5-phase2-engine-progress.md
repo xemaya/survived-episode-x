@@ -324,6 +324,36 @@ All W1-scope tasks closed. Next /loop tick will likely output "no task, idle" un
 
 (next /loop tick: re-read both docs; if no new W1-scope task, output "no task, idle".)
 
+---
+
+## 2026-05-06 · batch 15 — /loop tick 8 — Bug #19 monologue retune + Bug #18-regression dominant-speaker
+
+W1 (engine) /loop tick 8. QA Round 6+ filed two new majors: Bug #19 (monologue Z-overlap with panel + sticky) and Bug #18-regression (bubble persists across multi-paragraph step blobs into Day 4 weekly_report). Both touch the dialog area — bundled into one batch.
+
+**Bug #19 — internal-monologue retune (GM ✅ Option A)**:
+- `PROTAGONIST_HEAD_ANCHOR` (320, 240 mid-panel) → (320, 26 top region). Anchored well above panel (y=180-336) and sticky rack.
+- Style per GM spec: 11pt → 10pt, lineHeight 16 → 14, color 0xe8e0cc cream → 0xa8b0c0 cool-gray, alpha 0.6 → 1.0 (dim is now intrinsic to the color).
+- New `MAX_LINES: 4` + `ELLIPSIS: '…'` constants. `mountInternalMonologue.repaint` now iteratively trims a char before the ellipsis until measured `Pixi.Text.height ≤ MAX_LINES * LINE_HEIGHT`. Same pattern as the sticky-notes fit helper from batch 7.
+- Lifecycle unchanged — existing `clearMonologue()` at `paintStep` top + the Bug #18 deferred-flush teardown both hold.
+- Bug #20 ✓ closes as side-effect — narration (12pt cream upright bottom panel) and monologue (10pt cool-gray italic top region) are now visually distinct on position + size + color.
+
+**Bug #18-regression — bubble dominance heuristic**:
+- Root cause not "missing teardown" — `paintStep` already calls `clearBubble()` at top. The issue: SAME step's text starts with `Lisa："好，下次哈"` and continues through the next event's narration. `parseSpeaker` matches the first paragraph and mounts the bubble; it then hovers over multi-paragraph narration that's no longer about Lisa.
+- Fix: new `BUBBLE_REMAINDER_THRESHOLD = 30` chars in `ink-dialog.ts`. Bubble only mounts when `parsed.remainder.trim().length <= 30` (the speaker line is the dominant content). Long blobs skip the bubble — speaker stays inline in the panel as markdown-stripped `Lisa："好，下次哈"`.
+- Short Decision-Moment steps (just `Lisa："你看下这个行不行……"` + 3 choices) keep their bubble (remainder empty). Long narrative blobs across events skip the bubble.
+
+Tests: 2 prior monologue style pins rewritten to new spec + 2 new pins (font size 10, MAX_LINES 4 / ELLIPSIS '…'). Total 295/295.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 295/295.
+
+**Open after this tick**:
+- Bug #7 discussion (designer scope)
+- Bug #10 paint desync (low priority)
+- Bug #15 sprite label leakage (W5 owns Option A first, was promoted by GM)
+
+(next /loop tick: re-read; if QA hasn't filed new bugs and Bug #15 still W5-scope, output "no task, idle".)
+
+
 
 
 

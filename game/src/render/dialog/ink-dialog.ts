@@ -55,6 +55,16 @@ const CHOICE_BG = 0x2c4a6e;
 const CHOICE_BG_HOVER = 0x4a6a8e;
 const CHOICE_BORDER = 0xc8a85a;
 
+/** Bug #18-regression threshold: when the text after a speaker line
+ * (`parsed.remainder`) is longer than this many trimmed chars, the
+ * speaker bubble does NOT mount — the step is a multi-paragraph blob
+ * and a hovering bubble would linger next to non-speaker narration.
+ * The speaker line stays inline in the panel as `Lisa："…"` instead.
+ * Tunable; ~30 chars covers "1-2 line continuation" without firing
+ * for short Decision-Moment prompts that genuinely belong in a
+ * bubble. */
+const BUBBLE_REMAINDER_THRESHOLD = 30;
+
 /** Strip ink markdown (`**X**` → `X`, `_X_` → `X`) since PixiJS Text can't render mixed styles. */
 function stripMarkdown(s: string): string {
   return s.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
@@ -379,25 +389,35 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     // `parseSpeaker` regex on the dialog text for un-migrated `.ink`
     // content. `protagonist` id deliberately doesn't render a bubble
     // — the line falls through to the panel / monologue layers below.
+    //
+    // Bug #18-regression (2026-05-06): only mount the bubble when the
+    // speaker line is the *dominant* content of this step. If the rest
+    // (parsed.remainder) is long, we're inside a multi-paragraph blob
+    // that spans multiple events — showing the bubble lets it linger
+    // visually next to narration that's no longer the speaker's. In
+    // that case the speaker line stays inline in the panel as
+    // `Lisa："…"` (markdown stripped) and no bubble mounts.
     const speakerId = sceneState.get('speaker');
     const idAnchor = speakerId && speakerId !== 'protagonist' ? getNpcAnchorById(speakerId) : null;
     const parsed = parseSpeaker(step.text);
+    const speakerLineDominates =
+      parsed !== null && parsed.remainder.trim().length <= BUBBLE_REMAINDER_THRESHOLD;
     let working = step.text;
-    if (idAnchor && parsed) {
+    if (idAnchor && parsed && speakerLineDominates) {
       currentBubble = mountSpeechBubble(container, {
         anchor: idAnchor,
         text: stripMarkdown(parsed.dialog),
       });
       working = parsed.remainder;
-    } else if (idAnchor) {
-      // Tag fired but the dialog body isn't `Name：…` shaped — render
-      // the whole step as the bubble body.
+    } else if (idAnchor && !parsed && step.text.trim().length <= BUBBLE_REMAINDER_THRESHOLD) {
+      // Tag fired and the body is short — render whole step as bubble
+      // body. Long-text path falls through to panel rendering.
       currentBubble = mountSpeechBubble(container, {
         anchor: idAnchor,
         text: stripMarkdown(step.text),
       });
       working = '';
-    } else if (parsed) {
+    } else if (parsed && speakerLineDominates) {
       const legacyAnchor = getNpcAnchor(parsed.speaker);
       if (legacyAnchor) {
         currentBubble = mountSpeechBubble(container, {
@@ -407,6 +427,7 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
         working = parsed.remainder;
       }
     }
+    // (else: long multi-paragraph blob — speaker stays inline in panel)
 
     // Layer 2: whole-italic paragraphs → internal monologue overlay.
     const split = extractInternalMonologue(working);
