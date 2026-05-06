@@ -409,6 +409,33 @@ Both are non-W1-actionable. **All W1-actionable bugs and questions are now close
 
 (next /loop tick: re-read both docs; if QA hasn't filed new bugs and GM hasn't filed new questions, output "no task, idle".)
 
+---
+
+## 2026-05-06 · batch 18 — /loop tick 11 — Bug #21 + Bug #22 episode-end exit + render fix
+
+W1 (engine) /loop tick 11. Two new block-UX bugs filed (#21 + #22). Both touched `paintStep`'s `'ended'` phase; bundled into one batch.
+
+- **Bug #22 root cause** was twofold:
+  1. Episode-end recap text is authored as italic (`_今日 KPI: +0_` etc.). `extractInternalMonologue` lifted those whole-italic paragraphs into the top-region monologue overlay (per Bug #19's y=26 retune), leaving the panel `trimmedPanel` empty → `setPanelText` fell back to `'...'` and `drawPanelBg` was conditionally skipped.
+  2. `'ended'` branch mounted a `renderChoiceButton('（剧本结束）', -1, CANVAS_W/2, PANEL_Y - 16)` at `(320, 166)` — pre-T11 mid-canvas position, not post-T11 sticky rack at y=265.
+- **Fix**: `paintStep` now skips `extractInternalMonologue` when `step.ended` (recap text stays in panel as written). `'ended'` branch sets panel + draws BG as usual, then mounts a single-slot `mountStickyNotes` with `[新游戏]` at desk surface — same visual idiom as choice racks, no special pseudo-button.
+- **Bug #21**: `[新游戏]` click handler `triggerNewGame()` does the brutal-but-reliable hard-restart pattern — `await save.clearCurrentRun()` → `dialogState.reset()` → `window.location.reload()`. Boot then takes the no-save branch in `main.ts` and ink diverts to `intro` cleanly. Smoother "soft restart" UX (no page flash) would need per-singleton reset wiring (energy / kpi / ap / calendar / flow) which is bigger than this batch's scope; punt to P6.
+
+No new test files — behavior change is at dispatch sites; existing dialog-phase + sticky-notes suites cover the surrounding paths. Total still 302/302.
+
+QA Bugs #21 + #22 ✓ resolved.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 302/302.
+
+**Open after this tick**:
+- Bug #7 discussion (designer scope)
+- Bug #10 minor (paint desync, low priority)
+
+Both non-W1-actionable. **All W1-actionable bugs closed again.**
+
+(next /loop tick: re-read; if no new W1-scope task, output "no task, idle".)
+
+
 
 
 

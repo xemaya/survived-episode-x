@@ -953,3 +953,275 @@ All major engine bugs resolved. Open items are designer/discussion-tier.
 ### Next round target (R13)
 
 No more `fix(qa-bug-N)` priority items. R13 should extend driver coverage to Day 4-7 events to surface NEW bugs (day_3_after_work full 3-choice rack, day_4 weekly_report, day_6 weekend lisa wechat, day_7 mom video + cliffhanger).
+
+---
+
+## Round 13 — Bug #20 doc-close + Day 4 reach (`qa/p5-demo-r13.spec.ts`, 1 test, all pass)
+
+W2 QA Round 13 (2026-05-06). Latest commit: `5de6eb9 fix(qa-bug-20): close by Bug #19 fix dependency (no engine change)`. Smoke 302/302.
+
+### Verifies
+
+- ✓ **Bug #20 close** — closed via Bug #19's Option A monologue retune. Narration vs monologue split visually distinct without authoring change.
+- ✓ **Day 1 → Day 4 reach** — boot → intro → Day 1 (4 choice points) → Day 2 (2 + stub auto-skip) → Day 3 (Event 3.2 + after_work both full 3-choice) → Day 4 weekly_report.
+
+### Key beats reached
+
+| Day | Beat | Choices |
+|-----|------|---------|
+| 3 | 3.2 lisa after meeting | `看大家吧 / 我不去 / 我也不知道` |
+| 3 | after_work | `申报加班 -10 状态 +2 AP … / 按时下班 / 提前下班` |
+| 4 | weekly_report | `提交 / 改一改更具体一点 / 不提交，下班前再说` |
+
+### Observations
+
+- **Bug #6 still latent**: Day 3 after_work `[申报加班 -10 状态 +2 AP …]` mechanism-disclosure label still in ink content; sticky-fit truncates visually but underlying authoring sweep pending (P6).
+- **No console errors / pageerrors** through Day 1 → Day 4.
+
+### Next round target (R14)
+
+Reach Day 5-7. Day 6 weekend lisa wechat (3 choices line 1613), Day 7 mom video (3 choices line 1783) + cliffhanger (line 1898). Day 6/7 emit weekend regen + phone-scene tags — opportunity to test those.
+
+---
+
+## Bug #21 — block UX — episode-end has no main menu / new game exit; player stuck on "（剧本结束）"
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: block — when ink reaches `-> END`, only "（剧本结束）" pseudo-choice button shows. No way to return to main_menu, start new game, or load next episode. Refresh restores to same dead-end state.
+
+**Repro**:
+1. Progress to episode-1 D7 末 → ink reaches END
+2. Panel shows last beat + "（剧本结束）" button
+3. Click does nothing meaningful
+4. Refresh → save restores → same dead screen
+
+**Expected** (one of):
+- Auto-transit FSM → `gameover` state (already P0-P4 implemented Archive + RunSummary screen with new-game button)
+- Show Preact overlay `[回到主菜单] / [新游戏]` affordance
+- Auto-load next episode if available
+
+**Actual**: dead-end. Player stuck unless manually clear localStorage.
+
+**Files involved**: `game/src/render/dialog/ink-dialog.ts` `'ended'` phase + `game/src/flow/dispatcher.ts` (FSM no transit on ink-end) + `game/src/main.ts` boot path
+
+**Suggested fix**: when `step.ended` true, trigger FSM transit to `gameover` (P0-P4 state) which mounts Archive + new-game UI. Existing infrastructure, just need the trigger wire.
+
+**Status**: ✓ resolved — `fix(qa-bug-21,22)` (batch 18 W1 pickup, 2026-05-06). Took the simpler hard-restart path instead of FSM transit to `gameover`:
+
+- `paintStep` `'ended'` branch replaced — no more `（剧本结束）` mid-canvas pseudo-button. Mounts a real `[新游戏]` sticky note at desk surface via the existing `mountStickyNotes` rack (single-slot, same visual idiom as choice racks).
+- New `triggerNewGame()` handler: `await save.clearCurrentRun()` → `dialogState.reset()` → `window.location.reload()`.
+- Hard-restart UX: page flashes briefly, boots cleanly — no save → ink diverts to `intro` per existing `main.ts` logic. Brutal but reliable across all singletons (energy / kpi / ap / calendar / flow) without per-singleton reset wiring.
+
+If a smoother "soft restart" UX is wanted later (no flash), wire `flow.request({kind: 'main_menu'})` + per-singleton resets. `transitions.ts:38-49` already legalizes `action_day → main_menu`; missing piece is the reset wiring. Punt to P6.
+
+---
+
+## Bug #22 — block UX — episode-end rendering broken; narration on monitor + (剧本结束) at canvas center + no panel BG
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: block — at episode end, narration text ("今日 KPI: +0 / 状态: 100/100 (regen +30) / 关键时刻 today:...") renders on the monitor sprite area (top half), not in the bottom narration panel. Panel BG missing. "（剧本结束）" button at canvas center instead of sticky rack y=265.
+
+**Visual evidence**: GM screenshot 2026-05-06 — recap text overlaid on monitor sprite + 1 mid-canvas pseudo-choice button + no dark panel BG.
+
+**Hypothesis**: `'ended'` phase in `dialog-phase.ts` may render the choice but skip mounting / re-using the narration panel + sticky rack. Earlier paintStep's text node persists at default Pixi position, choice button at default mid-canvas.
+
+**Suggested investigation**:
+1. Drive to ink-end, log `decideDialogPhase()` output
+2. Inspect Pixi stage tree at end state: is `ink-dialog` panel mounted? Where? With what BG?
+3. Is `step.text` populated at end? Why isn't paintStep painting it into the proper panel?
+
+**Files involved**: `game/src/render/dialog/dialog-phase.ts` (7-phase switch) + `game/src/render/dialog/ink-dialog.ts` (paintStep `'ended'` branch)
+
+**Status**: ✓ resolved — `fix(qa-bug-21,22)` (batch 18 W1 pickup, 2026-05-06).
+
+Root cause was two-fold:
+1. **Recap text routed to monologue overlay**: episode-end recap is written as `_今日 KPI: +0 / 状态: 100/100 / ..._` (italic markdown). `extractInternalMonologue` lifted those whole-italic paragraphs out of the panel and into the top-region monologue overlay (per Bug #19's retune at y=26). Panel `trimmedPanel` ended up empty, so `setPanelText` fell back to `'...'` and `drawPanelBg` was conditionally skipped.
+2. **Pseudo-button at PANEL_Y - 16**: `renderChoiceButton('（剧本结束）', -1, CANVAS_W/2, PANEL_Y - 16)` sat at `(320, 166)` — pre-T11 mid-canvas position, not the post-T11 sticky rack at y=265.
+
+Fix:
+- `paintStep` skips `extractInternalMonologue` when `step.ended` so recap text stays in the panel as written.
+- `'ended'` branch sets the panel text + draws BG as usual, then mounts a single-slot `mountStickyNotes` with `[新游戏]` at desk surface (y=265 by default). Same visual idiom as choice racks — no special pseudo-button.
+
+Tests still 302/302 — behavior change is at the dispatch site; existing dialog-phase suite covers the surrounding paths.
+
+---
+
+## Bug #23 — block onboarding — 没有 intro 引导，玩家点"开始今日"后不知道干啥；morning_briefing card 在 AVG 流程里多余
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: block onboarding — 新玩家点开始 → morning_briefing Preact card "第 1 个月 · Day 1 · 周一 / 早晨 8:00 / 本月 KPI 0/100 / 精力 80/100 / [开始今日]" 弹出。这是 P0-P4 卡牌时代的 holdover overlay，但 design pivot 后是 AVG，所有信息走 ink narrative，这个 card 是多余打断。
+
+**GM 决定 (2026-05-06)**: ✅ **删除 morning_briefing Preact overlay 整个**。
+
+**理由**:
+- AVG 是 narrative-driven，不应该有 stat-card 中断
+- 信息全部走 ink narrative（"闹钟响了 3 次。你叫陈笑天。32 岁，产品助理..."）已经覆盖了 day/time/character intro
+- KPI / 精力数值由顶部 Status HUD 持续显示（见 Bug #29）
+- 月份递增 / 周几递增由 ink narrative 自然带出（"周一"、"周三晨会"）
+- 进入 Day 1 第一次需要 onboarding hint：1 个 modal 解释"我"vs"你" + 选择 vs 内心独白 + 不可能三角 — 仅出现 1 次
+
+**Spec for W1**:
+1. `game/src/flow/dispatcher.ts`: 删除 `MORNING_BRIEFING` FSM state 或 short-circuit 它直接 transit 到 `ACTION_DAY`
+2. `game/src/render/menu/morning-briefing.tsx`: deprecate (or kept as P6 backlog)
+3. 新增 `game/src/render/onboarding/first-time-tutorial.tsx`: 1 次性 modal，仅在 `localStorage` 没 `survived:tutorial_seen` 标志时弹出，关掉后写 flag。内容："本游戏 = 反向 KPI 中国职场生存模拟。文字 == 你眼中的世界 ('你')。倾斜浅灰文字 == 你的内心 ('我')。三个不可能三角：钱 / 事 / 离家近。下个月 KPI 阈值会涨。活到第 52 集。"
+4. ink boot path: `main.ts` 直接 `loadEpisode('episode-1') → ink.divertTo('intro')`，跳过 morning_briefing screen
+
+**Files**: `game/src/flow/dispatcher.ts` + `game/src/main.ts` + 新增 `first-time-tutorial.tsx` + 移除 `morning-briefing.tsx` mount
+
+**Status**: ⏳ open — block onboarding，W1 next pickup。
+
+---
+
+## Bug #24 — major UX — 一个对话框里塞了多人对话 + narration 多 beat 混杂
+
+**Reported by**: GM playtest (2026-05-06, screenshots 25 + 26)
+**Severity**: major UX — narration panel 单次 paint 包含多个 distinct beats（Lisa "谢谢哈" + 时间跳到 11:42 + 电梯门打开 + David 走入 + David quote），玩家无法 frame-by-frame 跟。
+
+**GM 决定 (2026-05-06)**: ✅ engine-side **auto-split on speaker line**。
+
+**Spec for W1**:
+- `runtime.ts step()` 累积 text 时检测每段是否以已知 NPC `Speaker："` 开头（用现有 `speaker-parser.ts` 或 `# speaker:` tag）
+- 如果检测到 NPC speaker line 而当前累积里**已经**有内容（≥1 paragraph 之前的 narration 或上一个 speaker line），**插入虚拟 pagebreak**：当前累积成为 step 1 paint，speaker line 成为 step 2 paint
+- 虚拟 pagebreak 跟现有 `# pagebreak` tag 走同 mechanism — `pendingChunk` 暂存 + click ▼ 推进
+- 内心 monologue (`_..._` italic) 不是 speaker，但应该也算 split point —— "narration → monologue → narration → speaker → narration..."
+
+**对 .ink writer 的连锁影响**: 不需要 retro-fit 现有 episodes。W3 / S3 ink writer 可以继续写多 paragraph 的混杂 beat，engine 会自动拆。
+
+**Test**: dev 跑 Day 2 Lisa 茶水间 → 验证 Lisa "谢谢哈" 单 paint，"11:42 你想去 16 楼上厕所" 单 paint，"电梯门打开 David 走入" 单 paint，"兄弟周末过得怎样？" 单 paint。各 paint 间 ▼ click 推进。
+
+**Status**: ⏳ open — major UX, W1 pickup（耦合 Bug #25, 一起做）。
+
+---
+
+## Bug #25 — major UX — Bug #13 Option B reverse: 选项出现时 panel 应该保留, 选项浮在桌面上
+
+**Reported by**: GM playtest (2026-05-06, screenshot 27)
+**Severity**: major UX — Bug #13 之前选 Option B（panel hide when sticky 出现），实测 unfriendly。AVG 标准是"对话框不动，选项浮上方，选完整对话继续"。
+
+**GM 决定 (2026-05-06)**: ✅ **Reverse 到 Option A** — narration panel 保留可见，sticky 浮在桌面上方与 panel 不冲突。
+
+**Spec for W1**:
+- `dialog-phase.ts` `'deferred-choices'` phase 改造：narration panel 保持 visible（同 narration-only phase），sticky rack mount 在 desk surface y=265（现 STICKY_CENTER_Y）
+- 解决 Bug #13 原冲突的方法 = **panel 高度从 156 缩到 96**（占下 1/3，y=240-336），sticky rack 移到 y=180-238 desk-surface 区
+- 或者保留 panel 156 高度但 sticky 透明度调到 0.95 让 panel 文字仍可见 underneath
+- `'header-band'` phase 不变（短 prompt 仍 inline）
+- ▼ 翻页机制保留——即使 panel + sticky 同时存在，长 narration 多页时 ▼ 推进直到最后一页 + sticky 出现
+
+**优先选 panel 高度调整方案**（panel 96 高 + sticky desk-surface），不用透明度黑魔法。
+
+**Test**: dev 跑到 Day 1 Event 1.2 茶水间 → 验证 narration panel + sticky 同屏 + 不互相 overlap
+
+**Status**: ⏳ open — major UX, W1 pickup（耦合 Bug #24）。
+
+---
+
+## Bug #26 — minor → polish — 左上角日历贴图残次 + 不更新
+
+**Reported by**: GM playtest (2026-05-06, screenshots 24-27)
+**Severity**: polish — calendar sprite (assets/sprites/hud/calendar_*.png) visual quality 差 + 不随 currentDay 变。
+
+**GM 决定 (2026-05-06)**: ✅ **改为 Pixi Graphics 程序绘制的 calendar widget**。
+
+**Spec for W1**:
+- 新建 `game/src/render/diegetic/calendar-widget.ts` — Pixi Container + Graphics 程序绘制：
+  - 顶部 banner: 月份 (e.g. "5月 MAY") + 装订环 visual
+  - Grid: 7 列 × 5 行 small cells, 每 cell 显示日期数字
+  - 当前 day 用红色圆框 highlight（仿现实台历翻页效果 — 之前的天淡灰）
+  - 周末列 column (周六 / 周日) 用红色字体 standard
+- 绑 `calendar.onDateChanged` listener — 自动 redraw on day advance
+- 替换 `mountWorkstation` 中现 calendar Sprite mount 路径
+
+**Test**: dev 跑 Day 1 → Day 2 → Day 3 等，验证 calendar widget 上 day cell highlight 跟着切。
+
+**Status**: ⏳ open — polish, W1 P2 pickup。
+
+---
+
+## Bug #27 — block design — AP 系统应已删除但仍在剧本 + 机制中
+
+**Reported by**: GM playtest (2026-05-06, screenshot 27 看到 "申报加班 -10 状态 +2 AP" + "提前下班 (你没用满 8 AP)")
+**Severity**: design — design pivot 时议过删 AP，但 episode-1.ink 还在 mention AP，game/src/economy/ap.ts 还存在。
+
+**GM 决定 (2026-05-06)**: ✅ **彻底删 AP 系统 + sweep ink mention**。
+
+**Spec**:
+
+A. **W1 engine-side**:
+- 删 `game/src/economy/ap.ts` (或 deprecate 整个 module)
+- 删 ap reference from `snapshot.ts` / `restore.ts` / `schema.ts`
+- 删 `OVERTIME_BONUS_AP` 常量, `BASE_AP_PER_DAY`, etc
+- `day-cycle.ts` 不再监 AP=0 触发 after_work transition——改为 ink narrative 自然到 day_N_after_work stitch 时 transit
+- `effort` module 保留（hero/overage 仍是 KPI Review 输入），只是 AP 那个 entry point 删除
+- `ap_cost` ink choice tag (如 W3 R2 加过) ignore
+
+B. **W3 (need re-engage from stand-down) ink content sweep**:
+- episode-1/2/3/4/5/6/7/8.ink 全 sweep `AP` mention，删除 OR rewrite
+  - "[申报加班 -10 状态 +2 AP 等价]" → "[申报加班]"（数值放选项 label = anti-Pillar 3，删数值；effects 写在 stitch body）
+  - "[提前下班 (你没用满 8 AP)]" → "[提前下班]"
+  - "8 个时间槽" intro screen 2 文案 → 删除或改 "节奏感" 描述
+- daily-choices.ink 同 sweep
+
+**Files**: 整个 `game/src/economy/ap*` + 8 个 episode .ink + daily-choices.ink
+
+**Test**: dev 跑全程 → 验证 console 无 ap referenceerror + 选项 label 不再含 AP / 状态数值披露
+
+**Status**: ⏳ open — design priority。W1 engine-side delete (1-2h)，W3 ink content sweep (~2h script-driven)。
+
+---
+
+## Bug #28 — minor → polish — 工位背景图一成不变 + 没 NPC 立绘
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: T04 + T05/T06 backlog — 已知，重申。
+
+**Status**: tracked in `w1-task-queue.md` T-1 (T04 scene registry) + T-2 (T05/T06 NPC sprite slots)。priority 升到 P0（之前是 P1）—— user 玩起来明显感觉缺。
+
+---
+
+## Bug #29 — major UX — 缺右上角 Status HUD 三要素显示 + 选项 effect 视觉反馈
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: major UX — 三要素 KPI / 钱 / 状态 玩家无法实时看到。选项选完后的数值变化也没 visual feedback。
+
+**GM 决定 (2026-05-06)**: ✅ **加 Status HUD 在右上角 + 选项 effect flash**。
+
+**Spec for W1**:
+A. Status HUD (top-right):
+- Pixi Container at (canvas.W - 100, 20), 60×100 size
+- 3 行: KPI X/Y / 钱 ¥X / 状态 X/100
+- 实时绑 `kpi.onChanged` / `state.onChanged` / `money.onChanged` (state 是不可能三角"离家近"的代名 — verify 当前 module 名)
+- 字体 10pt, 半透明 BG `#000000a0`, cream text `#E8E0CC`
+
+B. Choice effect flash:
+- 选完 sticky → 在 Status HUD 对应行 trigger `+N` / `-N` flash text 浮动 0.8s 然后 fade
+- 数值同步动画（500ms tween）从旧值到新值
+
+**Files**: 新增 `game/src/render/hud/status-hud.ts` + `mountWorkstation` 加 mount
+
+**Test**: dev 跑 Day 1 Event 1.2 → 选 `[让 Lisa 先]` → 验证状态 +3 flash + Status HUD KPI/钱/状态值刷新
+
+**Status**: ⏳ open — major UX。
+
+---
+
+## Bug #30 — design — "我" vs "你" 内心独白 vs 旁白 voice 区分不清
+
+**Reported by**: GM playtest (2026-05-06)
+**Severity**: design feedback — Bug #19 fix already moved monologue to top + 10pt italic + cool gray. But user still confused.
+
+**GM 决定 (2026-05-06)**:
+
+设计意图保留——"我" = monologue (top, italic, 10pt cool gray) / "你" = narration (bottom, upright, 12pt cream)。这是 game voice 核心 device。
+
+但**加强 onboarding clarification**：在 first-time-tutorial.tsx (Bug #23 fix) 显式说明这两个 voice：
+
+```
+"本游戏的语言:"
+"  - 顶上倾斜浅灰文字 = 你的内心独白（"我..."）"
+"  - 底下白色文字 = 你身边发生的事（"你..."）"
+"  - 黄色便利贴 = 你的选项"
+```
+
+只 onboarding 中说一次。runtime 不再 explain。
+
+**Status**: ⏳ open — gated on Bug #23 first-time-tutorial 实现。

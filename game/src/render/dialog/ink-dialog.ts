@@ -22,6 +22,7 @@ import { type InkStoryStep, ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
 import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
 import { autosave } from '@/save/autosave';
+import { save } from '@/save/system';
 import { sceneState } from '@/scene/scene-state-mirror';
 import { Container, Graphics, Text } from 'pixi.js';
 import { decideDialogPhase } from './dialog-phase';
@@ -51,9 +52,9 @@ const TEXT_COLOR = 0xe8e0cc;
 const PANEL_BG = 0x000000;
 const PANEL_BG_ALPHA = 0.78;
 const PANEL_BORDER = 0x5a7080;
-const CHOICE_BG = 0x2c4a6e;
-const CHOICE_BG_HOVER = 0x4a6a8e;
-const CHOICE_BORDER = 0xc8a85a;
+// (Pre-T11 CHOICE_BG / CHOICE_BG_HOVER / CHOICE_BORDER constants removed —
+// the legacy renderChoiceButton was the only consumer; T11 sticky-notes
+// own their palette in sticky-notes-layout.ts.)
 
 /** Bug #18-regression threshold: when the text after a speaker line
  * (`parsed.remainder`) is longer than this many trimmed chars, the
@@ -217,59 +218,34 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     panelBg.stroke({ color: PANEL_BORDER, width: 1 });
   };
 
-  const renderChoiceButton = (label: string, idx: number, x: number, y: number): (() => void) => {
-    const btn = new Container();
-    btn.label = `choice-${idx}`;
-    btn.eventMode = 'static';
-    btn.cursor = 'pointer';
-    btn.x = x;
-    btn.y = y;
-
-    const bg = new Graphics();
-    btn.addChild(bg);
-
-    const lbl = new Text({
-      text: label,
-      style: {
-        fontFamily: TEXT_FONT,
-        fontSize: 12,
-        fill: TEXT_COLOR,
-      },
-    });
-    lbl.anchor.set(0.5);
-    btn.addChild(lbl);
-
-    const w = lbl.width + 20;
-    const h = 22;
-    const repaint = (hover: boolean) => {
-      bg.clear();
-      bg.rect(-w / 2, -h / 2, w, h);
-      bg.fill({ color: hover ? CHOICE_BG_HOVER : CHOICE_BG, alpha: 0.9 });
-      bg.stroke({ color: CHOICE_BORDER, width: 1 });
-    };
-    repaint(false);
-
-    btn.on('pointerover', () => repaint(true));
-    btn.on('pointerout', () => repaint(false));
-    btn.on('pointertap', () => {
-      if (idx < 0) return; // ended-state placeholder
-      advanceChoice(idx);
-    });
-
-    choicesLayer.addChild(btn);
-    return () => btn.destroy({ children: true });
-  };
-
   /** Apply a choice + dispatch its tags + autosave + paint the next step.
-   * Called from every choice surface (legacy button + sticky note). T16
-   * autosave fires here so a refresh from any mid-episode position will
-   * resume to the choice the player just made (Bug #9 fix). */
+   * Called from every choice surface (sticky note rack). T16 autosave
+   * fires here so a refresh from any mid-episode position will resume
+   * to the choice the player just made (Bug #9 fix). */
   const advanceChoice = (idx: number) => {
     if (idx < 0) return;
     const nextStep = ink.selectChoice(idx);
     tagDispatcher.dispatchAll(nextStep.tags);
     void autosave();
     queueMicrotask(() => paintStep(nextStep));
+  };
+
+  /** Bug #21 fix: episode-end "新游戏" handler. Hard-restart pattern —
+   * clears the save file, resets in-memory dialog cache, and reloads
+   * the page. Boot picks up cleanly: no save → ink diverts to intro.
+   * The page-reload approach is brutal but guarantees a clean slate
+   * across all singletons (energy / kpi / ap / calendar) without
+   * having to re-implement individual reset paths for a P5 demo. */
+  const triggerNewGame = (): void => {
+    void (async () => {
+      try {
+        await save.clearCurrentRun();
+      } catch (e) {
+        console.warn('[new-game] clearCurrentRun failed:', (e as Error).message);
+      }
+      dialogState.reset();
+      window.location.reload();
+    })();
   };
 
   /** Resume the story past a `# pagebreak` and paint the next chunk.
@@ -430,7 +406,13 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
     // (else: long multi-paragraph blob — speaker stays inline in panel)
 
     // Layer 2: whole-italic paragraphs → internal monologue overlay.
-    const split = extractInternalMonologue(working);
+    // Bug #22 fix: at ink-end, recap text often appears wrapped in
+    // `_..._` (e.g. `_今日 KPI: +0_`). That's NOT internal voice — it's
+    // the closing recap and belongs in the panel for visibility. Skip
+    // the monologue split when step.ended so the recap stays put.
+    const split = step.ended
+      ? { monologue: '', remainder: working }
+      : extractInternalMonologue(working);
     if (split.monologue.length > 0) {
       currentMonologue = mountInternalMonologue(container, {
         text: split.monologue,
@@ -459,15 +441,18 @@ export function mountInkDialog(parent: Container): InkDialogHandles {
 
     switch (phase) {
       case 'ended': {
-        // Story reached `-> END` — show "（剧本结束）" placeholder.
-        if (trimmedPanel.length > 0 || !(currentBubble || currentMonologue)) {
-          setPanelText(stripMarkdown(trimmedPanel || '...'));
-          drawPanelBg();
-        } else {
-          hidePanel();
-        }
-        const teardown = renderChoiceButton('（剧本结束）', -1, CANVAS_W / 2, PANEL_Y - 16);
-        choiceTeardowns.push(teardown);
+        // Bug #21 + #22 fix: story reached `-> END`. Render the final
+        // recap text in the panel as usual, then mount a single
+        // sticky `[新游戏]` at desk surface (matches T11 visual idiom)
+        // wired to a hard-restart that clears the save and reloads
+        // the page so boot starts fresh.
+        const endText = trimmedPanel.length > 0 ? trimmedPanel : '剧本结束。';
+        setPanelText(stripMarkdown(endText));
+        drawPanelBg();
+        currentStickies = mountStickyNotes(container, {
+          choices: [{ index: 0, text: '新游戏' }],
+          onSelect: () => triggerNewGame(),
+        });
         break;
       }
       case 'paged': {
