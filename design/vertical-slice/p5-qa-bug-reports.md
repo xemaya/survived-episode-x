@@ -498,7 +498,7 @@ Tests: 6 new vitest cases in `prop-registry.test.ts`. Total 272/272.
 
 **GM recommendation**: Option A first (15 min). If still visible, fall back to C.
 
-**Status**: ⏳ open — W5 (Option A) or W1 (Option C). User decides.
+**Status**: ✓ resolved via Option C — `fix(qa-bug-15)` (batch 16 W1 pickup, 2026-05-06). W5 hadn't acted in R6/R7/R8/R9 and GM marked the bug "promote priority — visible in every screenshot", so W1 implemented the Pixi-side crop. See the duplicate-mention block lower in this file for full implementation notes; W5 can still do Option A (cleaner source) and drop the `cropEdges` spec from `workstation.ts` when ready.
 
 ---
 
@@ -829,7 +829,13 @@ Tests: existing bubble tests still green; behavior change is exercised end-to-en
 
 **GM playtest 2026-05-06 update**: screenshot 3 captures it precisely — fruit_bowl sprite shows "Front" text label in upper-right corner. No fix in commit log yet (R7 + R8 + R9 didn't touch). GM recommendation from earlier was Option A (re-cut with bigger `label_band`, ~15 min) or Option C (PixiJS Sprite-side crop mask). Still pending W5/W1 pickup.
 
-**Status**: ⏳ open — promote priority. Visible in every screenshot that shows the fruit_bowl prop.
+**Status**: ✓ resolved (Option C) — `fix(qa-bug-15)` (batch 16 W1 pickup, 2026-05-06). PixiJS-side crop applied to fruit_bowl after W5 didn't act in R6/R7/R8/R9.
+
+- `prop-entity.ts`: new `PropCropEdges` type (`{ top?, right?, bottom?, left? }`) on `PropEntitySpec`. New `computeCropFrame(sourceW, sourceH, edges)` pure helper returns the inner frame rect or null when no crop. New `applyCropEdges(base, edges)` builds a `Texture` sharing `base.source` with a narrowed `Rectangle` frame (cheap — only metadata changes; bitmap is shared). State-swap path also re-applies the crop on every state's loaded texture so all three frames (apple/strawberry/empty) get the same trim.
+- `workstation.ts`: fruit_bowl mounts with `cropEdges: { top: 80, bottom: 80 }` (matches the 341×844 source — symmetric trim hides "Front" label at top + "9:00" timestamp at bottom without shifting visible content's vertical center relative to the sprite's anchor 0.5/0.5).
+- W5 / Option A migration plan: when the source PNGs get re-cut without baked labels, drop the `cropEdges` spec from `workstation.ts` (one-line revert). The crop helper stays — useful for future leakage incidents.
+
+Tests: 7 new vitest cases in `prop-registry.test.ts` for `computeCropFrame` (null on undefined / all-zero / empty / partial; crop math for top+bottom, all-four, asymmetric, degenerate clamp). Total 302/302.
 
 ---
 
@@ -886,3 +892,28 @@ Bug #12 close rationale only fully holds **cross-day**. Intra-day events without
 ### Next round target (R11)
 
 Verify #19 / #18-regression / #15 fixes when they land. Otherwise extend driver to Day 5-7.
+
+---
+
+## Round 11 — verify Bug #19 + Bug #18-regression (`qa/p5-demo-r11.spec.ts`, 4 tests, all pass)
+
+W2 QA Round 11 (2026-05-06). Latest commit: `fafa078 fix(qa-bug-19,18-regression): monologue top-region retune + bubble dominance heuristic`. Smoke 295/295 (was 293 — 2 new tests).
+
+### Verifies
+
+- ✓ **Bug #19 (monologue Z-overlap)** — RESOLVED via Option A. Driver verifies: post-flush states (Day 1 morning + Event 1.2 sticky phase) show NO monologue overlay visible, no Z-collision with sticky rack or panel. Visual screenshots `r11-01`, `r11-02` show clean separation. Fix moved `PROTAGONIST_HEAD_ANCHOR` to (320, 26) — top region well above panel y=180-336.
+- ✓ **Bug #18-regression (bubble dominance heuristic)** — RESOLVED. Driver picks `[让 Lisa 先]` at Event 1.2 (mounts Lisa "谢谢哈." bubble) → advances through Event 1.3 (David, picks `[还行你呢]`) → 1.4 王总监 → 1.5/1.6/day_1_after_work. At each subsequent paint, `readSpeechBubbleText` returns `[]` — no stale bubbles persist.
+- ✓ **Re-verify #6 / #11 / #14**: no regressions.
+
+### Round 11 tooling note
+
+- **N28 — Smoke 295/295** (was 293).
+- **N29** — monologue position assertion only verifies "not visible at post-flush" since test paths landed on sticky-rack states. Not adversarial — fix is position-pinned via constant change, code-readable.
+
+### Round 11 outstanding
+
+- Bug #15 (sprite-sheet "Front" label leak) — STILL OPEN since R5.
+
+### Next round target (R12)
+
+Bug #15 fix verification when it lands. Otherwise R12 extends driver to Day 4-7.

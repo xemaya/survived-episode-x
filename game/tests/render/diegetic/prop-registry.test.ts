@@ -3,7 +3,11 @@
 // (Assets.load needs a real fetch).
 
 import { describe, expect, it } from 'vitest';
-import type { PropEntity, PropScope } from '../../../src/render/diegetic/prop-entity';
+import {
+  type PropEntity,
+  type PropScope,
+  computeCropFrame,
+} from '../../../src/render/diegetic/prop-entity';
 import { PropRegistry, parsePropTagValue } from '../../../src/render/diegetic/prop-registry';
 
 function fakeEntity(
@@ -205,5 +209,58 @@ describe('PropEntity scope + hideScopedTo (Bug #14 fix)', () => {
     expect(mug.visible).toBe(true);
     expect(r.hideScopedTo('permanent')).toBe(1);
     expect(mug.visible).toBe(false);
+  });
+});
+
+describe('computeCropFrame (Bug #15 fix — pure crop math)', () => {
+  it('returns null when edges are undefined', () => {
+    expect(computeCropFrame(341, 844, undefined)).toBeNull();
+  });
+
+  it('returns null when all edges are zero', () => {
+    expect(computeCropFrame(341, 844, { top: 0, right: 0, bottom: 0, left: 0 })).toBeNull();
+  });
+
+  it('returns null when an empty object is passed', () => {
+    expect(computeCropFrame(341, 844, {})).toBeNull();
+  });
+
+  it('crops top + bottom (the fruit_bowl reproducer)', () => {
+    expect(computeCropFrame(341, 844, { top: 80, bottom: 80 })).toEqual({
+      x: 0,
+      y: 80,
+      width: 341,
+      height: 844 - 80 - 80,
+    });
+  });
+
+  it('crops all four sides asymmetrically', () => {
+    expect(computeCropFrame(200, 200, { top: 10, right: 20, bottom: 30, left: 40 })).toEqual({
+      x: 40,
+      y: 10,
+      width: 200 - 40 - 20,
+      height: 200 - 10 - 30,
+    });
+  });
+
+  it('clamps inner dimensions to 1px minimum on degenerate edges', () => {
+    const f = computeCropFrame(100, 100, { top: 200, bottom: 200 });
+    expect(f).not.toBeNull();
+    expect(f?.height).toBe(1);
+  });
+
+  it('handles partial-edge specs (only some sides defined)', () => {
+    expect(computeCropFrame(100, 100, { right: 20 })).toEqual({
+      x: 0,
+      y: 0,
+      width: 80,
+      height: 100,
+    });
+    expect(computeCropFrame(100, 100, { left: 30 })).toEqual({
+      x: 30,
+      y: 0,
+      width: 70,
+      height: 100,
+    });
   });
 });

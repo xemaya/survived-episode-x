@@ -306,6 +306,13 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
       x: 510,
       y: 250,
       scale: 0.12,
+      // Bug #15 fix (Option C — Pixi-side crop): the source PNGs are
+      // 341×844 with "Front" label baked at the top edge and a "9:00"
+      // timestamp at the bottom. Symmetric ~80px crop top/bottom hides
+      // both without shifting the visible content's vertical center
+      // relative to the sprite's anchor (0.5, 0.5). Drop this field
+      // when W5 lands Option A (re-cut sheets without labels).
+      cropEdges: { top: 80, bottom: 80 },
     });
     propRegistry.register(fruitBowl);
     teardowns.push(() => {

@@ -353,6 +353,36 @@ Tests: 2 prior monologue style pins rewritten to new spec + 2 new pins (font siz
 
 (next /loop tick: re-read; if QA hasn't filed new bugs and Bug #15 still W5-scope, output "no task, idle".)
 
+---
+
+## 2026-05-06 · batch 16 — /loop tick 9 — Bug #15 Option C (Pixi-side crop)
+
+W1 (engine) /loop tick 9. Bug #15 has been "open" since R5 with W5/W1 split — W5 owned Option A (re-cut sheets) but didn't act in R6/R7/R8/R9 and GM "promote priority" because the leaked "Front" + "9:00" labels show in every fruit_bowl frame. Picked up Option C (Pixi-side crop) so the demo isn't visibly broken while waiting for the source-side fix.
+
+- **prop-entity.ts**:
+  - New `PropCropEdges = { top?, right?, bottom?, left? }` type on `PropEntitySpec`.
+  - New pure helper `computeCropFrame(sourceW, sourceH, edges)` — returns null when no crop applies (undefined / all-zero / empty), otherwise the inner-rect coords clamped to ≥1 px on each axis. Vitest-able without Pixi.
+  - New `applyCropEdges(base, edges)` builds a `Texture` sharing `base.source` with a narrowed `Rectangle` frame. Cheap — bitmap reused, only metadata changes.
+  - `createPropEntity` calls `applyCropEdges` on initial mount and on every `setState` texture swap so all states of a prop get the same trim.
+- **workstation.ts**: fruit_bowl now mounts with `cropEdges: { top: 80, bottom: 80 }`. Source PNGs are 341×844; symmetric trim hides "Front" label at top + "9:00" timestamp at bottom without shifting the visible content's vertical center relative to the sprite anchor (0.5/0.5).
+- **W5 migration plan**: when Option A lands (re-cut sheets without baked labels), `workstation.ts` drops the `cropEdges` line — `applyCropEdges` no-ops when the spec is gone. The helper stays in `prop-entity.ts` for future use cases (other props that leak labels).
+
+Tests: 7 new vitest cases in `prop-registry.test.ts` for `computeCropFrame`. Total 302/302.
+
+QA Bug #15 ✓ resolved via Option C.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 302/302.
+
+**Open after this tick**:
+- Bug #7 discussion (designer scope)
+- Bug #10 paint desync (low priority — only headless screenshot timing)
+- Bug #20 design observation (gated on tone-bible / authoring discipline call)
+
+All W1-actionable bugs closed. Remaining items are designer scope or low-priority discussion.
+
+(next /loop tick: re-read; if no new W1-scope task, output "no task, idle".)
+
+
 
 
 

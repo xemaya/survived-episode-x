@@ -12,9 +12,21 @@
 // workstation.ts — migration to PropEntity can happen incrementally
 // once # prop tags arrive from ink for those props too.
 
-import { Assets, type Container, Sprite } from 'pixi.js';
+import { Assets, type Container, Rectangle, Sprite, Texture } from 'pixi.js';
 
 export type PropScope = 'permanent' | 'scene';
+
+/** Per-side pixel inset for cropping a sprite-sheet / single-frame
+ * texture. Used by Bug #15 fix (Option C — Pixi-side crop) to hide
+ * label leakage at the corners (e.g. fruit_bowl frames carry "Front"
+ * + "9:00" timestamps on the source PNG that the upstream cuts.yaml
+ * label_band didn't fully strip). All four sides default to 0. */
+export interface PropCropEdges {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
 
 export interface PropEntitySpec {
   /** Stable id used by the tag dispatcher to look this prop up. */
@@ -42,6 +54,13 @@ export interface PropEntitySpec {
    *   via the next prop-tag emission.
    * Default: `'scene'` (most diegetic props are scene-bound). */
   scope?: PropScope;
+  /** Bug #15 fix (Option C — Pixi-side crop): per-side pixel inset
+   * cropping the texture frame so labels baked into the source PNG
+   * don't leak into the rendered sprite. Applied uniformly to every
+   * state's texture (assumes the source sheets share label
+   * placement). All four sides default to 0 — no crop. When W5 lands
+   * Option A (re-cut sheets without labels), drop this field. */
+  cropEdges?: PropCropEdges;
 }
 
 export interface PropEntity {
@@ -67,6 +86,42 @@ export interface PropEntity {
   destroy(): void;
 }
 
+/** Pure helper: compute the inner frame rectangle for given source
+ * dimensions + per-side edges. Returns null when no crop is needed
+ * (no edges set, or all four edges zero). Inner dims clamp to 1 px
+ * minimum so degenerate edge specs don't produce invalid frames.
+ *
+ * Exported for unit tests — render path goes through applyCropEdges. */
+export function computeCropFrame(
+  sourceW: number,
+  sourceH: number,
+  edges: PropCropEdges | undefined,
+): { x: number; y: number; width: number; height: number } | null {
+  if (!edges) return null;
+  const top = edges.top ?? 0;
+  const right = edges.right ?? 0;
+  const bottom = edges.bottom ?? 0;
+  const left = edges.left ?? 0;
+  if (top === 0 && right === 0 && bottom === 0 && left === 0) return null;
+  const innerW = Math.max(1, sourceW - left - right);
+  const innerH = Math.max(1, sourceH - top - bottom);
+  return { x: left, y: top, width: innerW, height: innerH };
+}
+
+/** Returns a Texture cropped by the per-side `edges` insets, or the
+ * input texture verbatim when no crop is needed. The cropped texture
+ * shares the source bitmap with `base` — only the frame rectangle is
+ * narrowed — so swapping textures across states with the same crop
+ * spec stays cheap. */
+export function applyCropEdges(base: Texture, edges: PropCropEdges | undefined): Texture {
+  const frame = computeCropFrame(base.source.width, base.source.height, edges);
+  if (frame === null) return base;
+  return new Texture({
+    source: base.source,
+    frame: new Rectangle(frame.x, frame.y, frame.width, frame.height),
+  });
+}
+
 export async function createPropEntity(
   parent: Container,
   spec: PropEntitySpec,
@@ -79,8 +134,9 @@ export async function createPropEntity(
   }
 
   const initialUrl = spec.states[spec.initialState] as string;
-  const tex = await Assets.load(initialUrl);
-  tex.source.scaleMode = 'linear';
+  const baseTex = await Assets.load(initialUrl);
+  baseTex.source.scaleMode = 'linear';
+  const tex = applyCropEdges(baseTex, spec.cropEdges);
   const sprite = new Sprite(tex);
   sprite.label = `prop:${spec.id}`;
   sprite.anchor.set(spec.anchorX ?? 0.5, spec.anchorY ?? 0.5);
@@ -110,9 +166,9 @@ export async function createPropEntity(
       );
       return;
     }
-    const newTex = await Assets.load(url);
-    newTex.source.scaleMode = 'linear';
-    sprite.texture = newTex;
+    const newBase = await Assets.load(url);
+    newBase.source.scaleMode = 'linear';
+    sprite.texture = applyCropEdges(newBase, spec.cropEdges);
     current = state;
   };
 
