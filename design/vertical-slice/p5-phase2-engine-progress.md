@@ -515,9 +515,50 @@ Bug #27 was filed as a **design block**: AP (10/day, refilled at recap) is a hol
 
 (next /loop tick: probably Bug #25 — small/local panel-sizing tweak, or Bug #29 since it's now unblocked.)
 
+---
 
+## 2026-05-06 · batch 21 — Bug #25 (panel + sticky coexist, reverse Bug #13)
 
+GM 决定反转 Bug #13 Option B (panel-hides-when-sticky-mounts) → Option A (both visible). Reasoning per the bug report: AVG 标准是 "对话框不动，选项浮上方，选完整对话继续" — defer-on-tap UX is unfriendly when the player wants to glance at narration while reading the choices.
 
+**Approach** (per spec): panel shrinks instead of hides, sticky rack moves up to desk surface so they don't overlap.
+
+### Engine changes
+
+- **`game/src/render/dialog/ink-dialog.ts`** — `PANEL_H: 156 → 96`. Panel now occupies y=256-352 (bottom strip). Comment block updated to walk through the size history (130 → 156 for Bug #4 → 96 for Bug #25).
+- **`deferred-choices` phase**: rewritten. Instead of parking the step on `deferredChoicesStep`, drawing panel + ▼, and flushing on click, it now mounts panel + sticky rack **simultaneously** in a single paint. No more ▼ defer for the choice case; the player reads the panel and picks a sticky directly.
+- **`choices-only` first-paint restore-narration branch**: same simplification. When ink restores into a choice point with a saved narration string, the panel paints the saved text and the sticky rack mounts alongside (no ▼ tap to reveal).
+- **`paged` phase**: untouched. Explicit `# pagebreak` chunks still get the ▼ continue affordance; that's the legitimate pagination path the spec called out ("▼ 翻页机制保留").
+- **`renderHeaderBand` y position**: 200 → 170 (bottom-anchored). With the rack moved up, the header needs to sit higher so the last text line baseline tucks just above the rack top edge (~175).
+- **`advanceContinue`**: collapsed from a two-case dispatch to a single pagebreak path. The "deferred-choices flush" case 1 was load-bearing for Bug #13 Option B and is now dead; deleted along with the `deferredChoicesStep` parking variable, the now-unused `InkStoryStep` type import, and the resetting `deferredChoicesStep = null` line in paintStep prep.
+- **`game/src/render/choice/sticky-notes-layout.ts`** — `DEFAULT_CENTER_Y: 248 → 210`. Rack span now y=175-245, sitting in the desk-surface band per art-bible §7.1 (above the keyboard area, slightly overlapping the desk surface — matches concept 02 reference).
+- **`game/src/render/choice/sticky-notes.ts`** — fallback `startY` constant `248 → 210` to match the new default.
+
+### Tests
+
+- No test changes needed. The `decideDialogPhase` pure-helper still returns `'deferred-choices'` for the same input shapes — Bug #25 only changes how the **render layer** consumes that phase value, not the phase decision logic. Sticky-notes layout tests pass centerY explicitly so they're independent of the default.
+- Full suite: **289/289 passing** (unchanged from batch 20).
+
+### Verification
+
+- `pnpm tsc` ✓ clean
+- `pnpm test` ✓ 289/289
+
+### What this unblocks
+
+- The "panel hides on sticky" friction is gone — Day 1 Event 1.2 (Lisa 茶水间) and Day 2 Event 2.2/2.3 multi-paragraph events read naturally now: full narration in the bottom strip, three sticky options floating on the desk surface, no extra clicks.
+- Bug #24 (auto-split on speaker line) becomes the next likely UX target — with panel + sticky coexisting, the residual UX problems are speaker-blob splitting and the Status HUD (Bug #29).
+
+### Open after this tick
+
+- Bug #24 (auto-split on speaker line — engine runtime change)
+- Bug #29 (Status HUD top-right + effect flash — unblocked by Bug #27 AP slot deletion)
+- Bug #23 second half — first-time tutorial modal
+- Bug #26 (Pixi calendar widget polish)
+- Bug #28 (T04/T05/T06 backlog — workstation BG / NPC sprites)
+- Bug #30 (gated on tutorial modal)
+
+(next /loop tick: probably Bug #29 — Status HUD now has a clean top-right corner thanks to Bug #27, and it's a major UX gap. Bug #24 is the alternative if the speaker-blob mixing keeps showing up in QA.)
 
 
 

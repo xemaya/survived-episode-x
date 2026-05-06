@@ -83,7 +83,7 @@ export function mountStickyNotes(parent: Container, opts: MountStickyNotesOpts):
   // choices with 4-5 options don't drop content silently.
   if (opts.choices.length > slots.length) {
     const overflow = opts.choices.slice(slots.length);
-    const startY = (opts.centerY ?? 248) - STICKY_NOTES_STYLE.HEIGHT / 2 - FALLBACK_GAP;
+    const startY = (opts.centerY ?? 210) - STICKY_NOTES_STYLE.HEIGHT / 2 - FALLBACK_GAP;
     overflow.forEach((c, j) => {
       const fallbackY = startY - j * FALLBACK_GAP;
       const handle = mountFallbackChoice(
