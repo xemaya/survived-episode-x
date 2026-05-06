@@ -3,24 +3,37 @@
 // (Assets.load needs a real fetch).
 
 import { describe, expect, it } from 'vitest';
-import type { PropEntity } from '../../../src/render/diegetic/prop-entity';
+import type { PropEntity, PropScope } from '../../../src/render/diegetic/prop-entity';
 import { PropRegistry, parsePropTagValue } from '../../../src/render/diegetic/prop-registry';
 
-function fakeEntity(id: string, states: ReadonlyArray<string>): PropEntity {
+function fakeEntity(
+  id: string,
+  states: ReadonlyArray<string>,
+  scope: PropScope = 'scene',
+): PropEntity {
   let current = states[0] ?? '';
+  let visible = scope === 'permanent';
   const calls: string[] = [];
   const entity: PropEntity & { _calls: string[] } = {
     id,
+    scope,
     stateNames: [...states].sort(),
     get currentState() {
       return current;
     },
+    get visible() {
+      return visible;
+    },
     async setState(s: string) {
       calls.push(s);
+      visible = true;
       if (states.includes(s)) current = s;
     },
     hasState(s: string) {
       return states.includes(s);
+    },
+    setVisible(v: boolean) {
+      visible = v;
     },
     destroy() {},
     _calls: calls,
@@ -126,5 +139,71 @@ describe('PropRegistry', () => {
     r.register(fakeEntity('phone', ['face_down']));
     r.clear();
     expect(r.ids()).toEqual([]);
+  });
+});
+
+describe('PropEntity scope + hideScopedTo (Bug #14 fix)', () => {
+  it('scene-scoped fakes start invisible; permanent fakes start visible', () => {
+    const sceneProp = fakeEntity('phone', ['face_down'], 'scene');
+    const permProp = fakeEntity('mug', ['full'], 'permanent');
+    expect(sceneProp.visible).toBe(false);
+    expect(permProp.visible).toBe(true);
+  });
+
+  it('setState wakes the prop (visible=true) even if state matches current', async () => {
+    const phone = fakeEntity('phone', ['face_down', 'face_up'], 'scene');
+    expect(phone.visible).toBe(false);
+    await phone.setState('face_down'); // same as initial
+    expect(phone.visible).toBe(true);
+  });
+
+  it('hideScopedTo("scene") hides only scene-scoped entities, permanent unaffected', async () => {
+    const r = new PropRegistry();
+    const phone = fakeEntity('phone', ['face_down'], 'scene');
+    const fruit = fakeEntity('fruit_bowl', ['apple'], 'scene');
+    const mug = fakeEntity('mug', ['full'], 'permanent');
+    r.register(phone);
+    r.register(fruit);
+    r.register(mug);
+    // Wake the scene props first.
+    await r.setStateFromTag('phone_face_down');
+    await r.setStateFromTag('fruit_bowl_apple');
+    expect(phone.visible).toBe(true);
+    expect(fruit.visible).toBe(true);
+
+    const hiddenCount = r.hideScopedTo('scene');
+    expect(hiddenCount).toBe(2);
+    expect(phone.visible).toBe(false);
+    expect(fruit.visible).toBe(false);
+    expect(mug.visible).toBe(true); // permanent — unaffected
+  });
+
+  it('post-hide setStateFromTag re-shows scene-scoped entities', async () => {
+    const r = new PropRegistry();
+    const phone = fakeEntity('phone', ['face_down', 'face_up'], 'scene');
+    r.register(phone);
+    await r.setStateFromTag('phone_face_down');
+    expect(phone.visible).toBe(true);
+
+    r.hideScopedTo('scene');
+    expect(phone.visible).toBe(false);
+
+    // Next prop tag — even with the SAME state — wakes it.
+    await r.setStateFromTag('phone_face_down');
+    expect(phone.visible).toBe(true);
+  });
+
+  it('hideScopedTo on empty registry is a no-op (returns 0)', () => {
+    const r = new PropRegistry();
+    expect(r.hideScopedTo('scene')).toBe(0);
+  });
+
+  it('hideScopedTo("permanent") hides permanent props (escape hatch — unusual but works)', () => {
+    const r = new PropRegistry();
+    const mug = fakeEntity('mug', ['full'], 'permanent');
+    r.register(mug);
+    expect(mug.visible).toBe(true);
+    expect(r.hideScopedTo('permanent')).toBe(1);
+    expect(mug.visible).toBe(false);
   });
 });

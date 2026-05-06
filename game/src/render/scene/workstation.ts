@@ -8,7 +8,7 @@ import { mountInkDialog } from '@/render/dialog/ink-dialog';
 import { createPropEntity } from '@/render/diegetic/prop-entity';
 import { propRegistry } from '@/render/diegetic/prop-registry';
 import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
-import { installSceneStateTagHandler } from '@/scene/scene-state-mirror';
+import { installSceneStateTagHandler, sceneState } from '@/scene/scene-state-mirror';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
 
@@ -343,6 +343,15 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   // without re-registering on the global TagDispatcher.
   const teardownSceneStateTags = installSceneStateTagHandler();
   teardowns.push(teardownSceneStateTags);
+
+  // Bug #14 fix: when ink emits a different `# scene:` value, hide all
+  // scope='scene' props. They auto-re-show via PropEntity.setState's
+  // visible=true on the next `# prop:` tag emission. Permanent props
+  // (mug/monitor/calendar bound to game state) are unaffected.
+  const teardownSceneScopeHide = sceneState.on('scene', () => {
+    propRegistry.hideScopedTo('scene');
+  });
+  teardowns.push(teardownSceneScopeHide);
 
   // ── Card hand removed (P5: replaced by ink-driven event/choice runtime) ──
   // Action_day no longer presents a card hand. Dialog + choices come from the

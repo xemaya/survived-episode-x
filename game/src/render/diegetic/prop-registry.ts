@@ -11,7 +11,7 @@
 // scan registered ids longest-first and accept the first that the tag
 // value begins with `<id>_`. Pure function so it can be unit-tested.
 
-import type { PropEntity } from './prop-entity';
+import type { PropEntity, PropScope } from './prop-entity';
 
 export interface ParsedPropTag {
   id: string;
@@ -64,6 +64,24 @@ export class PropRegistry {
   /** Drop all registrations (typically on scene unmount). */
   clear(): void {
     this.byId.clear();
+  }
+
+  /**
+   * Bug #14 fix: hide all entities matching a scope. Used by the
+   * scene-state mirror's `# scene:` listener to bulk-hide transient
+   * props on scene change. Returns the count hidden (for tests /
+   * debug). Entities are NOT unregistered — they re-show on the next
+   * `# prop:` tag emission via PropEntity.setState's auto-visible.
+   */
+  hideScopedTo(scope: PropScope): number {
+    let count = 0;
+    for (const entity of this.byId.values()) {
+      if (entity.scope === scope) {
+        entity.setVisible(false);
+        count++;
+      }
+    }
+    return count;
   }
 
   /** For debug: snapshot of id → currentState. */

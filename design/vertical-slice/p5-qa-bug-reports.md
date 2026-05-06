@@ -449,7 +449,13 @@ Tests: 12 new vitest cases in `tests/render/dialog/dialog-phase.test.ts` coverin
 - Short-term: when ink emits `# scene: <new>`, PropRegistry destroys non-permanent props. Permanent (mug/monitor/calendar) are bg-bound; transient (phone/fruit_bowl) are scene-bound.
 - Or: dedicated daily_recap scene with its own BG that hides desk surface.
 
-**Status**: ⏳ open — W1 pickup (T04 sub-task or PropRegistry teardown trigger).
+**Status**: ✓ resolved — `fix(qa-bug-14)` (batch 11 W1 pickup, 2026-05-06). PropEntity gains `scope: 'permanent' | 'scene'` (default `'scene'`). Scene-scoped props start invisible at mount; `setState()` always sets `visible=true` (any `# prop:` tag wakes the prop, even when the state matches the current one). PropRegistry adds `hideScopedTo(scope)` that bulk-hides all matching entities. workstation.ts wires `sceneState.on('scene', () => propRegistry.hideScopedTo('scene'))` so transient props auto-hide on `# scene:` tag value change. Re-show on the next `# prop:` tag.
+
+For the recap reproducer: phone starts hidden at mount → never visible until ink emits a phone tag (which currently happens at Day 2 Event 2.2 only) → during Day 1 daily_recap (`# scene: home_phone_screen`), phone is hidden, no collision with recap text. fruit_bowl follows the same lifecycle: hidden until `# prop: fruit_bowl_apple` fires (Day 1 Event 1.1 Vivian), hidden again at next scene change, re-shown at next prop tag.
+
+Permanent props (mug, monitor, calendar — currently bound directly to game state singletons, NOT via the registry yet) are NOT in this lifecycle and stay visible. When they migrate to the registry (post-T05/T06), they'll register with `scope: 'permanent'`.
+
+Tests: 6 new vitest cases in `prop-registry.test.ts`. Total 272/272.
 
 ---
 
@@ -596,3 +602,27 @@ Fix is option (A) per the suggested-fix table: tear bubble down at the dismiss b
 ### Next round target (R6)
 
 Verify Bug #18 fix when it lands. Verify Bug #14 (phone unmount on scene change) when fix lands. Verify Bug #15 (sprite label leak) Option A or C fix when it lands. Extend driver to Day 3-7 paths now that Day 1-2 are clean.
+
+---
+
+## Round 6 — verify Bug #18 fix + Bug #13 commit (`qa/p5-demo-r6.spec.ts`, 3 tests, all pass)
+
+W2 QA Round 6 (2026-05-06). Latest commits:
+- `a576f7a fix(qa-bug-18): tear down speech bubble + monologue on deferred-choices flush`
+- `63931dc fix(qa-bug-13): defer sticky rack behind ▼ click; header band for short prompts`
+
+### Verifies
+
+- ✓ **Bug #18 (stale speech bubble)** — RESOLVED in `a576f7a`. Driver path: Day 2 Event 2.1 `[一起]` (mounts Lisa "你喝什么?" bubble) → ink advances through Event 2.2 (David, no choices) → Event 2.3 (老周凉茶, 3 sticky choices). At Event 2.3 sticky phase: `speech-bubble` label count = 0 (was 1 stale in R5), `readSpeechBubbleText()` returns `[]` (no "你喝什么" content). Bubble torn down at the deferred-choices flush boundary, so it doesn't bleed into the next event's sticky-rack phase.
+- ✓ **Bug #13 commit** — VERIFIED (was working tree only in R5, now formally committed as `63931dc`). Driver verifies the 2-paint cycle: after `[开始今日]` (which leads to long Event 1.1+1.2 narration > 60-char threshold), labels list immediately = `[]` (deferred-choices phase: panel + ▼ visible, no sticky yet). After 1 panel-tap to flush: labels list = `[sticky-0=让 Lisa 先, sticky-1=你先, sticky-2=不说话，先接你的]` (sticky rack mounted alone). No overlap.
+- ✓ **No regressions on #1/#3/#6**: Day 2 Event 2.3 long sticky still rendered with ellipsis (`主动跟老周说"对不起，您…`). Picking `[偷喝那杯，再走]` → no `pageerror`, no console error. Pagebreak gating still works.
+
+### Round 6 tooling notes
+
+- **N20 — Bug #18 reproducer dropped on dev's lap clean**: my Round 5 filing matched the engineer's understanding of the issue (per `a576f7a` commit message: "Step blob contained Lisa's line at Event 2.1 + narration through 2.2 + choices at 2.3 — paintStep mounted Lisa's bubble for the first paragraph"). Engineer fix was tear-down at deferred-choices flush boundary — clean.
+- **N21 — Smoke tests baseline post-fix**: `pnpm test` = 266/266 still passing (no new tests added in this batch; Bug #18 fix is rendering-side and tested via R6 driver).
+- **N22 — Day 2 path stable now**: after R5 → R6, the entire Day 1 + Day 2 path through Event 2.3 picks all work without any console errors or visual artifacts.
+
+### Next round target (R7)
+
+Bug #14 (phone prop persistence across scenes) + Bug #15 (sprite-sheet label leakage) still open per W1 backlog. Will verify when fixes land. Meanwhile R7 should extend driver into Day 3-7 paths (sticky-rack 3-choice variants, 申报加班 path, 提前下班 path, KPI weekly recap, weekend regen).

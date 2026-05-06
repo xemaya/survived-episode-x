@@ -231,6 +231,29 @@ QA Bug #18 ✓ resolved. Note: with QA Bug #3 (recap blob) ✓ resolved via `# p
 
 (next /loop tick: still Bug #14, but scoped down — add `scope: 'scene' | 'permanent'` to PropEntitySpec + a `propRegistry.destroyScopedTo(scope)` method + a `sceneState.on('scene', …)` listener that fires the destroy. Accept the "won't re-mount on return-to-workstation" limitation until T04 lands; designer can use `# prop: phone_face_down` to bring it back if needed.)
 
+---
+
+## 2026-05-06 · batch 11 — /loop tick 4 — Bug #14 prop scope + scene-aware hide/show
+
+W1 (engine) /loop tick 4. Bug #14 (phone prop persists across scene changes; covers Day 1 daily_recap text). Final approach is hide-not-destroy: scene-scoped props start invisible, become visible on any `# prop:` tag, and auto-hide on `# scene:` tag value change. No re-mount semantics needed — the next prop-tag emission handles re-showing.
+
+- **prop-entity.ts**: new `PropScope = 'permanent' | 'scene'` type + optional `spec.scope` field (default `'scene'`). `PropEntity` interface gains `readonly scope`, `readonly visible`, `setVisible(b)`. `setState()` now sets `sprite.visible = true` UNCONDITIONALLY (even when the requested state matches the current one) so designer can re-emit the same tag to wake a hidden prop. Initial sprite.visible = (scope === 'permanent') so scene-scoped props start hidden.
+- **prop-registry.ts**: new `hideScopedTo(scope)` method iterates entities and calls `setVisible(false)` on matching ones. Returns count for tests/debug. Entities are NOT unregistered.
+- **workstation.ts**: `sceneState.on('scene', () => propRegistry.hideScopedTo('scene'))` listener wired alongside the existing tag handlers. On every `# scene:` value change, all transient props hide.
+- **Lifecycle for fruit_bowl + phone**: register with default `scope: 'scene'` → hidden at boot → ink fires e.g. `# prop: fruit_bowl_apple` at Day 1 Event 1.1 → fruit_bowl visible. Subsequent `# scene:` change (e.g. break_room) → fruit_bowl hidden again. Day 1 daily_recap (`# scene: home_phone_screen`) → phone hidden (it was already hidden because the only phone tag in current ink is at Day 2 Event 2.2, AFTER recap).
+- **Permanent props (mug/monitor/calendar)**: still bound directly to game state singletons, NOT routed through the registry yet. Their visibility is unaffected by this fix. When migration happens (post-T05/T06), they register with `scope: 'permanent'`.
+
+Tests: 6 new vitest cases in `tests/render/diegetic/prop-registry.test.ts` covering scope defaults, setState auto-wake, hideScopedTo per-scope filtering, post-hide re-show via tag. Total 272/272.
+
+QA Bug #14 ✓ resolved. The recap reproducer no longer collides because phone is hidden by the time recap renders.
+
+**Verify**: `pnpm tsc` ✓, `pnpm test` ✓ 272/272.
+
+**Open major bugs after this tick**: #15 (sprite sheet label leakage — W5 owns Option A first; W1 fallback Option C is a Pixi-side crop mask). Open minors: #7 discussion, #10 paint desync, #11 reload `…` placeholder, #12 sceneState single-slot. Plus Q-4 path interceptor still pending W1 pickup (not blocking until E8/E12 finale).
+
+(next /loop tick: pick from Q-4 path-interceptor.ts (T20 prep, ~30 lines) OR Bug #11 T16 follow-up (persist last-rendered narration text in save). Q-4 cleaner architectural work, Bug #11 smaller. Will pick whichever is most context-fresh on next tick.)
+
+
 
 
 
