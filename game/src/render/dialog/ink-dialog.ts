@@ -32,29 +32,22 @@ import { save } from '@/save/system';
 import { Container, Graphics, Text } from 'pixi.js';
 import { decideDialogPhase } from './dialog-phase';
 import { dialogState } from './dialog-state';
-import {
-  NARRATION,
-  type Source,
-  detectSource,
-  sourceLabel,
-  stripSpeakerPrefix,
-} from './source-detector';
+import { NARRATION, type Source, detectSource } from './source-detector';
 
 const CANVAS_W = 640;
 
-// Panel geometry per avg-architecture.md §1.3:
+// Panel geometry per avg-architecture.md §1.3 v3 (Q-DD removed header
+// bar, body fills full panel):
 // - y=240-336 (96 px tall, bottom-anchored with 24 px gap from canvas
 //   bottom so the workstation BG stays visible underneath)
 // - 600 px wide, centered
 // - 1 px border #2A1F14, BG #5A7080 (cubicle navy) + alpha 0.85
-// - header bar at top (HEADER_BAR_H px) carries the source label
+// - body fills full panel rect; source distinction via body color +
+//   italic toggle (no header bar / source label).
 const PANEL_W = 600;
 const PANEL_H = 96;
 const PANEL_X = (CANVAS_W - PANEL_W) / 2;
 const PANEL_Y = 240;
-const HEADER_BAR_H = 18;
-const PANEL_BODY_Y = PANEL_Y + HEADER_BAR_H;
-const PANEL_BODY_H = PANEL_H - HEADER_BAR_H;
 const PANEL_PADDING_X = 12;
 const PANEL_PADDING_Y = 6;
 const PANEL_TEXT_LINE_HEIGHT = 16;
@@ -62,11 +55,9 @@ const TEXT_FONT = 'PingFang SC, -apple-system, sans-serif';
 const PANEL_BG = 0x5a7080;
 const PANEL_BG_ALPHA = 0.85;
 const PANEL_BORDER = 0x2a1f14;
-const HEADER_BAR_BG = 0x3d4a5a; // 比 panel BG 暗一档
-const HEADER_BAR_BG_ALPHA = 0.95;
-const HEADER_LABEL_COLOR = 0xe8e0cc;
 const BODY_COLOR_NORMAL = 0xe8e0cc; // narration / NPC speech — cream
 const BODY_COLOR_MONOLOGUE = 0xa8b0c0; // monologue — cool gray
+const TRIANGLE_COLOR = 0xe8e0cc; // ▼ continue tint (was HEADER_LABEL_COLOR)
 
 // ▼ continue affordance — bottom-right of the panel.
 const CONTINUE_TRI_W = 8;
@@ -121,21 +112,6 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
   // Panel surfaces: BG + header bar + header label + body text + clip mask.
   const panelBg = new Graphics();
   container.addChild(panelBg);
-  const headerBarBg = new Graphics();
-  container.addChild(headerBarBg);
-
-  const headerLabel = new Text({
-    text: '',
-    style: {
-      fontFamily: TEXT_FONT,
-      fontSize: 11,
-      fill: HEADER_LABEL_COLOR,
-      lineHeight: HEADER_BAR_H,
-    },
-  });
-  headerLabel.x = PANEL_X + PANEL_PADDING_X;
-  headerLabel.y = PANEL_Y + 2;
-  container.addChild(headerLabel);
 
   const bodyText = new Text({
     text: '',
@@ -149,7 +125,7 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
     },
   });
   bodyText.x = PANEL_X + PANEL_PADDING_X;
-  bodyText.y = PANEL_BODY_Y + PANEL_PADDING_Y;
+  bodyText.y = PANEL_Y + PANEL_PADDING_Y;
   container.addChild(bodyText);
 
   // Clip the body to the body region so over-long text bleeds into a
@@ -157,9 +133,9 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
   const bodyMask = new Graphics();
   bodyMask.rect(
     PANEL_X + PANEL_PADDING_X,
-    PANEL_BODY_Y + PANEL_PADDING_Y,
+    PANEL_Y + PANEL_PADDING_Y,
     PANEL_W - 2 * PANEL_PADDING_X,
-    PANEL_BODY_H - 2 * PANEL_PADDING_Y,
+    PANEL_H - 2 * PANEL_PADDING_Y,
   );
   bodyMask.fill(0xffffff);
   container.addChild(bodyMask);
@@ -188,15 +164,18 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
     }
   };
 
-  /** Paint the panel surfaces (BG + header bar + label + body text)
-   * for a given source + body string. Idempotent — overwrites prior
-   * content, never appends.
+  /** Paint the panel surfaces (BG + body text) for a given source +
+   * body string. Idempotent — overwrites prior content, never appends.
    *
-   * Q-T (Bug #33, avg-architecture.md §1.3 update): narration is the
-   * default旁白; the `[视角]` header label is just visual noise. For
-   * narration source, skip the header bar entirely and let the body
-   * fill the full panel rect. Monologue / NPC sources keep the header
-   * bar so the disambiguation cue (`[笑天]` / `[Lisa]` / etc) survives.
+   * Q-DD (Bug #43, 2026-05-07, avg-architecture.md §1.3 v3): the
+   * panel never shows a header bar regardless of source. All paints
+   * are just panel BG + body text. Source distinction now lives in
+   * the body styling alone:
+   *   - narration: upright cream (default)
+   *   - monologue: italic cool gray `#A8B0C0`
+   *   - NPC: upright cream + the body keeps its inline `Name："…"`
+   *     prefix (revert Q-X strip per user spec — image 38 reference
+   *     reads as a single panel of prose).
    */
   const drawPanel = (source: Source, body: string) => {
     panelBg.clear();
@@ -204,43 +183,19 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
     panelBg.fill({ color: PANEL_BG, alpha: PANEL_BG_ALPHA });
     panelBg.stroke({ color: PANEL_BORDER, width: 1 });
 
-    const showHeader = source.kind !== 'narration';
-    headerBarBg.clear();
-    if (showHeader) {
-      headerBarBg.rect(PANEL_X, PANEL_Y, PANEL_W, HEADER_BAR_H);
-      headerBarBg.fill({ color: HEADER_BAR_BG, alpha: HEADER_BAR_BG_ALPHA });
-      headerBarBg.moveTo(PANEL_X, PANEL_Y + HEADER_BAR_H);
-      headerBarBg.lineTo(PANEL_X + PANEL_W, PANEL_Y + HEADER_BAR_H);
-      headerBarBg.stroke({ color: PANEL_BORDER, width: 1 });
-      headerLabel.text = `[ ${sourceLabel(source)} ]`;
-    } else {
-      headerLabel.text = '';
-    }
-
-    // Shift body up to fill the full panel when no header is present;
-    // narration gets ~18 px of extra body height, fitting an extra
-    // line of narration without overflow.
-    const bodyTop = showHeader ? PANEL_BODY_Y : PANEL_Y;
-    const bodyHeight = showHeader ? PANEL_BODY_H : PANEL_H;
-    bodyText.y = bodyTop + PANEL_PADDING_Y;
     bodyMask.clear();
     bodyMask.rect(
       PANEL_X + PANEL_PADDING_X,
-      bodyTop + PANEL_PADDING_Y,
+      PANEL_Y + PANEL_PADDING_Y,
       PANEL_W - 2 * PANEL_PADDING_X,
-      bodyHeight - 2 * PANEL_PADDING_Y,
+      PANEL_H - 2 * PANEL_PADDING_Y,
     );
     bodyMask.fill(0xffffff);
 
     const isMonologue = source.kind === 'monologue';
     bodyText.style.fill = isMonologue ? BODY_COLOR_MONOLOGUE : BODY_COLOR_NORMAL;
     bodyText.style.fontStyle = isMonologue ? 'italic' : 'normal';
-    // Q-X (Bug #37): strip "Lisa：" / "**Lisa**：" leading prefix from
-    // NPC bodies — the header bar already shows the source label, so
-    // repeating the name in the body is visual noise. Narration and
-    // monologue bodies pass through unchanged.
-    const bodyForRender = source.kind === 'npc' ? stripSpeakerPrefix(body) : body;
-    bodyText.text = stripMarkdown(bodyForRender);
+    bodyText.text = stripMarkdown(body);
 
     const trimmed = body.trim();
     if (trimmed.length > 0 && trimmed !== '...') {
@@ -250,8 +205,6 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
 
   const hidePanel = () => {
     panelBg.clear();
-    headerBarBg.clear();
-    headerLabel.text = '';
     bodyText.text = '';
   };
 
@@ -315,7 +268,7 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
       tx,
       ty + CONTINUE_TRI_H / 2,
     ]);
-    indicator.fill({ color: HEADER_LABEL_COLOR, alpha: 0.7 });
+    indicator.fill({ color: TRIANGLE_COLOR, alpha: 0.7 });
     container.addChild(indicator);
 
     const hit = new Graphics();
