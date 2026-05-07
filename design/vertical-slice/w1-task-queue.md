@@ -71,7 +71,129 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 
 ---
 
-## 🆕 P0 — Bug #38 — pause / back-to-main 按钮缺失
+## 🆕 P0 — Post batch-24 playtest sweep (5 bugs from GM 2026-05-07)
+
+GM playtest after batch 24 (W1 ship 6 commits + Q-T已 ship). 5 处 visible issue. 派 W1 batch (5 task ~3-4h total) + 1 子项 W5.
+
+### Q-Z · Bug #39 — NPC sprite 位置太挤 + 太小 (T-2 follow-up)
+
+**Why**: image 37 显示 NPC 立绘 ~30 px 高 dump 在 panel header 区. T-2 NPC_TABLE scale 0.3 for 64×96 portrait = 19×29 px tiny. Anchors inherited from old npc-anchors stub (was bubble tail tip, not 立绘 stand point).
+
+**Fix**:
+- NPC_TABLE scale 0.3 → **0.6-0.8** (per-sprite tune; verify 实际渲染 size)
+- 重 tune positions per workstation visual logic, **不**在 panel area (panel y=240-336):
+  - lisa: 右近隔壁工位 (x=520, y=200) — 同 row 同事
+  - david: 左近隔壁工位 (x=160, y=200)
+  - wang_director: 顶部 (x=320, y=120) — 站工位旁 push 的位置
+  - vivian: 顶部偏右 (x=560, y=130) — 远景前台
+  - zoe: 顶部偏左 (x=260, y=130) — HR 远端
+  - lao_zhou: 右远 (x=580, y=200)
+  - li_ayi: 左下 (x=80, y=270) — 拖地经过 (panel 下方但稍偏)
+  - mama: 中部居中 (x=320, y=180) — 视频 phone scene
+  - lin_jie: 顶部偏左 (x=200, y=130) — 隔壁部门
+  - it_xiaoma: 左中 (x=140, y=200) — IT 角落
+  - cafeteria_auntie: 中下 (x=320, y=270)
+
+**File**: `game/src/render/npc/npc-registry.ts` NPC_TABLE
+**Test**: dev 到 Day 1 Event 1.1 (Vivian) → 验证 Vivian sprite 在右上 visible 且不撞 panel
+**Estimate**: 30 min
+
+**Status**: ✅ done in commit `ca90261` (batch 25, 2026-05-07). Scale 0.3 → 0.6 across all 11 entries; positions retuned per spec (no NPC overlaps panel y=240+ or sticky band 170-240).
+
+### Q-AA · Bug #40 — Status HUD redesign 3 bar + 3 icon (no numbers)
+
+**Why**: image 37 现 HUD 是 "KPI 100/200 / 钱 ¥5,503 / 状态 83/100" 数字 readout. User: "右上角的状态栏很丑. 不显示数字, 显示三个柱状图. 注意不要报表. KPI/钱/状态三个词用三个一样大的 icon 替代."
+
+**Spec**: HUD 改 visual bar + icon (no numbers, no labels):
+- Container at (canvas.W - 84, 16), 80×56 (smaller than current)
+- 3 horizontal bars stacked vertically (3 px gap):
+  - Bar 1 KPI: ratio `actualKpi / monthlyThreshold` clamped 0-1.4 (handle 处刑 zone). 颜色 `#C8A85A` 打工人黄. 红色 highlight when >1.0 (over threshold).
+  - Bar 2 钱: ratio `(money - LOW_THRESHOLD) / (HIGH_THRESHOLD - LOW_THRESHOLD)` (LOW=2000 房贷扣款下限, HIGH=15000 充裕). 颜色 `#E0B050` 老板金.
+  - Bar 3 状态: `state / 100`. 颜色 `#5A7080` 灰蓝. 红色 highlight when <0.2 (即将病倒).
+- Each bar: 12 px tall × 60 px wide, 1 px border `#2A1F14`, BG empty 灰白
+- Above each bar: 12×12 icon (procedural Pixi Graphics):
+  - KPI icon: 表格 (3 horizontal stacked lines)
+  - 钱 icon: ¥ symbol (Graphics line drawing)
+  - 状态 icon: heart (or simple human bust silhouette via 3 ovals)
+- 3 icons SAME size 12×12 (per user spec — symmetry)
+- 选择 effect: bar tween value (500ms ease) + 300ms color brief flash
+
+**File**: `game/src/render/hud/status-hud.ts` rebuild
+
+**Estimate**: 1-2h
+
+**Status**: ✅ done in commit `ec09b42` (batch 25, 2026-05-07). status-hud.ts rebuilt as 80×56 container with 3 rows = `[12×12 icon] [60×12 bar]`. Icons: KPI 表格 (3 horizontal lines) + 钱 ¥ + 状态 heart silhouette. Bar fills with 处刑/病倒 red highlight zones. Per-row tween + 300ms color brighten flash on change. HUD position (556, 16).
+
+### Q-BB · Bug #41 — Calendar advance system (per ink stitch path)
+
+**Why**: image 37 calendar widget 显示 "1月1日" 不变. Day 不 advance 因为 engine 不知道当前是几号.
+
+**Fix (engine-only)**: 在 paintStep 顶部 parse `story.state.currentPathString` → match `day_(\d+)_` → call `calendar.set(N)`. ink content 已有 `day_N_*` stitch name, 不需 ink change.
+
+```ts
+function syncCalendarFromInk(ink: Story) {
+  const path = ink.state.currentPathString;
+  const m = path?.match(/day_(\d+)_/);
+  if (m) {
+    const day = parseInt(m[1], 10);
+    if (calendar.currentDay !== day) calendar.set(day);
+  }
+}
+```
+
+调用点: `ink-dialog.ts paintStep` 顶部 (every paint).
+
+**File**: `game/src/render/dialog/ink-dialog.ts` paintStep + `game/src/flow/calendar.ts` (verify `set(day: number)` API; 如无 add)
+
+**Estimate**: 30 min
+
+**注**: month 同样 derivable — episode-N.ink 对应 month-N. parse current ink story title or stitch knot name. 但 month advance 实际只发生 episode 切换, 周期跨度大, 暂时不动 calendar widget banner (1 月 JAN). 后续可加 episode 切换 listener → calendar.setMonth(N).
+
+**Status**: ✅ done in commit `b949969` (batch 25, 2026-05-07). New `calendar.setDay(day)` API rederives weekday + fires listeners. New `ink.currentPathString` getter on InkRuntime. New `syncCalendarFromInkPath()` helper called at top of paintStep parses `day_(\d+)_` and applies. 4 new vitest cases.
+
+### Q-CC · Bug #42 — HR portal mini-monitor 看起来重复
+
+**Why**: image 37 显示 2 个 monitor-like — 中间大显示器 (program mount swap target) + 它下方 desk 上小 "HR" 牌 mini-monitor. 后者是 `workstation_closeup.png` BG **艺术品烘焙**, 不是 program mount.
+
+**Decision**: GM 选 **W5 re-prompt** workstation_closeup.png 删除 mini HR 牌. 一次性 $0.13.
+
+**Fix path**:
+- W5 round-N: re-prompt workstation_closeup.png with explicit "no HR portal mini-monitor / second screen on desk; main monitor only, centered top"
+- Re-cut + sync to `game/public/sprites/backgrounds/workstation_closeup.png`
+- (No engine code change)
+
+**Owner**: W5 single-shot dispatch, 不入 W1 queue
+
+**Estimate**: 15 min W5 + assets:sync
+
+### Q-DD · Bug #43 — Kill all panel headers (per user "都没有")
+
+**Why**: image 36 + image 37 显示 inconsistent header (narration 无, monologue/NPC 有). User: "对话栏还是有问题, 纯旁白的时候标题栏就消失, 体验不一致. 我建议都没有, 比如类似这种 [image 38]". Image 38 reference shows panel **without any header**, with NPC quote inline as part of narration prose.
+
+**Spec change** (`avg-architecture.md` §1.3 v3):
+- Panel **never** shows source label header bar — ALL paints just panel BG + body text
+- Source distinction 通过 body 字体/字色 区分:
+  - narration: upright cream text (your/你...)
+  - monologue: italic cool gray text (我...)
+  - NPC speech: upright cream + inline `Name："..."` prefix kept (revert Q-X strip)
+- Source-detector 仍 useful: routing for body style (italic vs upright) + auto-split (▼ pacing per source boundary). 仅 mountPanelHeader() 退化为 no-op.
+
+**Fix**:
+1. `ink-dialog.ts` mountPanelHeader → 永远 return (no-op).
+2. drawPanel → remove `stripSpeakerPrefix` call. NPC body keeps `Lisa：` inline prefix.
+3. avg-architecture.md §1.3 表 update: header column → "无" for all sources.
+
+**File**: `game/src/render/dialog/ink-dialog.ts` + spec update
+
+**Test**: dev 跑 Day 1 morning_briefing → panel 永远无 header. NPC speech step → body 显示 `Lisa："诶, 你先用吧。"` inline (跟 image 38 reference 一致). italic monologue → 字色变 cool gray italic 但无 header.
+
+**Estimate**: 15 min
+
+**Status**: ✅ done in commit `0e53b60` (batch 25, 2026-05-07). drawPanel always paints panel BG + body only (no header bar). Body region restored to full panel. Removed stripSpeakerPrefix call. headerBarBg / headerLabel / HEADER_BAR_H / PANEL_BODY_Y / etc constants + state deleted. body styling preserves italic cool gray for monologue, upright cream for narration / NPC.
+
+---
+
+## P0 — Bug #38 已完成 — pause / back-to-main 按钮缺失
 
 ### Q-Y · Bug #38 — 游戏过程中无法回主菜单 / 重新开始
 

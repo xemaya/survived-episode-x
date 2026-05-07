@@ -784,3 +784,109 @@ P1:
 
 (next /loop tick: Q-S — small + no ink dependency. Q-Q after, depending on whether episode-1.ink D7 is ready with `# kpi_review_path_X` tags.)
 
+---
+
+## 2026-05-07 · batch 25 — post-batch-24 playtest sweep (4 fixes Q-Z / Q-AA / Q-BB / Q-DD)
+
+GM playtest after batch 24 (image 36-37) surfaced 4 visible UX issues + 1 W5-only re-prompt (Q-CC, not in W1 scope). Working through queue order Q-Z → Q-AA → Q-BB → Q-DD.
+
+### Q-Z (`ca90261`) — NPC sprite scale 0.3→0.6 + position retune (Bug #39)
+
+**Why**: T-2 initial NPC_TABLE used scale 0.3 with anchors inherited from the deleted npc-anchors.ts (originally bubble-tail tip coords, NOT sprite stand-points). Result: ~30 px-tall sprites dumped near the panel header area.
+
+**Fix**: NPC_TABLE entries updated:
+- All scales: 0.3 → 0.6
+- Re-tuned positions per spec workstation visual logic so no NPC sits in panel (y=240+) or sticky band (170-240):
+  - lisa (520, 200) — adjacent right cubicle peer
+  - david (160, 200) — mid-left desk
+  - wang_director (320, 120) — top-mid (push-in)
+  - vivian (560, 130) — top-right reception
+  - zoe (260, 130) — top-mid-left HR
+  - lao_zhou (580, 200) — far-right cubicle
+  - li_ayi (80, 270) — bottom-left cleaning
+  - mama (320, 180) — phone scene mid
+  - lin_jie (200, 130) — top-mid-left other-team
+  - it_xiaoma (140, 200) — IT corner
+  - cafeteria_auntie (320, 270) — cafeteria mid
+
+Existing test "all NPC_TABLE positions are within the 640x360 canvas" still passes (range check).
+
+### Q-AA (`ec09b42`) — HUD redesign: 3 bars + 3 icons, no numbers (Bug #40)
+
+**Why**: User feedback on image 37 — text-row HUD ("KPI 100/200 / 钱 ¥5,503 / 状态 83/100") read as a "ugly report". Spec: 3 horizontal bars + 3 same-size icons, no numbers, no labels.
+
+**Rebuild**: `src/render/hud/status-hud.ts` rewritten:
+- Container: 80×56 at (canvas.W - 84, 16) = (556, 16) (was 80×72 at 540,16)
+- 3 rows stacked vertically (3 px gap), each row = `[12×12 icon] [60×12 bar]`
+- Icons:
+  - KPI: 3 stacked horizontal lines (表格 motif) via Pixi Graphics
+  - 钱: ¥ glyph (Text node — Graphics-only at 12 px is awkward, semantic intent is "icon")
+  - 状态: heart silhouette (2 lobes via circles + triangle bottom) via Pixi Graphics
+- Bar values:
+  - KPI ratio = `actualKpi / monthlyThreshold`, clamped 0..1.4 (处刑 zone). Fill `#C8A85A` 打工人黄; flips to red `#C83428` when ratio > 1.0
+  - 钱 ratio = `(money - 2000) / 13000`, clamped 0..1. Fill `#E0B050` 老板金
+  - 状态 ratio = `state / 100`. Fill `#5A7080` 灰蓝; flips red when < 0.2 (病倒 imminent)
+- Bar visualization caps display at 1.0 (60 px wide); over-cap signaled via color flip
+- 选择 effect: 300 ms color brighten (40-channel lift) on row whose target changed; per-row tween at 0.18 ease
+
+Workstation HUD position updated to (556, 16) for the smaller container.
+
+### Q-BB (`b949969`) — calendar advance from ink stitch path (Bug #41)
+
+**Why**: Calendar widget stuck at "1 月 · 1日" because the engine had no signal to advance. The ink narrative already organizes content as `day_<N>_<event>_<phase>` stitches, so the day index can be lifted directly.
+
+**Fix**:
+1. New `calendar.setDay(day)` API — jumps current day directly, rederives weekday from `(day-1) % 7 + 1` (game starts day 1 = Monday). Out-of-range warning + no-op. Listener fires on actual change. 4 new vitest cases.
+2. New `ink.currentPathString` getter on InkRuntime — exposes `story.state.currentPathString` (inkjs program-counter path) so the renderer can poll without reaching into Story internals.
+3. New `syncCalendarFromInkPath()` helper in `ink-dialog.ts` — regex matches `day_(\d+)_` against `ink.currentPathString`, calls `calendar.setDay(N)` if found. Idempotent.
+4. Hook: called at the top of every `paintStep()` so the calendar widget redraws on each ink advance.
+
+(Month/episode advance is left for a future tick — month boundaries align with episode-N.ink swaps.)
+
+### Q-DD (`0e53b60`) — kill all panel headers (Bug #43)
+
+**Why**: User: 对话栏 inconsistent header (narration 无, monologue/NPC 有) feels uneven. Image 38 reference shows panel with NO header bar regardless of source; NPC quotes inline as part of prose.
+
+**Spec change** (avg-architecture.md §1.3 v3): panel **never** shows source label header bar. Source distinction migrates entirely to body styling.
+
+**Fix in `ink-dialog.ts`**:
+- `drawPanel()`: removed conditional `showHeader = source.kind !== 'narration'` branch. Always paints just panel BG + body text. Body region restored to full panel (y=PANEL_Y to y=PANEL_Y+PANEL_H, no longer offset by HEADER_BAR_H).
+- Removed `stripSpeakerPrefix` call — NPC body keeps inline `Lisa："…"` prefix per Q-DD spec (revert Q-X strip)
+- Body styling:
+  - narration: upright cream `#E8E0CC` (default)
+  - monologue: italic cool gray `#A8B0C0`
+  - NPC: upright cream + inline `Name："…"` prefix kept verbatim
+- Deleted: headerBarBg Graphics + headerLabel Text + their state cleanup paths
+- Deleted constants: HEADER_BAR_H, PANEL_BODY_Y, PANEL_BODY_H, HEADER_BAR_BG, HEADER_BAR_BG_ALPHA, HEADER_LABEL_COLOR (renamed to TRIANGLE_COLOR for the ▼ indicator's tint)
+- Removed unused imports: sourceLabel, stripSpeakerPrefix from source-detector
+
+`stripSpeakerPrefix` and `sourceLabel` remain exported from source-detector (still useful for any future renderer that wants to surface the source). Source detection itself remains in active use for runtime auto-split + body styling.
+
+### Verification
+
+- `pnpm tsc` ✓ clean across all 4 commits
+- `pnpm test` ✓ 331/331 (was 327, +4 new calendar.setDay cases)
+- All lefthook hooks green
+
+### Bugs closed
+
+- Bug #39 (NPC sprite scale + position)
+- Bug #40 (HUD bar/icon redesign)
+- Bug #41 (calendar advance from ink path)
+- Bug #43 (panel headers killed)
+
+(Bug #42 / Q-CC: W5-only re-prompt of `workstation_closeup.png` to drop the HR mini-monitor. Not in W1 scope.)
+
+### Open after this tick
+
+P0 (queue):
+- Q-Q · Bug #31 KPI Review cinematic (4-6h)
+- Q-S · Weekly meter modal (2-3h)
+- Q-K-2nd · First-time tutorial modal (1-2h)
+
+P1:
+- T-1 · scene registry (3-5h)
+
+(next /loop tick: Q-S — short + unblocks weekly cadence. Q-Q after, depends on episode-1 D7 ink readiness.)
+
+
