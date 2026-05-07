@@ -41,26 +41,34 @@ interface NpcConfig {
 // (i.e. where the NPC "stands"). Coordinates derived from the scene
 // description in series-structure.md (cubicle layout: protagonist
 // center, Lisa adjacent right, David mid-left, 老周 far right, etc.).
+// Bug #44 (2026-05-07): switched to 256×384 portrait source (post-W5 round-5
+// re-cut from 1024 src by tools/round5_high_res_recut.py) at scale 0.6 →
+// 154×230 visible (~64% of 360 canvas height). AVG-standard 立绘 size.
+// Positions: side-stand layout, anchor (0.5, 1) → bottom at y=235 (panel
+// top edge), head reaching y≈5.
 export const NPC_TABLE: Readonly<Record<string, NpcConfig>> = {
-  lisa: { spriteUrl: 'sprites/npc/lisa_sprite.png', x: 520, y: 200, scale: 0.6 },
-  david: { spriteUrl: 'sprites/npc/david_sprite.png', x: 160, y: 200, scale: 0.6 },
-  vivian: { spriteUrl: 'sprites/npc/vivian_sprite.png', x: 560, y: 130, scale: 0.6 },
+  // Right-side: adjacent peer Lisa, far-right 老周, S3 finale 林姐
+  lisa: { spriteUrl: 'sprites/npc/lisa.png', x: 520, y: 235, scale: 0.6 },
+  lao_zhou: { spriteUrl: 'sprites/npc/lao_zhou.png', x: 560, y: 235, scale: 0.6 },
+  lin_jie: { spriteUrl: 'sprites/npc/lin_jie.png', x: 520, y: 235, scale: 0.6 },
+  // Left-side: David (mid-left peer), Vivian (front desk), Zoe (HR), 李阿姨, IT 小马
+  david: { spriteUrl: 'sprites/npc/david.png', x: 140, y: 235, scale: 0.6 },
+  vivian: { spriteUrl: 'sprites/npc/vivian.png', x: 120, y: 235, scale: 0.6 },
+  zoe: { spriteUrl: 'sprites/npc/zoe.png', x: 140, y: 235, scale: 0.6 },
+  li_ayi: { spriteUrl: 'sprites/npc/li_ayi.png', x: 100, y: 235, scale: 0.6 },
+  it_xiaoma: { spriteUrl: 'sprites/npc/it_xiaoma.png', x: 140, y: 235, scale: 0.6 },
+  // Center / phone scene
   wang_director: {
-    spriteUrl: 'sprites/npc/wang_director_sprite.png',
+    spriteUrl: 'sprites/npc/wang_director.png',
     x: 320,
-    y: 120,
+    y: 235,
     scale: 0.6,
   },
-  lao_zhou: { spriteUrl: 'sprites/npc/lao_zhou_sprite.png', x: 580, y: 200, scale: 0.6 },
-  zoe: { spriteUrl: 'sprites/npc/zoe_sprite.png', x: 260, y: 130, scale: 0.6 },
-  li_ayi: { spriteUrl: 'sprites/npc/li_ayi_sprite.png', x: 80, y: 270, scale: 0.6 },
-  mama: { spriteUrl: 'sprites/npc/mama_sprite.png', x: 320, y: 180, scale: 0.6 },
-  lin_jie: { spriteUrl: 'sprites/npc/lin_jie.png', x: 200, y: 130, scale: 0.6 },
-  it_xiaoma: { spriteUrl: 'sprites/npc/it_xiaoma_sprite.png', x: 140, y: 200, scale: 0.6 },
+  mama: { spriteUrl: 'sprites/npc/mama.png', x: 320, y: 235, scale: 0.6 },
   cafeteria_auntie: {
     spriteUrl: 'sprites/npc/cafeteria_auntie.png',
     x: 320,
-    y: 270,
+    y: 235,
     scale: 0.6,
   },
 };
