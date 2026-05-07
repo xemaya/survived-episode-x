@@ -23,6 +23,15 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
     );
   }
 
+  // weekly_meter (Q-S, daily-pressure carrier): enterable from
+  // action_day (manual fire) / after_work (Fri-evening week_end) /
+  // recap (auto-fire when advanceDay lands on a Monday).
+  // resumeTo carries the post-dismiss target — typically the next
+  // action_day (week_start) or the next recap (week_end).
+  if (to.kind === 'weekly_meter') {
+    return from.kind === 'action_day' || from.kind === 'after_work' || from.kind === 'recap';
+  }
+
   // archive_list: enterable from main_menu (player clicks 档案 button)
   // or from gameover (auto-shown after death). Exits to main_menu only.
   if (to.kind === 'archive_list') {
@@ -71,7 +80,9 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
       // is the new-game entry point (was main_menu → morning_briefing).
       from.kind === 'recap' ||
       from.kind === 'kpi_review' ||
-      from.kind === 'main_menu'
+      from.kind === 'main_menu' ||
+      // Q-S: weekly meter (week_start variant) returns to action_day.
+      from.kind === 'weekly_meter'
     );
   }
 
@@ -88,8 +99,9 @@ export function isLegalTransition(from: SceneState, to: SceneState): boolean {
 
   // recap: enterable from after_work (normal day end, non-month-end day).
   // Previously reachable from action_day directly — that path is now illegal.
+  // Q-S: weekly_meter (week_end variant on Fri evening) flushes to recap.
   if (to.kind === 'recap') {
-    return from.kind === 'after_work';
+    return from.kind === 'after_work' || from.kind === 'weekly_meter';
   }
 
   // kpi_review: enterable from after_work on a month-end day.

@@ -6,6 +6,8 @@ export type GameOverReason =
 
 export type RecapKind = 'daily' | 'weekly';
 
+export type WeeklyMeterPhase = 'week_start' | 'week_end';
+
 export type SceneState =
   | { kind: 'main_menu' }
   | { kind: 'morning_briefing'; day: number }
@@ -16,6 +18,7 @@ export type SceneState =
   | { kind: 'kpi_review'; monthIndex: number }
   | { kind: 'gameover'; reason: GameOverReason; monthIndex: number }
   | { kind: 'pause'; resumeTo: SceneState }
+  | { kind: 'weekly_meter'; phase: WeeklyMeterPhase; resumeTo: SceneState }
   | { kind: 'archive_list' }
   | { kind: 'save_corrupt'; errorMessage: string };
 
@@ -39,6 +42,8 @@ export function describe(s: SceneState): string {
       return `gameover(reason=${s.reason}, month=${s.monthIndex})`;
     case 'pause':
       return `pause(resumeTo=${describe(s.resumeTo)})`;
+    case 'weekly_meter':
+      return `weekly_meter(${s.phase}, resumeTo=${describe(s.resumeTo)})`;
     case 'archive_list':
       return 'archive_list';
     case 'save_corrupt':

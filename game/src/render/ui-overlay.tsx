@@ -10,6 +10,7 @@ import { KpiReview } from './menu/kpi-review';
 import { MainMenu } from './menu/main-menu';
 import { PauseMenu } from './menu/pause-menu';
 import { SaveCorruptDialog } from './menu/save-corrupt-dialog';
+import { WeeklyMeter } from './menu/weekly-meter';
 import { WeeklyRecap } from './menu/weekly-recap';
 import { assertOverlayAllowed } from './stage';
 
@@ -28,6 +29,7 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     const hasOverlay =
       state.kind === 'main_menu' ||
       state.kind === 'pause' ||
+      state.kind === 'weekly_meter' ||
       state.kind === 'after_work' ||
       state.kind === 'recap' ||
       state.kind === 'kpi_review' ||
@@ -45,6 +47,9 @@ function OverlayRouter({ host }: RouterProps): preact.JSX.Element | null {
     case 'pause':
       assertOverlayAllowed(state);
       return <PauseMenu state={state} />;
+    case 'weekly_meter':
+      assertOverlayAllowed(state);
+      return <WeeklyMeter phase={state.phase} />;
     case 'morning_briefing':
       // QA Bug #23 fix (2026-05-06): morning_briefing card removed.
       // The state is no longer reachable via day-cycle (recap +

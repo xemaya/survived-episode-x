@@ -47,7 +47,10 @@ const sceneStateSchema = z.discriminatedUnion('kind', [
     reason: z.enum(['kpi_exceeds_capacity', 'dismissal_severe']),
     monthIndex: z.number().int().positive(),
   }),
-  // pause is transient — not saved (player must restart from saved state)
+  // pause + weekly_meter are transient overlays — not saved. autosave
+  // only fires from ink choice (action_day phase), never while these
+  // modals are mounted. If a sceneState ever leaks into a save, zod
+  // parse will reject it and the corrupt-save dialog kicks in.
 ]);
 
 export const runStateSchema = z.object({

@@ -10,6 +10,7 @@ import { mountWorkstation } from './scene/workstation';
 const OVERLAY_ALLOWED: ReadonlySet<SceneState['kind']> = new Set([
   'main_menu',
   'pause',
+  'weekly_meter',
   'morning_briefing',
   'after_work',
   'recap',

@@ -110,16 +110,38 @@ export class DayCycleController {
       flow.request({ kind: 'action_overtime', day: calendar.currentDay });
     } else {
       // end_day: route to recap or kpi_review depending on month-end.
+      // Q-S: on Friday non-month-end, intercept with the week_end
+      // weekly_meter (resumeTo = the recap that would have fired).
       if (calendar.isMonthEnd()) {
         flow.request({ kind: 'kpi_review', monthIndex: calendar.monthIndex });
       } else {
-        flow.request({
-          kind: 'recap',
-          recapKind: calendar.isWeeklyRecapDay() ? 'weekly' : 'daily',
+        const recapTarget = {
+          kind: 'recap' as const,
+          recapKind: calendar.isWeeklyRecapDay() ? ('weekly' as const) : ('daily' as const),
           day: calendar.currentDay,
-        });
+        };
+        if (calendar.currentWeekday === 5) {
+          flow.request({
+            kind: 'weekly_meter',
+            phase: 'week_end',
+            resumeTo: recapTarget,
+          });
+        } else {
+          flow.request(recapTarget);
+        }
       }
     }
+  }
+
+  // Q-S: dismiss the weekly meter modal — transit to the resumeTo
+  // target captured when the meter was triggered (next action_day for
+  // week_start, the deferred recap for week_end).
+  confirmWeeklyMeter(): void {
+    const { flow } = this.deps;
+    if (flow.state.kind !== 'weekly_meter') {
+      throw new Error(`confirmWeeklyMeter called from non-weekly_meter state: ${flow.state.kind}`);
+    }
+    flow.request(flow.state.resumeTo);
   }
 
   // Called by the recap UI when the player dismisses the recap screen.
@@ -142,7 +164,23 @@ export class DayCycleController {
     }
     // Bug #27: ap.resetForNewDay() removed (AP system deleted).
     // P5: card hand removed; no per-day card-played reset needed.
-    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    // Q-S: if the new day is a Monday (weekday=1), insert the
+    // week_start meter ahead of action_day. resumeTo captures the
+    // action_day target so confirmWeeklyMeter advances cleanly.
+    const actionDayTarget = {
+      kind: 'action_day' as const,
+      day: calendar.currentDay,
+      phase: 'morning' as const,
+    };
+    if (calendar.currentWeekday === 1) {
+      flow.request({
+        kind: 'weekly_meter',
+        phase: 'week_start',
+        resumeTo: actionDayTarget,
+      });
+    } else {
+      flow.request(actionDayTarget);
+    }
     void autosave();
   }
 

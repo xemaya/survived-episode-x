@@ -76,12 +76,16 @@ describe('DayCycleController (Bug #27 — AP system removed)', () => {
     expect((flow.state as { recapKind: 'daily' | 'weekly' }).recapKind).toBe('daily');
   });
 
-  it('endDayEarly on Friday → after_work → confirmAfterWork(end_day) → weekly recap', async () => {
+  it('endDayEarly on Friday → after_work → confirmAfterWork(end_day) → weekly_meter (week_end) → weekly recap', async () => {
     for (let i = 0; i < 4; i++) calendar.advanceDay(); // Fri
     flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
     controller.endDayEarly();
     expect(flow.state.kind).toBe('after_work');
     await controller.confirmAfterWork('end_day');
+    // Q-S: Friday non-month-end intercepts with weekly_meter before recap.
+    expect(flow.state.kind).toBe('weekly_meter');
+    expect((flow.state as { phase: string }).phase).toBe('week_end');
+    controller.confirmWeeklyMeter();
     expect(flow.state.kind).toBe('recap');
     expect((flow.state as { recapKind: 'daily' | 'weekly' }).recapKind).toBe('weekly');
   });
@@ -133,6 +137,32 @@ describe('DayCycleController (Bug #27 — AP system removed)', () => {
     controller.confirmRecap();
     expect(calendar.currentDay).toBe(2);
     expect(flow.state.kind).toBe('action_day');
+  });
+
+  it('Q-S: confirmRecap on Sunday→Monday inserts weekly_meter (week_start) before action_day', async () => {
+    // Advance to day 7 (Sunday), then end day + recap → confirmRecap
+    // brings us to day 8 (Monday) and should trigger week_start.
+    for (let i = 0; i < 6; i++) calendar.advanceDay();
+    expect(calendar.currentDay).toBe(7);
+    expect(calendar.currentWeekday).toBe(7); // Sunday
+    flow.request({ kind: 'action_day', day: calendar.currentDay, phase: 'morning' });
+    controller.endDayEarly();
+    await controller.confirmAfterWork('end_day');
+    expect(flow.state.kind).toBe('recap');
+    controller.confirmRecap();
+    expect(calendar.currentDay).toBe(8);
+    expect(calendar.currentWeekday).toBe(1); // Monday
+    expect(flow.state.kind).toBe('weekly_meter');
+    expect((flow.state as { phase: string }).phase).toBe('week_start');
+    controller.confirmWeeklyMeter();
+    expect(flow.state.kind).toBe('action_day');
+    expect((flow.state as { day: number }).day).toBe(8);
+  });
+
+  it('Q-S: confirmWeeklyMeter throws from non-weekly_meter state', () => {
+    expect(() => controller.confirmWeeklyMeter()).toThrow(
+      'confirmWeeklyMeter called from non-weekly_meter state: action_day',
+    );
   });
 
   // ─── confirmKpiReview → action_day (pass) / gameover (fail) ──────────────
