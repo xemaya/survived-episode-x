@@ -309,7 +309,9 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
   // ── Q-N (Bug #29) — Status HUD top-right (KPI / 钱 / 状态) ──────────────
   // Mounted BEFORE ink dialog so its refresh() can be passed into
   // mountInkDialog as `onAfterAdvance`. Reads ink VARs `kpi/money/state`.
-  const statusHud = mountStatusHud(ctx.worldLayer, { app: ctx.app, x: 540, y: 16 });
+  // Q-AA: HUD shrunk to 80×56 — position adjusted to (556, 16) so it
+  // still hugs the canvas right edge with 4 px padding.
+  const statusHud = mountStatusHud(ctx.worldLayer, { app: ctx.app, x: 556, y: 16 });
   teardowns.push(statusHud.destroy);
 
   const inkDialog = mountInkDialog(ctx.worldLayer, {
