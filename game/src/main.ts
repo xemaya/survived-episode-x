@@ -4,6 +4,7 @@ import { loadEpisode } from '@/ink/loader';
 import { ink } from '@/ink/runtime';
 import { installKeyboardHandler } from '@/input/keyboard';
 import { dialogState } from '@/render/dialog/dialog-state';
+import { mountFirstTimeTutorial } from '@/render/onboarding/first-time-tutorial';
 import { createPixiApp } from '@/render/pixi-app';
 import { bindStageToFlow } from '@/render/stage';
 import { mountOverlay } from '@/render/ui-overlay';
@@ -79,6 +80,11 @@ async function main(): Promise<void> {
   } catch (err) {
     console.error('[boot] ink load failed:', err);
   }
+
+  // Q-K-2nd: first-time onboarding modal — only mounts on a player's
+  // very first boot (keyed off localStorage flag). Idempotent on
+  // subsequent boots — early-return + no DOM touch.
+  mountFirstTimeTutorial();
 
   console.info('[boot] flow + dayCycle + overlay + keyboard + ink ready');
 
