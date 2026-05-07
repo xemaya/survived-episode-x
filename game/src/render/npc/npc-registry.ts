@@ -33,27 +33,35 @@ interface NpcConfig {
   scale: number;
 }
 
+// Q-Z (Bug #39, 2026-05-07): scale bumped 0.3 → 0.6 across the board
+// (T-2 initial sprites rendered ~30 px tall on a 256×96 source — too
+// small to read). Positions re-tuned per workstation visual logic so
+// no NPC sprite overlaps the panel (y=240-336) or sticky band
+// (y=170-240). Sprite anchor (0.5, 1) so config.y = bottom of sprite
+// (i.e. where the NPC "stands"). Coordinates derived from the scene
+// description in series-structure.md (cubicle layout: protagonist
+// center, Lisa adjacent right, David mid-left, 老周 far right, etc.).
 export const NPC_TABLE: Readonly<Record<string, NpcConfig>> = {
-  lisa: { spriteUrl: 'sprites/npc/lisa_sprite.png', x: 480, y: 200, scale: 0.3 },
-  david: { spriteUrl: 'sprites/npc/david_sprite.png', x: 180, y: 220, scale: 0.3 },
-  vivian: { spriteUrl: 'sprites/npc/vivian_sprite.png', x: 440, y: 150, scale: 0.3 },
+  lisa: { spriteUrl: 'sprites/npc/lisa_sprite.png', x: 520, y: 200, scale: 0.6 },
+  david: { spriteUrl: 'sprites/npc/david_sprite.png', x: 160, y: 200, scale: 0.6 },
+  vivian: { spriteUrl: 'sprites/npc/vivian_sprite.png', x: 560, y: 130, scale: 0.6 },
   wang_director: {
     spriteUrl: 'sprites/npc/wang_director_sprite.png',
     x: 320,
-    y: 150,
-    scale: 0.3,
+    y: 120,
+    scale: 0.6,
   },
-  lao_zhou: { spriteUrl: 'sprites/npc/lao_zhou_sprite.png', x: 540, y: 220, scale: 0.3 },
-  zoe: { spriteUrl: 'sprites/npc/zoe_sprite.png', x: 260, y: 150, scale: 0.3 },
-  li_ayi: { spriteUrl: 'sprites/npc/li_ayi_sprite.png', x: 120, y: 290, scale: 0.3 },
-  mama: { spriteUrl: 'sprites/npc/mama_sprite.png', x: 320, y: 220, scale: 0.3 },
-  lin_jie: { spriteUrl: 'sprites/npc/lin_jie.png', x: 200, y: 220, scale: 0.3 },
-  it_xiaoma: { spriteUrl: 'sprites/npc/it_xiaoma_sprite.png', x: 140, y: 270, scale: 0.3 },
+  lao_zhou: { spriteUrl: 'sprites/npc/lao_zhou_sprite.png', x: 580, y: 200, scale: 0.6 },
+  zoe: { spriteUrl: 'sprites/npc/zoe_sprite.png', x: 260, y: 130, scale: 0.6 },
+  li_ayi: { spriteUrl: 'sprites/npc/li_ayi_sprite.png', x: 80, y: 270, scale: 0.6 },
+  mama: { spriteUrl: 'sprites/npc/mama_sprite.png', x: 320, y: 180, scale: 0.6 },
+  lin_jie: { spriteUrl: 'sprites/npc/lin_jie.png', x: 200, y: 130, scale: 0.6 },
+  it_xiaoma: { spriteUrl: 'sprites/npc/it_xiaoma_sprite.png', x: 140, y: 200, scale: 0.6 },
   cafeteria_auntie: {
     spriteUrl: 'sprites/npc/cafeteria_auntie.png',
     x: 320,
-    y: 240,
-    scale: 0.3,
+    y: 270,
+    scale: 0.6,
   },
 };
 
