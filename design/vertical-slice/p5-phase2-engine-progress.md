@@ -889,4 +889,113 @@ P1:
 
 (next /loop tick: Q-S — short + unblocks weekly cadence. Q-Q after, depends on episode-1 D7 ink readiness.)
 
+---
+
+## 2026-05-07 · batch 26 — 5 task tick (Q-EE / Q-S / Q-Q / Q-K-2nd / T-1)
+
+User invoked `/loop` with queue Q-S → Q-Q → Q-K-2nd → T-1; Q-EE was already partially applied (npc-registry switch to portrait sprites + AVG side-stand layout per Bug #44 spec) but not committed, so committed as the first sub-task.
+
+### Q-EE (`5949d89`) — NPC portrait source + AVG side-stand layout (Bug #44)
+
+User-applied edit shipped as a follow-up to T-2 / Q-Z. Switched `spriteUrl` from `<id>_sprite.png` to `<id>.png` (256×384 portrait re-cut by W5 round-5 `tools/round5_high_res_recut.py`). All anchors moved to the AVG side-stand baseline `y = 235` (panel top edge). Multiple NPCs share the same x-anchor by scene grouping (Lisa/lin_jie at 520, david/zoe/it_xiaoma at 140, etc) — the engine doesn't resolve collision, ink writers control who's in scene.
+
+### Q-S (`e50dacb`) — Weekly meter modal
+
+New SceneState variant `weekly_meter` with `phase: 'week_start' | 'week_end'` + `resumeTo: SceneState`. Full FSM wiring:
+- `transitions.ts` — weekly_meter enterable from action_day / after_work / recap; exits to action_day (week_start) or recap (week_end)
+- `scene-state.ts` discriminated union + describe()
+- `save/schema.ts` — left out of zod (transient overlay; same convention as `pause`)
+- `stage.ts OVERLAY_ALLOWED` adds 'weekly_meter'
+- `ui-overlay.tsx` — case route → `<WeeklyMeter phase={state.phase} />`
+
+Triggers in DayCycleController:
+- **Mon week_start**: in `confirmRecap()` after `calendar.advanceDay()`, if `currentWeekday === 1` insert weekly_meter (resumeTo = next action_day) before transitioning. Player sees meter on Day 8 (start of week 2), 15 (week 3), 22 (week 4), 29 (week 5).
+- **Fri week_end**: in `confirmAfterWork('end_day')` for non-month-end Fridays (`currentWeekday === 5`), insert weekly_meter (resumeTo = the recap that would've fired). Month-end Friday skips meter, goes straight to kpi_review.
+- **Dismiss**: new `confirmWeeklyMeter()` transitions to `flow.state.resumeTo`.
+
+New `src/render/menu/weekly-meter.tsx` (~110 LOC) — modal Preact overlay:
+- Header: 第 N 月 · 第 W 周 · 周一/五 morning/evening
+- 4 progress rows (横向 ▓░ blocks per art-bible §3.3 公文风):
+  - 本月 KPI 累积 (vs 200)
+  - 钱 (vs 13000 range from 房贷扣款 floor 2000)
+  - 状态 (vs 100)
+  - 病倒次数 (6 cells, ■ used / □ unused)
+- 6s auto-progress timer + manual `[开始本周]`/`[收工回家]` button (label varies by phase)
+
+Reads ink VARs (`kpi/money/state/sick_count`) directly so the meter aligns with what `.ink content has emitted via `~ kpi += N`.
+
+Day-cycle test updated: Friday end-of-day now expects `weekly_meter` step before `recap` (1 case). Plus 2 new cases:
+- Sunday→Monday confirmRecap inserts weekly_meter
+- confirmWeeklyMeter throws from non-weekly_meter state
+
+333/333 tests passing.
+
+### Q-Q (`06f14fb`) — KPI Review cinematic (Bug #31)
+
+New `src/render/menu/kpi-review-cinematic.ts` (~95 LOC) — pure helpers + tag listener:
+- `KpiReviewPath = 'a' | 'b' | 'c' | 'd' | 'e'` (5 HR-speak paths)
+- `kpiReviewCinematic` singleton — captures latest `# kpi_review_path_<X>` tag value
+- Tag dispatcher hook installed at module load: `tagDispatcher.on('kpi_review_path', t => cinematic.setPath(t.value))`
+- `inferPathFromKpi(actualKpi, threshold, promotionCandidateCount)` — fallback path resolver when ink hasn't fired a path tag (W3 not yet authored). Logic: promo count ≥3 → d; ratio < 0.5 → e (red line); < 1.0 → c (below); < 1.2 → b (压线); else a (高产能)
+- `HR_SPEAK_FALLBACK` engine prose for each path — placeholder until W3 authors
+- Cinematic timing constants: PRE_REVEAL_MS=1500, REVEAL_ROW_MS=1200, REVEAL_ROWS=4
+
+Rewrote `kpi-review.tsx` as cinematic:
+1. `审核中…` placeholder for PRE_REVEAL_MS pause (anticipation beat)
+2. 4-row reveal in sequence with 本月 KPI tick-up (rAF tween, REVEAL_ROW_MS)
+3. HR-speak block (cinematic.path ?? inferPathFromKpi(...))
+4. `——这是您的 reward` attribution line
+5. `[确认归档]` button — disabled until all rows revealed; on click resets cinematic state + calls `dayCycle.confirmKpiReview()`
+
+15 new vitest cases for inferPathFromKpi + cinematic singleton + timing constants. 348/348 passing.
+
+### Q-K-2nd (`fdfebea`) — First-time tutorial modal (Bug #23 + Bug #30)
+
+New `src/render/onboarding/first-time-tutorial.tsx` (~110 LOC) — one-time onboarding:
+- `hasSeenTutorial()` / `markTutorialSeen()` — localStorage flag (`survived:tutorial_seen`)
+- `mountFirstTimeTutorial()` — early-returns false on subsequent boots; first boot creates a separate DOM host (z=20 above ui-overlay z=10), renders Preact tutorial, returns true
+- Modal content: 不可能三角 / 病倒上限 6 / 三种声音 (视角/笑天/选项) / 52 集 finite + dialog UI explanation paragraph
+- `[开始上班]` button writes flag + unmounts
+
+Wired into `main.ts` boot path right before the boot-ready log. Idempotent — subsequent boots skip with no DOM touch.
+
+4 new vitest cases for flag helpers (custom localStorage stub since jsdom isn't installed). 352/352 passing.
+
+### T-1 (`fe00e31`) — Scene BG registry + 200ms fade
+
+New `src/render/scene/scene-registry.ts` (~180 LOC):
+- `SCENE_BG_TABLE` — id → BG sprite URL (workstation / break_room=tea_room alias / cafeteria=office_floor_top fallback / meeting_room / hallway / reception=hallway alias / boss_office / monitor_modal=kpi_review BG / endgame=mom_kitchen / home_phone=mom_kitchen alias)
+- `SceneRegistry` singleton — `attach(parent)` / `mountInitial(id)` / `transitionTo(id)` / `detach()`
+- 200ms fade Graphics overlay (black, alpha 0→1→0) crossfades the BG swap; `runTransition` is serialized via an `inFlight` promise so rapid `# scene:` chains don't overlap
+- Pure helper `tweenAlpha(node, from, to, durationMs)` via requestAnimationFrame (no Pixi ticker dep)
+
+Workstation refactor:
+- Replaced inline `Assets.load('workstation_closeup.png')` + Sprite mount with `sceneRegistry.attach() + mountInitial('workstation')`
+- New `sceneState.on('scene', value => sceneRegistry.transitionTo(value))` listener (parallel to the existing prop-scope hide listener — props/NPCs still auto-clear via their own listeners)
+
+5 new vitest cases for SCENE_BG_TABLE invariants. 357/357 passing.
+
+### Verification
+
+- `pnpm tsc` ✓ clean across all 5 commits
+- `pnpm test` ✓ **357/357** (was 333; +24 new across cinematic + tutorial + scene + day-cycle Q-S cases)
+- All lefthook hooks green
+
+### Bugs closed
+
+- Bug #29 (revived again as Q-S — daily-pressure carrier landed)
+- Bug #30 (voice convention covered by tutorial modal)
+- Bug #31 (KPI Review cinematic engine half — ink content half pending W3)
+- Bug #44 (NPC portrait source + AVG side-stand)
+
+### Open queue
+
+P0:
+- Q-EE follow-up: per-NPC scale tuning when W5 ships canonical 256×384 sprites
+- Q-Q follow-up: W3 authors `# kpi_review_path_X` tag in episode-1.ink D7 + episode-12.ink D84 path A
+- W3 weekly_tradeoff stitches in episodes (per avg-architecture.md §2.3)
+
+(loop tick complete — queue empty per user input "Q-S → Q-Q → Q-K-2nd → T-1". Self-paced wakeup queued for monitoring GM messages.)
+
+
 

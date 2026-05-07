@@ -71,7 +71,57 @@ This **supersedes** outstanding Q-L Bug #24 (speaker auto-split), which becomes 
 
 ---
 
-## 🆕 P0 — Post batch-24 playtest sweep (5 bugs from GM 2026-05-07)
+## 🆕 P0 — Bug #44 — NPC 立绘 AVG 标准 size + 站位 (10x scale 重 calibration)
+
+### Q-EE · Bug #44 — NPC 立绘换 portrait source + scale 2.5-3.0 + AVG-style 站位
+
+**Why**: image 40 batch 25 ship 后 user 反馈 NPC 立绘 still 跟便利贴差不多小（scale 0.6 × 32×48 LOD0 sprite ≈ 19×29 px）. User: "立绘的尺寸超级小. 不是翻倍的问题, 是要 10X 才行."
+
+期望 reference: AVG 标准立绘 (Phoenix Wright / Steins;Gate / 中国职场题材打工人) — 立绘占 canvas 高 50-70%, 站位左右两侧, panel 在底部.
+
+**Fix**:
+1. `npc-registry.ts` NPC_TABLE 切换 source:
+   - 原: `sprites/npc/<id>_sprite.png` (32×48 LOD0)
+   - 新: `sprites/npc/<id>.png` (64×96 portrait, 已存在)
+2. Scale 0.6 → **2.5** (gives 64×96 portrait × 2.5 = 160×240 visible — ~67% of 360 canvas height)
+3. 重 tune positions for AVG-side-stand layout (640×360 canvas, panel y=240-336, sticky y=175-238):
+   - **左侧站位** (笑天 internal POV "看到右边" NPC): vivian / wang_director / zoe / it_xiaoma / li_ayi
+   - **右侧站位** (笑天 internal POV "看到左边" NPC): lisa / david / lao_zhou / lin_jie
+   - 中部 (electronic 出场): mama (phone scene) / cafeteria_auntie (cafeteria scene)
+   - **Y anchor 底部 ≈ 235** (panel 上方边缘), sprite anchor (0.5, 1) → 立绘脚跟 stand 在 y=235, 头到 y=235-240 ≈ y=-5 (顶部边缘 OK)
+
+   具体新 positions:
+   ```
+   lisa:           (520, 235) — right-side standing
+   david:          (140, 235) — left-side standing
+   wang_director:  (320, 235) — center (rare; Boss enters)
+   vivian:         (120, 235) — left-front-desk
+   zoe:            (140, 235) — left-HR (overlap with vivian, scene-driven)
+   lao_zhou:       (560, 235) — right-far cubicle
+   li_ayi:         (100, 235) — left-cleaning
+   mama:           (320, 235) — center (phone/video scene)
+   lin_jie:        (520, 235) — right (S3 finale)
+   it_xiaoma:      (140, 235) — left-IT
+   cafeteria_auntie: (320, 235) — center (cafeteria scene)
+   ```
+
+   多 NPC 同 scene 时按出场角色多寡微调 — 当前 NPC_TABLE single sprite per NPC, 同 scene 多 NPC 时各自站固定 anchor (engine 不解决 collision, 仅 stack — ink writer 通过 scene 切换控制谁在场).
+
+**File**: `game/src/render/npc/npc-registry.ts` NPC_TABLE — 11 entries spriteUrl + scale + x/y 改
+
+**Test**:
+- dev 跑 Day 1 Event 1.1 (Vivian) → Vivian 立绘 left-side, 跟 panel 不撞, 头部 visible
+- dev 跑 Day 1 Event 1.2 (Lisa 茶水间) → Lisa 立绘 right-side, 跟 sticky rack 不撞
+- dev 跑 Day 2 Event 2.1 (Lisa milk tea) → 同 Lisa 仍 right-side
+- 立绘大小 ≈ 半屏高 (AVG 标准)
+
+**Estimate**: 30 min (table edit + visual verify per Day 1-2 events)
+
+**Status**: ✅ done in commit `5949d89` (batch 26, 2026-05-07). Switched spriteUrl from `<id>_sprite.png` to `<id>.png` (W5 round-5 256×384 portrait re-cut). Anchors snapped to AVG side-stand baseline y=235 (panel top). Per-NPC x-anchors grouped by scene side; scale 0.6 stays (256×384 × 0.6 ≈ 154×230 visible, ~64% canvas height).
+
+---
+
+## ✅ Post batch-24 playtest sweep (Q-Z → Q-DD all done)
 
 GM playtest after batch 24 (W1 ship 6 commits + Q-T已 ship). 5 处 visible issue. 派 W1 batch (5 task ~3-4h total) + 1 子项 W5.
 
@@ -399,6 +449,8 @@ A' 更 clean — reuse existing mechanism, no new state. Recommended.
 
 **Dependencies**: T-1 T04 落地后 `# scene: monitor_modal` 才能切场。可与 T-1 并行实现, 落地时 wire 通。
 
+**Status**: ✅ done in commit `06f14fb` (batch 26, 2026-05-07). Engine half: new `kpi-review-cinematic.ts` (KpiReviewPath enum + singleton + tagDispatcher.on('kpi_review_path') listener + inferPathFromKpi fallback + HR_SPEAK_FALLBACK prose + timing constants). Rewritten `kpi-review.tsx` with PRE_REVEAL_MS pause + 4-row tick-up reveal + HR-speak block + "——这是您的 reward" + Confirm. **W3 follow-up**: author actual `# kpi_review_path_X` tags + canonical phrases in episode-1.ink D7 + episode-12.ink D84.
+
 ---
 
 ## P0 — Daily pressure mechanism
@@ -420,6 +472,8 @@ A' 更 clean — reuse existing mechanism, no new state. Recommended.
 
 **Estimate**: 2-3h
 
+**Status**: ✅ done in commit `e50dacb` (batch 26, 2026-05-07). New SceneState `weekly_meter` with phase + resumeTo. Mon week_start trigger in confirmRecap (post-advanceDay weekday=1) → action_day. Fri week_end trigger in confirmAfterWork('end_day') (weekday=5, non-month-end) → recap. New `weekly-meter.tsx` Preact modal with 4-row 横向 ▓░ progress (KPI/钱/状态/病倒 cells from ink VARs) + 6s auto-progress + manual dismiss. confirmWeeklyMeter() flushes to resumeTo.
+
 ### Q-K-2nd · First-time tutorial modal (Bug #23 second half + Bug #30)
 
 **Spec brief**:
@@ -434,6 +488,8 @@ A' 更 clean — reuse existing mechanism, no new state. Recommended.
 **Bug #30 close**: tutorial 解释 voice convention → Bug #30 同 close。
 
 **注**: Q-R 重构后 voice 通过 panel header 显式标识 (`[视角]/[笑天]/[Lisa]`), tutorial 主要解释三要素 + 52 集目标 + 病倒 cap, voice 解释成为辅助。
+
+**Status**: ✅ done in commit `fdfebea` (batch 26, 2026-05-07). New `src/render/onboarding/first-time-tutorial.tsx` mounts a one-time modal keyed off `survived:tutorial_seen` localStorage flag. Content: 不可能三角 + 病倒 cap 6 + 三种声音 + 52 集 + dialog UI explanation paragraph. mountFirstTimeTutorial() called early in main.ts boot path.
 
 ---
 
@@ -451,6 +507,8 @@ A' 更 clean — reuse existing mechanism, no new state. Recommended.
 - 200ms fade Graphics 过渡
 
 **Estimate**: 3-5h
+
+**Status**: ✅ done in commit `fe00e31` (batch 26, 2026-05-07). New `scene-registry.ts` with SCENE_BG_TABLE (workstation/tea_room/cafeteria/meeting_room/hallway/boss_office/monitor_modal/endgame + break_room/reception/home_phone aliases). 200ms black-overlay crossfade via Graphics + rAF tweenAlpha. transitionTo serialized via inFlight promise. workstation.ts replaced inline BG load with sceneRegistry.attach + mountInitial; sceneState.on('scene') listener fires transitionTo.
 
 ### T-2 · T05/T06 NPC sprite slots
 
