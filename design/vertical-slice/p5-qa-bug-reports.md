@@ -1580,3 +1580,26 @@ All previously-tracked GM bugs (#23-#44) appear to be resolved or in-progress. N
 ### Next round target (R58)
 
 Verify next dev pickup. Continue regression tracking.
+
+---
+
+## Rounds 58-59 — no new commits, idle
+
+---
+
+## Round 60 — chore commit regression check
+
+W2 QA Round 60 (2026-05-07). Latest commit: `6511f93 chore: AVG pivot ship + GH Pages workflow + biome ignore qa/`.
+
+This is a **milestone marker chore commit** — "AVG pivot ship" suggests P5 work is at a shippable point. No engine changes; just docs + CI workflow + biome ignore for `qa/` (so my driver files don't trigger lint warnings on dev's CI).
+
+Smoke 357/357 unchanged. R57 regression suite re-run: 4/4 pass. No regressions on Q-K-2nd tutorial, Q-Q KPI Review, T-1 scene BG, or earlier #25/#38/#40/#43/#44.
+
+### Round 60 outstanding
+
+Engine-side appears clean. Open items remaining on bug list:
+- None tracked as blocking. P5 phase 2 ship-ready per chore message.
+
+### Next round target (R61)
+
+Standard cadence — verify next pickup.
