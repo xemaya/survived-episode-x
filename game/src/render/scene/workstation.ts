@@ -9,6 +9,7 @@ import { propRegistry } from '@/render/diegetic/prop-registry';
 import { installPropTagHandler } from '@/render/diegetic/prop-tag-handler';
 import { mountStatusHud } from '@/render/hud/status-hud';
 import { npcRegistry } from '@/render/npc/npc-registry';
+import { sceneRegistry } from '@/render/scene/scene-registry';
 import { installSceneStateTagHandler, sceneState } from '@/scene/scene-state-mirror';
 import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { StageContext } from '../stage';
@@ -59,24 +60,15 @@ function pickMonitorFrame(actualKpi: number, threshold: number): keyof typeof MO
 export async function mountWorkstation(_state: SceneState, ctx: StageContext): Promise<() => void> {
   const teardowns: Array<() => void> = [];
 
-  // ── Workstation BG (full canvas, mounted first so everything else layers on top) ──
-  try {
-    const bgTex = await Assets.load('sprites/backgrounds/workstation_closeup.png');
-    bgTex.source.scaleMode = 'linear';
-    const bg = new Sprite(bgTex);
-    bg.label = 'workstation-bg';
-    bg.anchor.set(0.5);
-    bg.x = 320;
-    bg.y = 180;
-    // Scale to cover 640×360 canvas
-    const sx = 640 / bg.texture.width;
-    const sy = 360 / bg.texture.height;
-    bg.scale.set(Math.max(sx, sy));
-    ctx.worldLayer.addChild(bg);
-    teardowns.push(() => bg.destroy());
-  } catch (err) {
-    console.warn('[workstation] BG load failed; falling back to dark canvas:', err);
-  }
+  // ── BG (T-1: scene registry handles per-scene BG + 200ms fade) ──────────
+  // Scene registry attaches once per workstation mount; initial BG =
+  // workstation_closeup.png. Subsequent `# scene:` tag emissions from
+  // ink fire `transitionTo()` via the listener installed below, which
+  // crossfades to the matching BG. Per-scene props + NPCs already
+  // unmount on scene change via their own listeners.
+  sceneRegistry.attach(ctx.worldLayer);
+  await sceneRegistry.mountInitial('workstation');
+  teardowns.push(() => sceneRegistry.detach());
 
   // ── Static props ────────────────────────────────────────────────────────
   for (const spec of STATIC_PROPS) {
@@ -284,6 +276,16 @@ export async function mountWorkstation(_state: SceneState, ctx: StageContext): P
     propRegistry.hideScopedTo('scene');
   });
   teardowns.push(teardownSceneScopeHide);
+
+  // T-1: BG transition driven by `# scene:` ink tags via the scene
+  // registry. `sceneState.on('scene')` fires whenever the tag value
+  // changes; the registry crossfades to the matching BG (or warns
+  // when no BG is registered for that id). Idempotent — re-emitting
+  // the current scene id is a no-op inside the registry.
+  const teardownSceneBg = sceneState.on('scene', (value) => {
+    if (value) void sceneRegistry.transitionTo(value);
+  });
+  teardowns.push(teardownSceneBg);
 
   // T-2: NPC sprite registry. `# npc: <id>_<state>` from ink mounts
   // the matching W5 sprite at its workstation anchor; sprites stay
