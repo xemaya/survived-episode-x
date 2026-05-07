@@ -44,6 +44,24 @@ export class CalendarSystem {
     for (const l of this.listeners) l();
   }
 
+  /** Q-BB (Bug #41, 2026-05-07): jump current day directly. Used by
+   * the ink-dialog paintStep hook that parses `day_N_*` stitch names
+   * out of `story.state.currentPathString` so the calendar widget +
+   * weekly-meter triggers stay in sync with the narrative without
+   * requiring ink to call back into TS for each day advance. Weekday
+   * is rederived from day-1 (game starts day 1 = Monday). No-op if
+   * the requested day matches the current state. */
+  setDay(day: number): void {
+    if (day < 1 || day > MONTH_DAYS) {
+      console.warn(`[calendar] setDay out of range: ${day} (cap=${MONTH_DAYS})`);
+      return;
+    }
+    if (this._day === day) return;
+    this._day = day;
+    this._weekday = ((day - 1) % 7) + 1;
+    for (const l of this.listeners) l();
+  }
+
   advanceMonth(): void {
     this._day = 1;
     this._month += 1;

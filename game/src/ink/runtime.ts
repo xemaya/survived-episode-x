@@ -90,6 +90,15 @@ export class InkRuntime {
     return this.currentJsonPath;
   }
 
+  /** Q-BB: expose inkjs's internal program-counter path so the
+   * renderer can parse `day_(\d+)_` stitch prefixes for calendar
+   * sync without reaching into the Story instance directly. Returns
+   * null when no story loaded OR ink reports no path (idle / pre-
+   * intro state). */
+  get currentPathString(): string | null {
+    return this.story?.state?.currentPathString ?? null;
+  }
+
   /** Drive Continue() until !canContinue OR a virtual/explicit pagebreak
    * arrives, batching all output text + tags up to that point. Wraps
    * every Continue() in try/catch so a single bad path returns an

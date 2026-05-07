@@ -23,6 +23,7 @@
 // auto-splits steps so by the time paintStep sees a step, `step.text`
 // carries one source only and `detectSource` resolves it cleanly.
 
+import { calendar } from '@/flow/calendar';
 import { ink } from '@/ink/runtime';
 import { tagDispatcher } from '@/ink/tag-interceptors';
 import { type StickyNotesHandle, mountStickyNotes } from '@/render/choice/sticky-notes';
@@ -79,6 +80,23 @@ const CONTINUE_TRI_OFFSET_Y = 14;
  * are stripped here without losing the italic visual. */
 function stripMarkdown(s: string): string {
   return s.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
+}
+
+/** Q-BB (Bug #41): keep the calendar widget aligned with the ink
+ * narrative by parsing the current stitch path. ink content uses the
+ * convention `day_<N>_<event>_<phase>` for episode beats, so the day
+ * number can be lifted out of `state.currentPathString` without any
+ * tag plumbing. Idempotent — calendar.setDay() is a no-op when day
+ * matches current. Tolerant of paths that lack the prefix (e.g.
+ * episode entry points like `intro` or `0`). */
+const DAY_PATH_RE = /day_(\d+)_/;
+function syncCalendarFromInkPath(): void {
+  const path = ink.currentPathString;
+  if (!path) return;
+  const m = path.match(DAY_PATH_RE);
+  if (!m) return;
+  const day = Number.parseInt(m[1] ?? '', 10);
+  if (Number.isFinite(day)) calendar.setDay(day);
 }
 
 export interface InkDialogHandles {
@@ -330,6 +348,7 @@ export function mountInkDialog(parent: Container, opts: MountInkDialogOpts = {})
    * is unconditional teardown of all transient layers; bottom is mount-
    * fresh-by-phase. No surface state leaks across paints. */
   const paintStep = (step: ReturnType<typeof ink.step>) => {
+    syncCalendarFromInkPath();
     clearStickies();
     clearContinue();
 

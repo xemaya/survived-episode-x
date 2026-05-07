@@ -52,6 +52,41 @@ describe('CalendarSystem', () => {
     expect(calendar.currentWeekday).toBe(4); // weekday continuous across months
   });
 
+  it('setDay jumps to the requested day and rederives weekday (Q-BB)', () => {
+    const listener = vi.fn();
+    calendar.onDateChanged(listener);
+    calendar.setDay(15); // day 15 → (15-1) % 7 + 1 = 1 (Monday again)
+    expect(calendar.currentDay).toBe(15);
+    expect(calendar.currentWeekday).toBe(1);
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it('setDay to current day is a no-op (no listener fire)', () => {
+    const listener = vi.fn();
+    calendar.onDateChanged(listener);
+    calendar.setDay(1); // already at day 1
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('setDay rederives weekday correctly across the week', () => {
+    calendar.setDay(5); // Friday
+    expect(calendar.currentWeekday).toBe(5);
+    calendar.setDay(7); // Sunday
+    expect(calendar.currentWeekday).toBe(7);
+    calendar.setDay(8); // next Monday
+    expect(calendar.currentWeekday).toBe(1);
+  });
+
+  it('setDay clamps to MONTH_DAYS — out-of-range is rejected with no fire', () => {
+    const listener = vi.fn();
+    calendar.onDateChanged(listener);
+    calendar.setDay(0);
+    expect(calendar.currentDay).toBe(1);
+    calendar.setDay(MONTH_DAYS + 1);
+    expect(calendar.currentDay).toBe(1);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
   it('unsubscribe stops emissions', () => {
     const listener = vi.fn();
     const unsub = calendar.onDateChanged(listener);
