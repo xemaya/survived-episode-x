@@ -1,0 +1,25 @@
+A pixel art main menu background for a Chinese office life game — pre-dawn empty office, ready for UI overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — base layer, NOT finished illustration:
+- NO title text, NO game-name title ("活过第 X 集"), NO version date
+- NO menu buttons (those are PixiJS Graphics overlay)
+- NO logo (overlay)
+- NO subtitle
+- NO scrolling marquee
+- The mood is "no one is here yet" — empty, slightly desolate, fluorescent lights still off OR just one row on
+- Visual goal: a permanent backdrop on which the title + 4 menu buttons + version strip will be programmatically rendered on top
+
+LAYOUT — wide office floor view at pre-dawn / very early morning:
+- Wide-angle view of an open-plan office area (similar to BG1 but more cinematic angle, slightly low POV looking across cubicles)
+- Most fluorescent lights are OFF (dark gray ceiling), one or two bays have lights on (faint white pools)
+- One single highlighted workstation has its monitor on (faint screen glow #2C4A6E) — "the player's permanent station, even when no one's there"
+- Cubicle walls (#5A7080) cast long shadows in the partial darkness
+- Floor: dark grey-blue tile, suggestion of cleaning-cart wheel marks
+- Window on far wall (right edge): pre-dawn purple/blue gradient (#3A3050 fading into #2C4A6E), suggesting 5 AM
+- No NPCs, no character sprites
+- Composition leaves substantial cream/dark space in upper-left quadrant for the title text + version strip overlay
+- Mid-bottom area is reserved for menu buttons (kept relatively unbusy)
+
+PALETTE: 灰蓝 #5A7080 (cubicle walls + floor — dominant), 棕 #7A5838 (faint desk wood barely visible in dimness), 白 #E8E0CC (highlight pools where one light is on), 屏幕蓝 #2C4A6E (single monitor glow + window pre-dawn), 紫灰 #3A3050 (window upper portion + atmospheric), no gold accent (lights are off), no warning red.
+
+Output: PNG, 1024x1024, single composite main-menu background. Empty office at pre-dawn. Suitable for in-engine UI overlay (game title + 4 menu buttons + version strip will be rendered programmatically on top).

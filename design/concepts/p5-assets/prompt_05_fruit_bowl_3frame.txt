@@ -1,0 +1,53 @@
+A pixel art 3-frame sprite sheet for a Chinese office life game: a front-desk fruit bowl in 3 states — APPLE / STRAWBERRY / EMPTY. This is the front-desk Vivian's fruit bowl prop, signaling "morning abundance / midday remainder / late-day depletion" in the lobby diegetic layer.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Visual identity goal: "first glance recognition, second glance indictment". Mood: cheery generic-corporate hospitality with a mild dread undertone (fruit dwindles like the day itself).
+
+LAYOUT: A 3-column horizontal grid, equal width per cell. Each cell is the same fruit bowl shot from the same angle — only the contents change. Cells are equal-width (1024/3 each ≈ 341 px wide × 1024 px tall workspace, but the bowl is centered in the lower half of each cell with empty/light background above; engine will downsample to 192×64 grid (3 cols of 64×64)).
+
+CELL DIVIDERS: Thin 2px #5A7080 vertical lines between cells (so the cuts.yaml grid is unambiguous). Bottom of each cell has a 1px text label in #1a1a1a on #E8E0CC: "FRAME 1 苹果", "FRAME 2 草莓", "FRAME 3 空".
+
+THE BOWL (consistent across all 3 frames):
+- A shallow round ceramic bowl, off-white glaze (#E8E0CC) with a thin #5A7080 rim (1px).
+- Diameter takes 60% of cell width.
+- A faint blue Chinese-style decorative stripe (1px #5A7080 dotted) running around the rim.
+- Sitting on a small slice of wooden front-desk surface (#7A5838) at the bottom 1/8 of the cell.
+
+FRAME 1 — APPLE STATE (morning, 9:00 — fresh):
+- Bowl FULL of red apples (warmth red #B05050 with 1px highlight at #E0B050 — small gold accent allowed here as fruit shine, max 5 pixels per apple). 5-6 apples piled, slight overflow.
+- Each apple has a tiny 2x2 px green leaf at the stem (#4a7050).
+- Mood: abundant.
+
+FRAME 2 — STRAWBERRY STATE (midday, 14:00 — partially eaten):
+- Bowl now half-full of red strawberries (warmth red #B05050 with 1px lighter #C8A85A speckle dots representing strawberry seeds).
+- ~7-8 small strawberries, irregular pile.
+- One strawberry sits ALONE just outside the bowl on the wooden surface (someone took one and rolled it).
+- A tiny 1px green leaf cap on each strawberry.
+- Mood: mid-day abundance, slightly disordered.
+
+FRAME 3 — EMPTY STATE (late afternoon, 17:30 — picked clean):
+- Bowl completely empty. We see the inside ceramic glaze.
+- ONE remaining strawberry stem (no fruit) sits in the bowl, 2x2 px green only — the leftover.
+- One small 2x2 px brown wood-desk fly hovers 5 px above the bowl rim (1-2 px visual joke — the fruit was too good).
+- Mood: gone.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (strawberry seeds, apple highlight — 5%)
+- 格子间灰蓝 #5A7080 (bowl rim, cell dividers, decorative stripe — 10%)
+- 档案室棕 #7A5838 (wooden front-desk surface — 15%)
+- 白炽灯白 #E8E0CC (bowl body, cell BG — 35% dominant)
+- 屏幕蓝 #2C4A6E (NOT used)
+- 老板金 #E0B050 (max 3% — only as 1-2px apple highlights)
+- 家温红 #B05050 (apples + strawberries — 25%)
+- Tiny green #4a7050 (leaves — 2%)
+
+VISUAL JOKES (1-3px subtle):
+- Frame 1: a single 1px white-light reflection on the topmost apple — "morning sunshine".
+- Frame 2: the rolled-out strawberry has a 1-px shadow trail (it rolled).
+- Frame 3: the fly is the only "guest" left.
+- Across all 3 frames, in the bottom-right of each cell, a tiny 1px Chinese label (3-4 chars) noting the time: "9:00" / "14:00" / "17:30" — illegible at downsample but readable at full canvas.
+
+TITLE BANNER (top of canvas, 1/16 height, off-white #E8E0CC band, dark brown #7A5838 outline):
+中文: 「水果盘 — 一日三态」
+English: "Front desk fruit bowl — 3 frames"
+
+Output: PNG, 1024x1024, equal-width 3-column grid (each frame ≈ 341×1024 within the canvas, designed to crop to 192×64 final sheet of 3×(64×64)), 16-bit pixel art, ready for tools/cuts.yaml integration. Consistent with prior reference sheets, especially design/concepts/p5-ui/p5_ui_01_workstation_monday_morning.png.

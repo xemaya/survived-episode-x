@@ -1,0 +1,26 @@
+A pixel art workstation close-up background for a Chinese office life game — single cubicle viewed from a slight 3/4 angle, ready for sprite overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — this is a base layer, NOT a finished illustration:
+- NO title text, NO labels, NO captions, NO Chinese names
+- NO sticky notes (those are sprites overlaid in-engine)
+- NO coffee cup on desk (sprite overlay)
+- NO computer screen content (just bare bezel — screen content is sprite overlay)
+- NO NPC at desk (NPC is sprite overlay)
+- NO calendar / mug / phone props (all are sprites)
+- The desk surface, monitor bezel, chair, cubicle walls are PERMANENT background
+- Everything else (small props, NPCs, screen content) will be overlaid
+
+LAYOUT — single workstation close-up, 3/4 view (slight angle showing desk depth):
+- Center: a single workstation occupying 60% of frame
+  - Wood desk surface (#7A5838) with subtle grain, no items on it
+  - Bare grey-blue (#5A7080) plastic monitor bezel, screen blank dark blue (#2C4A6E)
+  - Black office chair pulled in (chairback visible behind desk edge)
+  - Cubicle wall partitions on left and right (3/4 height, gray-blue #5A7080)
+  - Single fluorescent light overhead (white tube + metal end caps)
+- Background: cubicle wall acting as the back of the workstation, with corkboard texture (faint gray dots, no pinned papers — those are sprite overlay)
+- Floor visible at bottom edge: grey-blue tile pattern
+- Soft 1px shadow under desk edge
+
+PALETTE: 灰蓝 #5A7080 (cubicle walls + monitor bezel + floor — dominant), 棕 #7A5838 (desk wood), 白 #E8E0CC (overhead light, paper-pale corkboard backing), 屏幕蓝 #2C4A6E (blank monitor screen + bezel highlight), faint 老板金 #E0B050 (max 1% — only on chair caster wheel reflection if any), no warning red.
+
+Output: PNG, 1024x1024, single composite workstation background. Empty desk + chair + monitor + cubicle walls + overhead light. Suitable for in-engine sprite overlay (the player NPC, sticky notes on cubicle walls, coffee mug on desk, monitor screen content, sticky lifecycle, AP-slot pencil cross will all be added programmatically on top of this base).

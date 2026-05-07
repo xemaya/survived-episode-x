@@ -41,7 +41,7 @@
   rows: 3
   crop_top: 110           # title banner
   crop_bottom: 10
-  label_band: 40          # per-cell "1. 卷王 / Tryhard" label
+  label_band: 100          # per-cell "1. 卷王 / Tryhard" label
   names:
     - [tryhard, slacker, toady]
     - [rookie, veteran_coworker, cleaning_auntie]
@@ -61,25 +61,10 @@
       row_top_skip: 35    # skip "细节 / DETAILS" sub-banner
       label_band: 30
 
-- source: C_world_map_v01.png
-  mode: single
-  output: maps/office_floor_map.png
 
-- source: D_character_detail_page_v01.png
-  mode: single
-  output: ui/character_detail_page.png
 
-- source: E_monthly_review_v01.png
-  mode: single
-  output: scenes/monthly_review.png
 
-- source: F_overtime_scene_v01.png
-  mode: single
-  output: scenes/overtime_night.png
 
-- source: G_game_over_v01.png
-  mode: single
-  output: scenes/game_over_split.png
 
 - source: H_action_cards_defense_v01.png
   mode: grid
@@ -118,3 +103,238 @@
     - [coffee_full, coffee_three_quarter, coffee_half, coffee_empty]
     - [monitor_idle, monitor_working, monitor_warning, monitor_critical]
     - [desk_surface, monitor_bezel, chair_active, chair_empty]
+
+- source: K_calendar_attendance_v01.png
+  mode: grid
+  output_dir: hud/
+  cols: 4
+  rows: 4
+  crop_top: 44
+  label_band: 80
+  row_boundaries: [62, 330, 580, 803, 1024]
+  row_top_skip: 5
+  names:
+    - [attendance_day_normal, attendance_day_busy, attendance_overtime, attendance_weekend]
+    - [attendance_kpi_review, attendance_day_off, attendance_gameover, attendance_main_menu]
+    - [calendar_month_day_1, calendar_mid_week, calendar_month_end, calendar_weekend_marked]
+    - [banner_anniversary, notice_board_fresh, notice_board_faded, notice_board_ancient]
+
+- source: L_npc_faces_set1_v01.png
+  mode: grid
+  output_dir: npc/faces/
+  cols: 4
+  rows: 4
+  crop_top: 39
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [tryhard_neutral, tryhard_warmup, tryhard_tension, tryhard_farewell]
+    - [slacker_neutral, slacker_warmup, slacker_tension, slacker_farewell]
+    - [toady_neutral, toady_warmup, toady_tension, toady_farewell]
+    - [rookie_neutral, rookie_warmup, rookie_tension, rookie_farewell]
+
+- source: M_npc_faces_set2_v01.png
+  mode: grid
+  output_dir: npc/faces/
+  cols: 4
+  rows: 5
+  crop_top: 32
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [veteran_neutral, veteran_warmup, veteran_tension, veteran_farewell]
+    - [auntie_neutral, auntie_warmup, auntie_tension, auntie_farewell]
+    - [boss_neutral, boss_warmup, boss_tension, boss_farewell]
+    - [hr_neutral, hr_warmup, hr_tension, hr_farewell]
+    - [other_dept_neutral, other_dept_warmup, other_dept_tension, other_dept_farewell]
+
+- source: N1_npc_positions_set1_v01.png
+  mode: grid
+  output_dir: npc/positions/
+  cols: 4
+  rows: 4
+  crop_top: 38
+  label_band: 80
+  row_boundaries: [47, 326, 573, 795, 1024]
+  row_top_skip: 5
+  names:
+    - [tryhard_at_desk_sit, tryhard_at_desk_stand, tryhard_walking, tryhard_at_boss_office]
+    - [slacker_at_desk_sit, slacker_at_desk_stand, slacker_walking, slacker_at_tea_room]
+    - [toady_at_desk_sit, toady_at_desk_stand, toady_walking, toady_at_boss_office]
+    - [rookie_at_desk_sit, rookie_at_desk_stand, rookie_walking, rookie_at_meeting_room]
+
+- source: N2_npc_positions_set2_v01.png
+  mode: grid
+  output_dir: npc/positions/
+  cols: 4
+  rows: 5
+  crop_top: 30
+  label_band: 80
+  row_boundaries: [40, 285, 483, 677, 859, 1024]
+  row_top_skip: 5
+  names:
+    - [veteran_at_desk_sit, veteran_at_desk_stand, veteran_walking, veteran_at_tea_room]
+    - [auntie_mopping, auntie_standing, auntie_walking, auntie_at_hallway]
+    - [boss_at_desk_sit, boss_at_desk_stand, boss_walking, boss_at_meeting_room]
+    - [hr_at_desk_sit, hr_at_desk_stand, hr_walking, hr_at_meeting_room]
+    - [other_dept_at_desk_sit, other_dept_at_desk_stand, other_dept_walking, other_dept_at_hallway]
+
+- source: O_kpi_review_ui_v02.png
+  mode: grid
+  output_dir: ui/kpi_review/
+  cols: 4
+  rows: 4
+  crop_top: 9
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [kpi_review_bg, kpi_three_row_panel, kpi_capacity_threshold, kpi_breakdown_row]
+    - [gameover_certificate_bg, ironic_promotion_stamp, letter_print_frame, skip_hint_strip]
+    - [confirm_button_normal, confirm_button_hover, confirm_button_pressed, confirm_button_disabled]
+    - [archive_list_row, archive_cap_banner, archive_delete_confirm, settlement_locked]
+
+- source: P_main_menu_pause_ui_v02.png
+  mode: grid
+  output_dir: ui/menu/
+  cols: 4
+  rows: 4
+  crop_top: 33
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [main_menu_bg, main_menu_buttons, title_logo_badge, version_date_strip]
+    - [pause_overlay, settings_bg, settings_group_audio, settings_group_language]
+    - [volume_slider, locale_dropdown, narrative_density_toggle, keymap_row]
+    - [tooltip, confirm_quit_dialog, settings_group_icons, reset_defaults_button]
+
+- source: Q_recap_ui_v01.png
+  mode: grid
+  output_dir: ui/recap/
+  cols: 4
+  rows: 3
+  crop_top: 39
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [daily_recap_bg, weekly_recap_bg, hr_header_strip, effort_3d_visualization]
+    - [event_list_row, kpi_prediction_strip, skip_hint_strip, daily_body_container]
+    - [weekly_body_container, recap_fade_in_frame, ap_energy_summary_row, calendar_mini_glyph]
+
+- source: R_environment_v01.png
+  mode: grid
+  output_dir: environment/
+  cols: 4
+  rows: 4
+  crop_top: 42
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [break_room_crack_lvl1, break_room_crack_lvl2, break_room_crack_lvl3, break_room_crack_lvl4]
+    - [boss_fake_plant, tea_room_signin, hallway_box_clean, hallway_box_stepped]
+    - [whiteboard_layer1, whiteboard_layer2, whiteboard_layer3, whiteboard_layer4]
+    - [fluorescent_tube, boss_purple_edge, steam_particle, dust_mote]
+
+- source: S_npc_lifecycle_v01.png
+  mode: grid
+  output_dir: npc/lifecycle/
+  cols: 4
+  rows: 4
+  crop_top: 35
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [tryhard_leaving, slacker_leaving, toady_leaving, rookie_leaving]
+    - [veteran_leaving, auntie_leaving, boss_leaving, hr_leaving]
+    - [other_dept_leaving, walk_cycle_1, walk_cycle_2, walk_cycle_3]
+    - [talk_mouth_open, talk_mouth_closed, xisang_smile, xisang_bow]
+
+- source: T_card_dialogue_ui_v01.png
+  mode: grid
+  output_dir: ui/card/
+  cols: 4
+  rows: 4
+  crop_top: 11
+  label_band: 100
+  row_boundaries: [60, 340, 595, 815, 1024]
+  row_top_skip: 5
+  names:
+    - [card_frame_1ap, card_frame_2ap, card_frame_3ap, card_hover_overlay]
+    - [card_disabled_overlay, dialogue_9slice, speaker_name_plate, choice_button_normal]
+    - [choice_button_hover, choice_button_pressed, choice_button_disabled, ap_slot_empty]
+    - [ap_slot_filled, dialogue_continue_arrow, card_front_icon_set, card_empty_slot]
+
+- source: U_npc_event_cg_v02.png
+  mode: grid
+  output_dir: npc/event_cg/
+  cols: 4
+  rows: 4
+  crop_top: 32
+  label_band: 60
+  row_top_skip: 5
+  auto_rows: true
+  names:
+    - [tryhard_calm, tryhard_agitated, slacker_calm, slacker_panicked]
+    - [toady_calm, toady_deferential, rookie_calm, rookie_nervous]
+    - [veteran_calm, veteran_knowing, auntie_calm, auntie_disapproving]
+    - [boss_calm, boss_commanding, hr_calm, hr_officious]
+
+- source: V_misc_polish_v01.png
+  mode: grid
+  output_dir: hud/
+  cols: 4
+  rows: 4
+  crop_top: 38
+  label_band: 80
+  row_boundaries: [52, 298, 532, 746, 1024]
+  row_top_skip: 5
+  names:
+    - [desk_stain_lvl1, desk_stain_lvl2, desk_stain_lvl3, desk_stain_lvl4]
+    - [desk_stain_lvl5, card_played_1, card_played_2, card_played_3]
+    - [card_played_4, sticky_lifecycle_1, sticky_lifecycle_2, sticky_lifecycle_3]
+    - [sticky_lifecycle_4, speaker_portrait_frame, archive_screen_bg, cleared_desk]
+
+# === P5 Phase 2 visual assets (W5 round 1, 2026-05-05) ===
+# Front-desk fruit bowl: 3 horizontal frames (apple / strawberry / empty)
+- source: fruit_bowl_3frame_sheet.png
+  mode: grid
+  output_dir: hud/
+  cols: 3
+  rows: 1
+  crop_top: 80         # title banner "水果盘 — 一日三态"
+  crop_bottom: 0
+  label_band: 100      # per-cell "FRAME N 苹果/草莓/空" label + time (Bug #15 Option A: 60→100)
+  names:
+    - [fruit_bowl_apple, fruit_bowl_strawberry, fruit_bowl_empty]
+
+# Xiaotian gray-polo turnaround sheet (2026-05-05).
+# Layout: title (top ~50px) / expression band 50-540 (3x2 grid) / poses band 570-1024 (4x1 grid).
+# Two separate entries because rows_unequal divides height evenly — actual rows are unequal heights.
+- source: xiaotian_polo_sheet.png
+  mode: grid
+  output_dir: character/turnaround_polo/
+  cols: 3
+  rows: 2
+  crop_top: 50
+  crop_bottom: 484     # cut off pose row (1024 - 540)
+  label_band: 90       # per-cell expression label (Bug #15 Option A: 50→90)
+  names:
+    - [expr_neutral, expr_slight_frown, expr_tired]
+    - [expr_pro_smile, expr_genuine_smile, expr_resigned]
+
+- source: xiaotian_polo_sheet.png
+  mode: grid
+  output_dir: character/turnaround_polo/
+  cols: 4
+  rows: 1
+  crop_top: 555        # pose band start
+  crop_bottom: 30      # bottom safe margin
+  label_band: 90       # per-pose label (Bug #15 Option A: 50→90)
+  names:
+    - [pose_standing, pose_sitting_desk, pose_walking, pose_thermos_check]

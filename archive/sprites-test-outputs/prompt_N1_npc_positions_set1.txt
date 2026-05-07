@@ -1,0 +1,52 @@
+A pixel art NPC position atlas for a Chinese office life game — 4 NPC archetypes × 4 station positions = 16 full-body sprite cells in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. Consistent with prior reference sheets like A_npc_archetypes_v01.png and B_three_view_v01.png — same characters at same scale.
+
+LAYOUT — 4x4 grid on cream/beige background (#E8E0CC). Each row is one NPC across 4 station positions (left to right: AT_DESK_SIT → AT_DESK_STAND → WALKING → AT_OTHER_LOCATION). Each cell shows the FULL BODY of the NPC at the indicated station. Each cell labeled below in pixel font.
+
+THE 4 NPCs (one per row, top to bottom):
+
+ROW 1 — 卷王 / TRYHARD:
+Recurring: spine +2px taller, perfect tie, eye bags 3px, navy suit
+1. 卷王 在工位 / Tryhard At Desk Sit — sitting upright at desk (90° spine), typing furiously, monitor in front, sticky-note covered cubicle wall behind
+2. 卷王 站工位 / Tryhard At Desk Stand — standing at desk reviewing printout, still typing one-handed, won't sit because that's slack
+3. 卷王 走动 / Tryhard Walking — power-walking with files clutched chest-high, side view, focused expression
+4. 卷王 在 Boss 办公室 / Tryhard At Boss Office — standing at attention in front of Boss's desk corner (Boss desk visible at right edge), holding portfolio
+
+ROW 2 — 摆烂族 / SLACKER:
+Recurring: one shoulder dropped 4px lower, slouching, gray shirt
+5. 摆烂族 在工位 / Slacker At Desk Sit — slumped in chair, leaning back 15°, phone hidden under desk edge, fake spreadsheet on screen
+6. 摆烂族 站工位 / Slacker At Desk Stand — half-leaning on cubicle wall, hand in pocket, looking around for who's watching
+7. 摆烂族 走动 / Slacker Walking — slow lazy gait, side view, hands in pockets, taking the long route
+8. 摆烂族 在茶水间 / Slacker At Tea Room — leaning on water dispenser, scrolling phone openly, coffee cup forgotten in other hand
+
+ROW 3 — 谄媚族 / TOADY:
+Recurring: oval face, chin forward 2px, hands clasped at chest
+9. 谄媚族 在工位 / Toady At Desk Sit — sitting upright but turned slightly toward boss-direction, attentive posture, business card visible on desk
+10. 谄媚族 站工位 / Toady At Desk Stand — standing in mid-bow direction, ready to respond, hands still clasped
+11. 谄媚族 走动 / Toady Walking — walking with slight lean-forward, almost a fast bow, side view
+12. 谄媚族 在 Boss 办公室 / Toady At Boss Office — bowed at 30° in front of Boss desk (corner visible), offering tea cup with both hands
+
+ROW 4 — 新人 / ROOKIE:
+Recurring: narrow build, long neck, oversized collar, lanyard askew
+13. 新人 在工位 / Rookie At Desk Sit — sitting forward in chair, hands in lap, looking at monitor with confused face, surrounded by training manuals
+14. 新人 站工位 / Rookie At Desk Stand — standing uncertainly beside chair, holding notebook, looking around for guidance
+15. 新人 走动 / Rookie Walking — tentative walking pose, side view, holding files awkwardly with both hands, careful steps
+16. 新人 在会议室 / Rookie At Meeting Room — sitting alone in large meeting chair, taking notes furiously, others not yet arrived
+
+PALETTE: 打工人黄 #C8A85A (skin), 灰蓝 #5A7080 (suits, cubicle walls), 棕 #7A5838 (hair, wood, files), 白 #E8E0CC (background, papers, shirt), 屏幕蓝 #2C4A6E (monitors), 老板金 #E0B050 (max 3% — small accents only), 警告红 #C83428 (Tryhard tie + warning posters).
+
+VISUAL JOKES (1-3 px subtle):
+- Tryhard at Boss office: sweat bead on temple (1px)
+- Slacker at tea room: coffee in cup is cold (no steam)
+- Toady's tea cup is held with EXAGGERATED both-hands respect (cup nearly chest-height)
+- Rookie at meeting room: training manual is upside-down
+
+CRITICAL CONSTRAINTS:
+- All 4 NPCs maintain silhouette identity across all 4 stations
+- "Walking" cells show side-view profile for movement readability
+- Each station communicates the NPC's character (Tryhard never relaxes, Slacker always seeking exit, Toady always orienting toward power, Rookie always uncertain)
+- NO heroic styling — these are office workers in office spaces
+- Each cell visually framed but borderless
+
+TOP TITLE BANNER: "NPC 站位 · 第一组 / NPC Position Atlas · Set 1" pixel font, centered, dark cubicle blue text.
+
+Output: PNG, 1024x1024, single composite 4x4 position sheet, ready to be cropped into individual NPC full-body sprites.

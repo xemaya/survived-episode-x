@@ -1,0 +1,51 @@
+A pixel art UI element sheet for a Chinese office life game — 16 card play and dialogue UI elements arranged in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. UI motif: corporate report-form aesthetic, 0-radius right-angle rectangles, 1px borders. Consistent with H_action_cards_defense_v01.png and O_kpi_review_ui_v01.png.
+
+LAYOUT — 4x4 grid on cream/beige background (#E8E0CC). Each cell shows ONE UI element, centered, with 1px border in cubicle gray-blue. Each cell labeled with Chinese + English in pixel font below.
+
+THE 16 UI ELEMENTS (top-left to bottom-right):
+
+ROW 1 — Card frame backgrounds (3 AP cost variants + hover):
+1. 卡牌底框 1 AP / Card Frame 1 AP — empty card frame template: cubicle-gray border, white inner area, AP cost icon "1" in upper-left corner (small lightbulb/punch-clock badge), bottom strip "防御 / DEFENSE" placeholder, central illustration area empty
+2. 卡牌底框 2 AP / Card Frame 2 AP — same template but AP icon shows "2", slightly thicker border to suggest higher cost
+3. 卡牌底框 3 AP / Card Frame 3 AP — same template but AP icon shows "3", border distinctly thicker still, gold-tinted inner accent (1px)
+4. 卡牌悬停叠层 / Card Hover Overlay — same template with double 1px border (stamp effect from O sheet button), subtle highlight glow
+
+ROW 2 — Card states + dialogue frame:
+5. 卡牌禁用叠层 / Card Disabled Overlay — same template but desaturated grey, 1px diagonal hatching across whole face, "AP 不足" text in muted color at bottom
+6. 对话九宫格框 / Dialogue 9-Slice Frame — pixel-art 9-slice scalable dialogue box: 1px dark border, cream interior, all 4 corners + 4 edges + center designed for tiling, sample text "..." inside
+7. 说话人名牌 / Speaker Name Plate — small horizontal name plate: 1px border, "卷王 / TRYHARD" in pixel font, used above dialogue frame to show who is speaking
+8. 选项按钮 普通 / Choice Button Normal — choice button rectangle: "选择 1: 接受 / Accept", grey-blue fill, 1px border, label centered
+
+ROW 3 — Choice button states:
+9. 选项按钮 悬停 / Choice Button Hover — same button with double 1px border (stamp effect), slightly brighter fill
+10. 选项按钮 按下 / Choice Button Pressed — inverted colors (dark fill, light text), 1px border thicker, suggests depression
+11. 选项按钮 禁用 / Choice Button Disabled — desaturated grey, label muted, 1px diagonal hatch overlay, "需要前置事件" text
+12. AP 槽位空 / AP Slot Empty — single empty AP slot icon: 1px square border with no fill (the receptacle without the AP token in it)
+
+ROW 4 — AP slots + dialogue helpers:
+13. AP 槽位填充 / AP Slot Filled — same square icon now FILLED with AP token: yellow Post-it tinted center (#C8A85A) with subtle pencil-cross marking, ready for "spent"
+14. 对话继续提示 / Dialogue Continue Indicator — small ▼ down-arrow pixel sprite, blinking-state default, used at corner of dialogue frame to indicate "tap to continue"
+15. 卡片正面图标合集 / Card Front Icon Set (8-12 stamp icons in this cell) — small 2x4 grid of icon stamps: 装病/装睡/装忙/摸鱼/拖延/吹捧/抢功/咖啡 — each a 16x16 pixel stamp icon
+16. 空卡牌槽位 / Empty Card Slot — single placeholder card-shaped rectangle, 1px dashed border (1px dash pattern), faint label "空 / EMPTY", used as hand layout placeholder
+
+PALETTE: 打工人黄 #C8A85A (AP slot fill), 灰蓝 #5A7080 (UI dominant), 棕 #7A5838 (paper trim, name plates), 白 #E8E0CC (background, card body), 屏幕蓝 #2C4A6E (dialogue frame accent), 老板金 #E0B050 (max 3% — 3 AP card border accent only), 警告红 #C83428 (disabled diagonal hatch tint).
+
+VISUAL JOKES (1-3 px subtle):
+- 1 AP / 2 AP / 3 AP frames have subtly increasing border thickness (cost = visual weight)
+- Disabled card hatch is the same 1px diagonal pattern as warning monitor (consistent visual language for "no")
+- AP slot empty looks slightly sad (not just absence, but absence-of)
+- AP slot filled: the post-it tint is the same yellow as J sheet sticky notes (consistent diegesis)
+- Dialogue continue ▼ uses the same arrow pattern as KPI critical ↓ but pointing different way
+- Card front icons are stamp-like (mimicking actual office stamps, not flashy icons)
+
+CRITICAL CONSTRAINTS:
+- ALL right-angle 0-radius rectangles per UI motif
+- 9-slice frame must be tileable (corners + edges work as scalable border)
+- Card frames designed to be filled with per-card illustrations from H/I reference sheets (compatible style)
+- Disabled state uses dual encoding: grey color + 1px hatch pattern
+- NO triumphant card iconography — these cards represent corporate maneuvers, not magical attacks
+- Each cell visually framed, label below
+
+TOP TITLE BANNER: "卡片 · 对话 / Card · Dialogue UI" pixel font, centered, dark cubicle blue text on cream.
+
+Output: PNG, 1024x1024, single composite 4x4 UI element sheet, ready to be cropped into individual UI sprites for the card play and dialogue systems.

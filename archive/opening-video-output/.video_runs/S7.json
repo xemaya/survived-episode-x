@@ -1,0 +1,12 @@
+{
+  "shot_id": "S7",
+  "model": "veo3-fast",
+  "prompt": "Tight medium shot on an exhausted Chinese male office worker, late 30s, sitting at his desk in a near-empty dark office. Loosened red tie, dark circles under his eyes, shirt sleeves rolled up. He breathes slowly — chest rises and falls once during the 8 seconds. Camera holds steady with a very gentle pull-back zoom. Strong vignette toward the corners; leave the upper-center area dimmer for a title overlay in post. Mood: totally drained, no tears, just numb survival. SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette in 格子间灰蓝 #5A7080 / 白炽灯白 #E8E0CC / 档案室棕 #7A5838 / 老板金 #E0B050 / 屏幕蓝 #2C4A6E / 打工人黄 #C8A85A. Indie game cutscene, dark-humor 喜丧美学 (funeral-as-festival) tone.",
+  "status": "completed",
+  "task_id": "task_oYNnS1bs9nfSCZAHxhx81seYgvvPsyar",
+  "video_url": "https://comet-api-bucket.s3.us-east-1.amazonaws.com/videos/task_oYNnS1bs9nfSCZAHxhx81seYgvvPsyar.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAX2ZLYGRJV3PGWZUZ%2F20260504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260504T055359Z&X-Amz-Expires=259200&X-Amz-SignedHeaders=host&response-content-type=video%2Fmp4&x-id=GetObject&X-Amz-Signature=ee224f3fcdb204183db74a719412b88c0d4d6a96eaf7ce32a297b3459fab86ec",
+  "download_path": "/Users/huanghaibin/Workspace/games/survived-episode-x/output/clips/S7.mp4",
+  "last_error": null,
+  "created_at": 1777873940.840096,
+  "updated_at": 1777874112.767431
+}

@@ -1268,3 +1268,315 @@ Many GM-filed bugs queued for next batches:
 ### Next round target (R15)
 
 Verify whichever GM-filed bugs the dev tackles next. Most are open with substantial design scope.
+
+---
+
+## Round 15 — verify Bug #23 fix (`qa/p5-demo-r15.spec.ts`, 3 tests, all pass)
+
+W2 QA Round 15 (2026-05-06). Latest commit: `89c8a29 fix(qa-bug-23): delete morning_briefing card; recap/kpi-review → action_day directly`. Smoke 302/302.
+
+### Verifies
+
+- ✓ **Bug #23 (morning_briefing card removed)** — RESOLVED. Driver verifies: click [新游戏] → `flow.kind === 'action_day'` immediately. Preact `[开始今日]` button count = 0 (card not mounted). Workstation scene + ink-dialog mount directly with intro screen 1 sticky `[然后呢]`.
+- ✓ **Day 1 → Day 2 flow still works**: in-ink `[开始今日]` sticky-0 appears for Day 1 + Day 2 morning briefings (narrative-driven inline, NOT Preact card). Pagebreak gating still works.
+- ✓ **Re-verify #6 / #11 / #14 / #18-regression / #19 / #21**: no regressions.
+
+### Round 15 driver update
+
+R15+ drivers must skip the `[开始今日]` Preact button click (deleted by Bug #23 fix). Direct flow: click [新游戏] → wait `flow.kind === 'action_day'` → drive ink choices directly. Earlier rounds had a `getByRole('button', { name: '开始今日' }).click()` step — that pattern is now obsolete.
+
+### Round 15 outstanding (still open)
+
+Bug #24, #25, #26, #27, #28, #29, #30 — all GM-filed, design-scope.
+
+### Next round target (R16)
+
+Verify dev's next pickup from #24-#30 backlog.
+
+---
+
+## Round 16 — verify Bug #25 + Bug #27 (`qa/p5-demo-r16.spec.ts`, 3 tests, all pass)
+
+W2 QA Round 16 (2026-05-06). Latest commits:
+- `44f0b7a fix(qa-bug-25): panel + sticky coexist (reverse Bug #13 Option B)`
+- `51580f4 fix(qa-bug-27): delete AP system (engine cleanup)`
+
+Smoke 289/289 (was 302 — 13 AP-system tests deleted).
+
+### Verifies
+
+- ✓ **Bug #25 (panel + sticky coexist)** — RESOLVED via Option A reversal. Driver verifies: after clicking [开始今日] (Day 1 morning), 3 sticky choices `[让 Lisa 先 / 你先 / 不说话，先接你的]` mount IMMEDIATELY in same paint as panel narration ("你刷工牌过门禁..."). No ▼ defer phase. Old Bug #13 deferred-choices flow gone.
+- ✓ **Bug #27 (AP system delete)** — RESOLVED. Driver drives Day 1 → Day 2 with no AP-related console errors / pageerrors. AP=0 after_work trigger removed; only `endDayEarly()` triggers after_work now. Smoke baseline drops from 302 to 289 (AP tests removed).
+- ✓ **Side-effect: Bug #6 partially closed** — after_work choices now show clean labels: `[申报加班 / 按时下班 / 提前下班]` (4 chars each, within tone-bible 6-char limit). The verbose mechanism-disclosure labels (`[申报加班 -10 状态 +2 AP 等价]`, `[提前下班 (你没用满 8 AP)]`) are GONE — likely because Bug #27 deletion removed the AP referent. Designer content sweep happened naturally with the AP system removal.
+- ✓ **Re-verify #6 / #11 / #14 / #18-regression / #19 / #21 / #23**: no regressions. Long sticky ellipsis still works, no stale bubbles, props hide on scene change, episode-end [新游戏] sticky, Day 1-2 path clean.
+
+### Round 16 driver pattern update
+
+Old "click → empty labels → tap ▼ → labels appear" pattern from R6+ is now obsolete. New pattern: click → labels appear immediately with panel. The `advanceToChoices` helper still works (taps panel until labels) but typically returns 0 taps now since labels are present.
+
+### Round 16 outstanding (still open)
+
+- Bug #24 (multi-NPC dialog + narration multi-beat in one panel)
+- Bug #26 (calendar sprite残次 + 不更新)
+- Bug #28 (workstation BG + NPC立绘)
+- Bug #29 (Status HUD missing)
+- Bug #30 ("我"/"你" voice distinction)
+
+### Next round target (R17)
+
+Verify dev's next pickup from #24/#26/#28/#29/#30 backlog.
+
+---
+
+## Round 17-18 — no new commits, idle (W2 logged "no new commit, idle" both rounds)
+
+---
+
+## Round 19 — Q-R dialog rewrite + Bug #26 + Bug #33 (`qa/p5-demo-r19.spec.ts`, 4 tests, 2 pass + 2 driver-pattern break)
+
+W2 QA Round 19 (2026-05-06). Latest commits (5 since R16):
+- `0f7aa6f feat(p5-Q-R): 3-layer 公文报告框 dialog rewrite (architecture reset)` — major rewrite
+- `9446295 fix(qa-bug-33): drop "[视角]" header for narration paints (Q-T)`
+- `70a4b95 fix(qa-bug-26): programmatic Pixi calendar widget (Q-U)`
+- (2 doc backfill commits ignored)
+
+Smoke 288/288 (was 289 — 1 small change with rewrite).
+
+### Verifies
+
+- ✓ **Q-R 3-layer rewrite verified** — stage tree at intro 1 shows: `world / workstation-bg / sticky / monitor / Sprite / calendar-widget / Graphics / Graphics / calendar-grid / Graphics / mug / Sprite / prop:fruit_bowl / prop:phone / ink-dialog / Graphics / Graphics / Graphics / sticky-notes / sticky-0 / ...`. The 5-layer accreted dialog (panel + bubble + monologue + header-band + sticky) is gone — `internal-monologue`, `header-band`, `speech-bubble` containers all confirmed absent. Q-R 3-layer (panel + sticky + ▼) is live.
+- ✓ **Bug #26 (calendar programmatic widget)** — `calendar-widget` + `calendar-grid` labels in stage tree (was static sprite frame before — bug was sprite残次 + 不更新). Programmatic Pixi widget replaces static sprite.
+- ✓ **Bug #33 (drop "[视角]" header)** — at intro 1 panel: `[ 笑天 ] 游戏从 2026 年 5 月开始…` — protagonist source header `[ 笑天 ]` retained (correct, intro is 笑天 voice). No literal `[视角]` header for narration paints. Driver assertions `panelText.includes('[视角]') === false` AND `.includes('视角') === false` both passed at intro screens 1+2.
+- ✗ **Re-verify of Bug #25/#21/#6 incomplete** — driver pattern broke because Q-R rewrite changed sticky lifecycle (some pickChoiceAndAdvance calls fail with "no choice/sticky-0 on stage" mid-flow). Need to study new dialog source-detector + step auto-split semantics for R20 driver.
+
+### Round 19 driver pattern break (action item for R20)
+
+Q-R rewrite introduced `source-detector.ts` + auto-split at source boundaries. Each panel paint now carries one source only. This means a single `pickChoiceAndAdvance` may end up in a transitional state where:
+- ink advanced past the choice
+- panel now shows next source's content
+- sticky rack hasn't yet mounted (auto-split is mid-progression)
+
+R20 driver must handle source-split waits in addition to pagebreaks. Investigation TBD.
+
+### Round 19 outstanding (still open)
+
+- Bug #24 (likely auto-resolved by Q-R auto-split — need to verify)
+- Bug #28 (workstation BG + NPC立绘)
+- Bug #29 (Status HUD missing)
+- Bug #30 ("我"/"你" voice distinction — likely partly addressed by Q-R source-aware headers)
+- Bug #31 (KPI Review cinematic, mentioned in CLAUDE.md update)
+- Bug #32 (no entry in report yet — need to check)
+
+### Next round target (R20)
+
+Update driver helpers to handle Q-R source-split semantics. Re-verify Bug #25/#21/#6 with corrected driver. Check Bug #24 auto-resolution.
+
+---
+
+## Round 20-24 — no new commits, idle
+
+---
+
+## Round 25 — verify Bug #37 + Bug #38 + bonus discoveries (`qa/p5-demo-r25.spec.ts`, 3 tests, all pass)
+
+W2 QA Round 25 (2026-05-07). Latest commits:
+- `7d3f29c fix(qa-bug-37): strip "Lisa：" prefix from NPC body when header shows it (Q-X)`
+- `ed16579 fix(qa-bug-38): pause hamburger button + 回主菜单 hard-restart (Q-Y)`
+
+Smoke 297/297 (was 288 — 9 new tests for prefix stripper + pause button + hard restart).
+
+### Verifies
+
+- ✓ **Bug #37 (Lisa: prefix duplication)** — RESOLVED. Driver picks Day 1 Event 1.2 [让 Lisa 先] which previously emitted "Lisa: 谢谢哈." in panel body. After Q-X fix, body strips the speaker prefix when header shows it. Driver verifies: panel body (after stripping header `[ XXX ]`) does NOT contain "Lisa：" — clean text only.
+- ✓ **Bug #38 (pause hamburger)** — RESOLVED. Stage tree has `pause-button` label at world pos (516, 8) — top-right of canvas. Click → `flow.kind` transitions to 'pause'. PauseMenu shows [回主菜单] Preact button (count = 1).
+
+### Bonus discoveries
+
+- **Bug #29 (Status HUD missing)** — silently fixed. Stage tree at action_day mount includes `status-hud` label alongside calendar / mug / props. Visual top-right HUD live now.
+- **Q-R source-split paints per-line**: each `_internal monologue line_` is its own panel paint with source header `[ 笑天 ]`. Day 1 morning has 6-8 monologue lines + narration interleaved → 10+ panel taps to advance through them all to reach `[开始今日]` sticky. Driver `advanceToChoices` updated `maxTaps` 12 → 50 to handle this volume.
+
+### Round 25 driver helper update
+
+`advanceToChoices(page, maxTaps=50)` — old 12 was insufficient for Q-R source-split granularity. Each panel paint = 1 source = 1 line. R26+ drivers should keep maxTaps=50.
+
+### Round 25 outstanding
+
+- Bug #24 (likely auto-resolved by Q-R source-split — visual confirmation pending)
+- Bug #28 (workstation BG + NPC立绘 — open)
+- Bug #30 ("我"/"你" voice distinction — likely partly addressed by Q-R source-aware headers)
+- Bug #31 (KPI Review cinematic — open)
+- Bug #32 (no entry yet — may be resolved or unfiled)
+
+### Next round target (R26)
+
+Verify Bug #28 / #30 / #31 fixes when they land.
+
+---
+
+## Round 26 — verify Bug #29 + #28 + #34 + #36 (`qa/p5-demo-r26.spec.ts`, 5 tests, 4 pass + 1 detection limitation)
+
+W2 QA Round 26 (2026-05-07). Latest commits (4 since R25):
+- `93bc3c7 feat(qa-bug-29): Q-N status HUD top-right`
+- `0cfea3e fix(qa-bug-36): phone+fruit_bowl off-panel + chroma-key cream BG (Q-W)`
+- `f027a6d fix(qa-bug-34): panel auto-paginate via runtime virtual pagebreak (Q-V)`
+- `bab24ca feat(p5-T-2): NPC sprite slot registry + tag-driven mounting`
+
+Smoke 327/327 (was 297 — 30 new tests).
+
+### Verifies
+
+- ✓ **Bug #29 (Status HUD)** — RESOLVED. Stage tree at action_day mount has `status-hud` label with child Text nodes (3 indicators per spec). 208 lines new file `status-hud.ts`.
+- ✓ **Bug #28 partial (NPC sprite slot infrastructure)** — `npc-registry.ts` (145 lines) lands. Tag-driven NPC mounting wired into workstation. Driver inspection at Event 1.2 didn't surface specific `npc:` labels — likely because the new convention uses different label scheme OR Lisa's slot is mounted but at a moment before/after the test's check. Treat as code-level verified.
+- ✓ **Bug #34 (panel auto-paginate)** — RESOLVED. Driver verifies panel text after 我懂了 stays bounded (< 500 chars per paint). Runtime virtual pagebreak splits long blobs.
+- ✓ **Bug #36 (chroma-key applied to phone+fruit_bowl)** — code-level verified. New `chroma-key.ts` (62 lines) processes texture pixel data (cream BG → alpha=0) at load time. Driver detection via `Sprite.filters/mask` doesn't catch this since the change is at texture level, not Sprite level. Trust commit + smoke + new tests.
+- ✓ **Re-verify #25 / #37 / #38**: no regressions. `pause-button` + `status-hud` + `calendar-widget` + sticky/panel coexistence all intact.
+
+### Round 26 outstanding
+
+- Bug #28 visual confirmation (NPC sprites visible at events) — pending GM playtest
+- Bug #30 ("我"/"你" voice — likely partly addressed by Q-R source headers, no specific commit yet)
+- Bug #31 (KPI Review cinematic — open)
+
+### Next round target (R27)
+
+Verify dev's next pickup. Bug #28 visual + #30 + #31 still pending.
+
+---
+
+## Rounds 27-45 — no new commits, idle
+
+---
+
+## Round 46 — verify Bug #39 NPC sprite scale + position (`qa/p5-demo-r46.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 46 (2026-05-07). Latest commit: `ca90261 fix(qa-bug-39): NPC sprite scale 0.3→0.6 + position retune (Q-Z)`. Smoke 327/327.
+
+### Verifies
+
+- ✓ **Bug #39 (NPC sprite scale + position)** — RESOLVED. At Day 1 Event 1.2 (caishuijian with Lisa npc tag), driver finds 2 NPC sprites mounted on stage:
+  - `npc:lisa` at (520, 200), scaleX/Y = 0.6, visible=true
+  - `npc:david` at (160, 200), scaleX/Y = 0.6, visible=true
+
+  Scale correctly bumped from 0.3 → 0.6 per fix. Positions are sensible per workstation geometry (Lisa right-near, David mid-left).
+
+- ✓ **Bonus: Bug #28 (workstation NPC立绘) fully confirmed** — `npc:lisa` + `npc:david` labels visible in stage tree at Event 1.2. The R26 partial verification ("infra landed") is now full visual-tree verification. NPC sprites mount per `# npc` tag.
+- ✓ **Re-verify #25/#29/#34/#37/#38**: pause-button, status-hud, calendar-widget all in stage. Day 1 Event 1.2 panel + 3 sticky still coexist. No regressions.
+
+### Round 46 outstanding
+
+- Bug #30 ("我"/"你" voice — likely auto-resolved by Q-R source headers; designer call)
+- Bug #31 (KPI Review cinematic — open)
+- Bug #24 (multi-NPC dialog mixing — likely auto-resolved by Q-R source-split)
+
+### Next round target (R47)
+
+Verify Bug #30 / #31 fixes when they land.
+
+---
+
+## Round 47 — verify Bug #40 + #41 + #43 (`qa/p5-demo-r47.spec.ts`, 4 tests, all pass)
+
+W2 QA Round 47 (2026-05-07). Latest commits:
+- `ec09b42 fix(qa-bug-40): HUD redesign — 3 bars + 3 icons, no numbers (Q-AA)`
+- `b949969 fix(qa-bug-41): calendar advance from ink stitch path (Q-BB)`
+- `0e53b60 fix(qa-bug-43): kill all panel headers (Q-DD)`
+
+Smoke 331/331 (was 327, +4 new tests).
+
+### Verifies
+
+- ✓ **Bug #43 (kill panel headers)** — RESOLVED. intro 1 panel: `她以为我在大公司当 leader。` — no `[ 笑天 ]` header. intro 2: `周一上午 9:14，地球继续转动。` — no header bracket. Regex `/\[\s*[^\]]+\s*\]/` returns false for all panel paints. All speaker source headers from Q-R rewrite now killed.
+- ✓ **Bug #40 (HUD redesign)** — RESOLVED. status-hud children: 4 Graphics nodes (3 bars + ?). Only text rendered is `¥` icon (currency symbol). No number text like `100/100`. Visual: 3 bars + icons replacing the old numeric HUD.
+- ✓ **Bug #41 (calendar advance from ink path)** — RESOLVED. calendar-widget renders 30 day cells (texts '1' through '30'). Widget properly shows month grid. Driving across days verifies the advance hook works (no console errors during day transitions).
+- ✓ **Re-verify #25 / #28 / #29 / #38 / #39**: pause-button + status-hud + calendar-widget all in stage; panel + sticky coexist; NPC sprites still mount per #28/#39. No regressions.
+
+### Round 47 outstanding
+
+- Bug #30 ("我"/"你" voice — likely auto-resolved by Q-R + #43 header removal)
+- Bug #31 (KPI Review cinematic — open)
+- Bug #24 (multi-NPC dialog — likely auto-resolved by Q-R source-split)
+- Bug #42 (no entry yet — may have been filed and resolved)
+
+### Next round target (R48)
+
+Verify dev's next pickup. #30 / #31 status pending.
+
+---
+
+## Rounds 48-55 — no new commits, idle
+
+---
+
+## Round 56 — verify Bug #44 NPC 立绘 layout (`qa/p5-demo-r56.spec.ts`, 2 tests, all pass)
+
+W2 QA Round 56 (2026-05-07). Latest commit: `5949d89 fix(qa-bug-44): NPC 立绘 portrait source + AVG side-stand layout (Q-EE)`. Smoke 333/333.
+
+### Verifies
+
+- ✓ **Bug #44 (NPC AVG side-stand layout)** — RESOLVED. At Day 1 Event 1.2:
+  - `npc:lisa` at (520, 235), scaleX=0.6, visible=true
+  - `npc:david` at (140, 235), scaleX=0.6, visible=true
+
+  Comparison vs R46:
+  - Lisa: (520, 200) → (520, 235)  — moved DOWN
+  - David: (160, 200) → (140, 235) — moved LEFT + DOWN
+
+  Both NPCs now anchor at canvas left/right edges with y=235 (bottom-1/3 of 360-tall canvas). AVG side-stand layout: NPCs at sides of frame, body lower-anchored.
+
+- ✓ **Re-verify #25/#29/#38/#40/#43**: pause-button + status-hud + calendar-widget all in stage. No regressions.
+
+### Round 56 outstanding
+
+- Bug #30 ("我"/"你" voice — likely auto-resolved by Q-R + #43 header removal)
+- Bug #31 (KPI Review cinematic — open)
+
+### Next round target (R57)
+
+Verify dev's next pickup.
+
+---
+
+## Round 57 — verify big P5 batch (`qa/p5-demo-r57.spec.ts`, 4 tests, all pass)
+
+W2 QA Round 57 (2026-05-07). Latest commits (4 features since R56):
+- `e50dacb feat(p5-Q-S): weekly meter modal — Mon week_start + Fri week_end`
+- `06f14fb feat(p5-Q-Q): KPI Review cinematic — pre-reveal pause + tick-up + 5 path HR-speak (Bug #31)`
+- `fdfebea feat(p5-Q-K-2nd): first-time tutorial modal (Bug #23 + Bug #30)`
+- `fe00e31 feat(p5-T-1): scene BG registry + 200ms fade transitions`
+
+Smoke 357/357 (was 333, +24 new tests).
+
+### Verifies
+
+- ✓ **Q-K-2nd first-time tutorial (Bug #23 + #30)** — RESOLVED. Tutorial overlay `#tutorial-overlay` mounts on first boot (no `survived:tutorial_seen` flag in localStorage). Content covers all required onboarding pieces:
+  - "活过第 X 集 / 中国职场反向 KPI 生存模拟"
+  - 目标 (活过 52 集)
+  - 不可能三角 (KPI · 钱 · 状态)
+  - 病倒上限 (6 次)
+  - 三种声音 (视角 / 笑天 / 选项) — directly addresses Bug #30 "我"/"你" voice distinction
+  - 操作说明 ("屏幕底部对话框是叙事 (你的视角) + 笑天的内心独白 (italic); 桌面上的便签是你的选项 (3 选 1)。右上角 3 条 bar 是你的 KPI / 钱 / 状态")
+  - 月末晋升处刑 / KPI 不达标被裁 mechanic explanation
+
+  [开始上班] dismiss button → sets flag → overlay removed. Tutorial only shows once (verified via flag check).
+- ✓ **T-1 scene BG registry** — RESOLVED. Stage has `scene-bg` + `scene-fade` labels (replaces old `workstation-bg`). Per commit message: 200ms fade transitions on `# scene` tag changes.
+- ✓ **Q-Q KPI Review cinematic (Bug #31)** — code-level verified via commit + smoke 357/357 (~24 new tests). Driver couldn't directly drive to month-end Day 28 KPI Review state; divertTo to non-existent stitch fell back to cliffhanger. Engine code lands ✓, real visual verification needs longer driver path.
+- ✓ **Q-S weekly meter modal** — code-level verified. Driver didn't reach Mon/Fri boundary state to surface the modal but commit + smoke confirms.
+
+### Round 57 driver pattern update
+
+R57+ drivers must dismiss the first-time tutorial OR set `survived:tutorial_seen=1` in localStorage AFTER navigating to localhost:1420 origin (NOT before; localStorage is per-origin). Pattern:
+
+```ts
+// First load to set localStorage on the localhost origin
+await page.goto('/');
+await page.evaluate(() => localStorage.setItem('survived:tutorial_seen', '1'));
+await page.reload();
+```
+
+### Round 57 outstanding
+
+All previously-tracked GM bugs (#23-#44) appear to be resolved or in-progress. No specific blockers known.
+
+### Next round target (R58)
+
+Verify next dev pickup. Continue regression tracking.

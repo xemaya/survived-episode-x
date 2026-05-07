@@ -1,0 +1,59 @@
+A pixel art character portrait for a Chinese office life game: NPC `mama` — 妈妈 (the protagonist's mother), 58 yo female. The Sunday 8:30 PM video call anchor — but THIS sprite is for dialog speech head (32×48 + 64×96), used when mom appears in dialog box during ink runtime, separate from the existing `mom_video_call.png` (which is the inside-phone-screen UI scene). Half-body portrait (head + shoulders + part of torso), 3/4 facing.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: warm-but-anxious — the mother who has 30 unspoken concerns but only asks "吃了吗？".
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO kitchen BG (different sprite), NO scenery, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas. (This is the dialog-head version — kitchen BG is separate sprite.)
+
+THE CHARACTER — Mama (58):
+- Chinese woman, 58 years old.
+- Hair: SALT-AND-PEPPER (盐霜), MOSTLY GRAY (#aab0ad gray) with darker streaks #5a5552. NOT dyed. Per npcs.md "头发花白没染过". Slightly wavy, pulled back simply.
+- READING GLASSES (老花镜) — pushed UP onto her FOREHEAD as visual signature. Per npcs.md "戴老花眼镜——视频时眼镜距离屏幕很近". The glasses are 12-15 px wide thin metal frames, perched at her hairline above the brow. Lenses ARE present (unlike Zoe's empty frames) — small subtle 1-2px glass shine.
+- FACE: weathered with 3-4px wrinkle lines around eyes and mouth, slight under-eye softness 2-3px (she's been worried about you for 30 years), small jowl 1-2px. SKIN tone slightly more saturated than office-pallor — she's home and warm.
+- Mouth: a small WARM SMILE — both corners up 1-2px, eyes slightly crinkle. This is one of the ONLY genuine smiles in the entire NPC roster (mom + endgame笑天). Subtle warmth.
+- A 1-2px subtle worry crease between eyebrows (she's always asking "你那边冷不冷" when it's 25°C in Shenzhen).
+
+OUTFIT:
+- A DARK NAVY/MAROON KNIT SWEATER (深色毛衣) per npcs.md "永远穿一件深色毛衣（春夏她也穿）". Color: muted navy #2C4A6E with 家温红 #B05050 accent threading (1-2px subtle). The sweater has a worn knit texture — 1-2px subtle stitch lines.
+- Hands a bit weathered if visible at lower edge of half-body (knuckles slightly darker from years of work).
+- NO accessories (no jewelry, no watch — she's home).
+
+KEY PROP / SILHOUETTE ANCHOR:
+- The READING GLASSES PUSHED UP on FOREHEAD are her signature visual marker. They MUST be clearly visible, parked above her brow line.
+- Optionally: a small ceramic bowl in her hand (steam wisp 1-2px) — she's holding food, gesturing toward camera "看，妈做的". This is the diegetic prop tied to her one verbal anchor "吃了吗？".
+
+BODY LANGUAGE:
+- Slightly hunched FORWARD toward camera — she leans in close to the phone screen because old eyes. Per npcs.md.
+- Shoulders relaxed, slightly soft.
+- Body weight even.
+- The leaning-forward posture is her core gesture.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — slightly warmer, slightly tan — 22%)
+- 格子间灰蓝 #5A7080 (sweater shadows — 8%)
+- 档案室棕 #7A5838 (small accent — 3%)
+- 白炽灯白 #E8E0CC (light pools, hair highlights, glasses lens shine — 12%)
+- 屏幕蓝 #2C4A6E (sweater base — 18%)
+- 老板金 #E0B050 (NOT used — 0%. Mom has no power motif.)
+- 家温红 #B05050 (sweater accent threading + bowl steam tint — 6%)
+- Hair gray #aab0ad with darker #5a5552 streaks (15%)
+- Black #1a1a1a (glasses frame — 4%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- Her glasses are slightly smudged (1px detail at one lens corner) — per round-1 mom_video_call.png anchor.
+- Her sweater has 1-2px subtle pilling near the elbow (worn).
+- Her hair has a 1-2px stray strand floating up (she just turned away from a pot).
+- A 1-2px worry crease between brows — barely visible but there.
+
+DESIGN GUARDRAILS (CRITICAL — mom禁忌):
+- DO NOT apply heroic / saturated / "filter" lighting. Mom is warm but real. NOT fake.
+- DO NOT make her smile too brightly — small 1-2px upturn, eyes slightly crinkle, that's the limit.
+- She MUST read as 58, not 45. Visible salt-and-pepper hair, reading glasses on forehead, weathered face.
+- DO NOT add father/family photos in BG (per character note: 爸爸 8 年前去世了 — never referenced).
+- DO NOT add kitchen BG (separate sprite mom_kitchen_endgame.png + mom_video_call.png exist).
+- DO NOT add a phone or video-call HUD overlay — this sprite is for dialog speech head, not video call screen.
+- This is the SECOND mom sprite — visual continuity with `mom_video_call.png` is desired, but DIFFERENT framing (no phone bezel, no video HUD).
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

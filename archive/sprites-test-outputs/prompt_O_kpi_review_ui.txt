@@ -1,0 +1,50 @@
+A pixel art UI element sheet for a Chinese office life game — 16 KPI Review and Game Over UI elements arranged in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. UI motif: 公司内刊 + 打卡机界面 — all panels use 0-radius right-angle rectangles, 1px borders, mimicking copier-printed forms. Consistent with reference G_game_over_v01.png and D_character_detail_page_v01.png.
+
+LAYOUT — 4x4 grid on a clean cream/beige background (#E8E0CC). Each cell shows ONE UI element, centered, with 1px border in cubicle gray-blue (#5A7080). Each cell labeled with Chinese + English in pixel font below.
+
+THE 16 UI ELEMENTS (top-left to bottom-right):
+
+ROW 1 — KPI Review screen elements:
+1. KPI 考核屏背景 / KPI Review BG — full-screen mockup miniature: corporate purple-grey background (#3A3050 hint), header strip "月度考核 / MONTHLY REVIEW", body area for results, no decorative flourishes — bureaucratic
+2. 三行面板 / Three-Row Panel — empty form panel with three horizontal divisions, each row labeled "工作量 / 努力 / 关系" placeholder text in tiny pixel font, 1px right-angle borders
+3. 容量阈值数显 / Capacity vs Threshold — large pixel number readout "8 / 12" style display, 8 in dark text, slash, 12 in red (#C83428), like a punch-clock LCD
+4. KPI 单行样例 / KPI Breakdown Row — single row showing label + numeric capacity bar (filled cells out of total cells, like 5/8), red-green dual-encoding (red=down arrow with hatching, green=up arrow solid)
+
+ROW 2 — Game Over screen elements:
+5. 解雇通知书背景 / Termination Certificate BG — beige official certificate paper background, "中国人力资源管理 / HR" letterhead at top, body area for name + date + reason, two horizontal lines for signatures at bottom, fold lines (1px) at thirds
+6. "恭喜晋升"反讽红章 / Ironic Promotion Stamp — circular red stamp (#C83428) reading "恭喜晋升 / CONGRATS PROMOTION" in pixel font, slightly rotated 7°, fading at edges as if just stamped, the irony being it's on a termination paper
+7. 信件打印动画帧 / Letter Print Animation Frame — single moment of dot-matrix printer extruding the certificate, paper half-out of printer, paper edges with perforated lines (1px dot pattern)
+8. Skip 提示 strip / Skip Hint Strip — narrow horizontal strip with "按任意键继续 / Press any key" text in muted pixel font, faint pulse highlight
+
+ROW 3 — Confirm/Action button states:
+9. 确认按钮 普通 / Confirm Button Normal — rectangular pixel button "确认 / Confirm", grey-blue fill, 1px dark border, label centered
+10. 确认按钮 悬停 / Confirm Button Hover — same button, double 1px border (1px inner + 1px outer = stamp effect), slightly brighter fill
+11. 确认按钮 按下 / Confirm Button Pressed — same button, inverted colors (dark fill, light text), 1px border thickened to suggest depression
+12. 确认按钮 禁用 / Confirm Button Disabled — same shape, desaturated grey fill, label in muted text, 1px diagonal hatch pattern overlay
+
+ROW 4 — Archive + Settlement elements:
+13. 档案行样例 / Archive List Row — single horizontal row in archive list: small thumbnail icon left, name+date middle, score right, separator 1px line below
+14. 档案上限提示 / Archive Cap Banner — narrow banner at top of archive view: "档案已满 200/200 / Archive full" in muted red text, 1px border
+15. 删档确认对话框 / Archive Delete Confirm — small modal frame, "确认删除? / Confirm Delete?" header, two stacked buttons "确认 / 取消"
+16. 月底结算锁定指示 / Settlement Locked Indicator — small lock-shaped icon (chunky pixel padlock) with "月末锁定中" text below, indicates UI is in non-skippable settlement phase
+
+PALETTE: 打工人黄 #C8A85A, 灰蓝 #5A7080 (UI dominant), 棕 #7A5838 (paper trim), 白 #E8E0CC (paper bg, button labels), 屏幕蓝 #2C4A6E (KPI Review header tint), 老板金 #E0B050 (max 3% — only on letterhead seal accent if any), 警告红 #C83428 (irony stamp + threshold red + warning), KPI Review purple-grey #3A3050 (KPI Review BG only).
+
+VISUAL JOKES (1-3 px subtle):
+- The "恭喜晋升" stamp slightly overlaps the termination paper's "解雇" text — the cruelty
+- Letter print animation: paper has microperf 1px dots between every other line
+- Archive cap banner shows 200/200 because it's at exactly the limit (the cap is a hard boundary)
+- Settlement lock icon shape is the same pixel pattern as the punch-clock — "you're locked in"
+- Skip hint pulse is subtle enough to be ignorable (so player doesn't accidentally skip GO)
+
+CRITICAL CONSTRAINTS:
+- ALL panel/button shapes are right-angle rectangles, 0 radius corners (UI motif)
+- Borders are 1px clean lines, never gradient
+- Buttons use stamp-effect double-border on hover (signature interaction language)
+- Colorblind: warning uses red color + downward arrow + 1px diagonal hatching (triple-encoded)
+- NO triumph styling on certificate — the certificate is the joke, played straight
+- Each cell visually framed, label below
+
+TOP TITLE BANNER: "月末考核 · 解雇 / KPI Review · Game Over UI" pixel font, centered, dark cubicle blue text on cream.
+
+Output: PNG, 1024x1024, single composite 4x4 UI element sheet, ready to be cropped into individual UI sprites for the in-game KPI Review and Game Over screens.

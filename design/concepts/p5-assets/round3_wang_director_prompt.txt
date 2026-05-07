@@ -1,0 +1,57 @@
+A pixel art character portrait for a Chinese office life game: NPC `wang_director` — 王总监 (Director Wang, "Eric"), 50+ yo male, the department director / boss-tier archetype. Half-body portrait (head + torso + waist), facing 3/4 toward viewer with slight downward gaze (he is taller, looking down at viewer height).
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: practiced authority — the man who has perfected both the smile and the threat with the same face muscles.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO desk, NO office BG, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 75% of canvas (slightly larger than other NPCs because he's framed as boss-tier).
+
+THE CHARACTER — Wang director (50+):
+- Chinese male, 50+ years old. SILHOUETTE TOP +8 px taller than other NPCs (per art-bible §5.2 boss archetype) — even half-body, his head/upper-torso silhouette is taller and broader than peers.
+- Hair: thinning, slightly receded, GREY at temples (#aab0ad gray strands), neat side-part. A hint of comb-over at top.
+- FACE: round-ish, healthy weight (not skinny), small eye bags 1px (less than David's — he's earned his rest). Slight double chin 1-2px.
+- Mouth: a CONTROLLED PROFESSIONAL SMILE — both corners up 2px symmetrically, eyes do NOT crinkle. This is the "I am noticing you" smile that contains a threat. NOT warm.
+- Eyebrows: slightly raised — the "interested in your performance" arch.
+
+OUTFIT:
+- A LIGHT BLUE LONG-SLEEVE SHIRT (#5A7080 lighter variant), CUFFS ROLLED UP TO FOREARMS — per npcs.md "衬衫一定挽袖子（'我也是干活的'姿态）". This is his core cosplay.
+- THE WIDEST NECKTIE in the cast — solid #2C4A6E navy with a 老板金 #E0B050 GOLD TIE CLIP at chest height (3-4px tall). The gold tie clip is the gold-accent budget for this image — strict <3% pixel coverage.
+- Dark dress trousers (#1a1a1a near-black) visible if framing reaches.
+- Brown leather belt (#7A5838).
+- A high-quality silver watch on right wrist (HE WEARS WATCH ON WRONG HAND — subtle 1-2px detail showing he learned wrist-watch etiquette wrong).
+
+KEY PROP / SILHOUETTE ANCHOR:
+- HANDS CLASPED BEHIND BACK (per art-bible §5.2 boss archetype). This means the half-body silhouette shows the chest area only — no visible cup, no visible folder. Both hands disappear behind his back → silhouette is wide-shoulder + clean-front.
+- An employee lanyard with company badge HUNG VISIBLY (he wears badge, despite being director — performative humility).
+- His shirt pocket has a peek of a fancy pen (1-2px gold clip).
+
+BODY LANGUAGE:
+- Standing tall, slight chin-tilt downward (looking at viewer like a low-ranking employee).
+- Shoulders broad, slightly back.
+- Body weight even — calm.
+- He's NOT leaning forward (unlike David). He's planted.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — slightly more saturated, slightly tan — 15%)
+- 格子间灰蓝 #5A7080 (light blue shirt — 25%)
+- 档案室棕 #7A5838 (belt — 3%)
+- 白炽灯白 #E8E0CC (light highlights, watch face — 8%)
+- 屏幕蓝 #2C4A6E (necktie dominant — 12%)
+- 老板金 #E0B050 (TIE CLIP + pen clip — strict 3% pixel coverage; this is the ONLY gold-accent image in the round-3 set, and the only character allowed gold)
+- Black #1a1a1a (slacks, hair shadow, tie outline — 18%)
+- Gray-black hair #5a5552 with #aab0ad temples (10%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- A tiny golf swing pin on his lapel (1-2px) — per npcs.md "桌上放高尔夫小摆件" his social aspiration motif.
+- His tie clip has 1px finer detail — almost catches the light.
+- A 1-2px crease line on his rolled cuff — he's been doing the "rolled-cuff worker" cosplay so long the crease is permanent.
+
+DESIGN GUARDRAILS:
+- The +8px taller silhouette must read at glance. He's the visually largest NPC in this round.
+- Smile is professional, NOT genuine. Eyes do NOT crinkle.
+- DO NOT add background, office BG, scenery — PURE WHITE BG ONLY.
+- Hands must be clasped behind back (silhouette anchor).
+- Gold accent strictly <3% pixel — only on tie clip + pen clip.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

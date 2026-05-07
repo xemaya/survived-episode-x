@@ -1,0 +1,26 @@
+{
+  "model": "gpt-image-2",
+  "quality": "low",
+  "size": "1024x1024",
+  "prompt_file": "/Users/huanghaibin/Workspace/games/survived-episode-x/assets/sprites/test_outputs/prompt_three_view.txt",
+  "prompt_chars": 2430,
+  "elapsed_sec": 85.1,
+  "ts": "2026-05-03 20:52:46",
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 780,
+    "prompt_tokens_details": {
+      "cached_tokens_details": {}
+    },
+    "completion_tokens_details": {},
+    "input_tokens": 584,
+    "output_tokens": 196,
+    "input_tokens_details": {
+      "text_tokens": 584,
+      "cached_tokens_details": {}
+    },
+    "claude_cache_creation_5_m_tokens": 0,
+    "claude_cache_creation_1_h_tokens": 0
+  }
+}

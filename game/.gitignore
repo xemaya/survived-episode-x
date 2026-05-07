@@ -5,8 +5,16 @@ dist/
 src-tauri/target/
 src-tauri/gen/
 public/sprites/
+public/ink/
+scripts/inklecate-bin/
 src/generated/
 .env
 .env.local
 .env.*.local
 coverage/
+
+# Playwright QA harness (Round 1 — see design/vertical-slice/p5-qa-bug-reports.md)
+qa/output/
+test-results/
+playwright-report/
+.playwright-cache/

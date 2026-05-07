@@ -1,0 +1,12 @@
+{
+  "shot_id": "S6",
+  "model": "veo3-fast",
+  "prompt": "An overtime night office scene. Pull-back camera over 8 seconds, revealing more cubicles. Office overhead fluorescent lights extinguish one by one in waves from the periphery inward. By 6 seconds in, only ONE cubicle's lamp remains lit — a central one with a lone exhausted worker hunched over his keyboard. The remaining lit cubicle pulses faintly. Final ambience: deep blue night, single white light pool, extreme isolation. SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette in 格子间灰蓝 #5A7080 / 白炽灯白 #E8E0CC / 档案室棕 #7A5838 / 老板金 #E0B050 / 屏幕蓝 #2C4A6E / 打工人黄 #C8A85A. Indie game cutscene, dark-humor 喜丧美学 (funeral-as-festival) tone.",
+  "status": "completed",
+  "task_id": "task_nrCAzgDXq2qT1veI7sLD2yDj90cvMOlD",
+  "video_url": "https://comet-api-bucket.s3.us-east-1.amazonaws.com/videos/task_nrCAzgDXq2qT1veI7sLD2yDj90cvMOlD.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAX2ZLYGRJV3PGWZUZ%2F20260504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260504T055040Z&X-Amz-Expires=259200&X-Amz-SignedHeaders=host&response-content-type=video%2Fmp4&x-id=GetObject&X-Amz-Signature=f613e91563119f8ae072b8ef91e8feef73eeb609e546d1b011cdd56f336f6d62",
+  "download_path": "/Users/huanghaibin/Workspace/games/survived-episode-x/output/clips/S6.mp4",
+  "last_error": null,
+  "created_at": 1777873736.69677,
+  "updated_at": 1777873940.813503
+}

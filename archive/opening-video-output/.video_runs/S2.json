@@ -1,0 +1,12 @@
+{
+  "shot_id": "S2",
+  "model": "veo3-fast",
+  "prompt": "Tight close-up on a weary middle-aged Chinese male office worker in a navy suit and red tie, holding a steel thermos in his left hand. He is wearing a forced, unwavering corporate smile. The camera slowly pulls back over 8 seconds, revealing the cubicle wall behind him is completely empty — no awards, no certificates, just a blank beige wall. His smile doesn't waver. The promo-bright golden lighting persists but starts to feel hollow. SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette in 格子间灰蓝 #5A7080 / 白炽灯白 #E8E0CC / 档案室棕 #7A5838 / 老板金 #E0B050 / 屏幕蓝 #2C4A6E / 打工人黄 #C8A85A. Indie game cutscene, dark-humor 喜丧美学 (funeral-as-festival) tone.",
+  "status": "completed",
+  "task_id": "task_w0RsPIQ8FINtJoTI0M1izVyciMQF1AMv",
+  "video_url": "https://comet-api-bucket.s3.us-east-1.amazonaws.com/videos/task_w0RsPIQ8FINtJoTI0M1izVyciMQF1AMv.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAX2ZLYGRJV3PGWZUZ%2F20260504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260504T053900Z&X-Amz-Expires=259200&X-Amz-SignedHeaders=host&response-content-type=video%2Fmp4&x-id=GetObject&X-Amz-Signature=333ec3b8f44cab4f131a607880d22854b4585fe1ac41089792eddfb9353e0dbb",
+  "download_path": "/Users/huanghaibin/Workspace/games/survived-episode-x/output/clips/S2.mp4",
+  "last_error": null,
+  "created_at": 1777873041.786648,
+  "updated_at": 1777873236.569102
+}

@@ -1,0 +1,23 @@
+A pixel art hallway background for a Chinese office life game — corridor ready for sprite overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — base layer, NOT finished illustration:
+- NO title text, NO labels, NO captions
+- NO floor map sign (overlay)
+- NO delivery box (overlay; R-sheet ASSET-033 has the box sprites)
+- NO NPCs walking (overlay)
+- NO trash cart
+- NO posted notices on walls
+
+LAYOUT — single-point perspective view down an office corridor:
+- Center: vanishing-point perspective into the depth of the hallway
+- Walls: cream (#E8E0CC) on both sides, with a horizontal trim line at chair-rail height
+- Floor: grey-blue tile (#5A7080), with 1px tile grid lines receding toward vanishing point
+- Doors: 3-4 closed office doors visible on each side, each a simple wood-tone (#7A5838) rectangle with a small chrome handle (1px gold accent)
+- Each door has a placeholder name plate area (small blank rectangle beside door, no text — name plates are sprite overlay if needed)
+- Ceiling: row of 4 fluorescent light bars receding into distance (white tubes)
+- End of hallway: T-intersection or door at the vanishing point (deeper interior visible)
+- Single 1px highlight on floor where light reflects, suggesting fluorescent glare
+
+PALETTE: 灰蓝 #5A7080 (floor + dominant cool), 棕 #7A5838 (door wood), 白 #E8E0CC (walls + light tubes), 屏幕蓝 #2C4A6E (faint cool reflection), 老板金 #E0B050 (max 1% — only on door handles), no warning red.
+
+Output: PNG, 1024x1024, single composite hallway background. Empty of people and props. Suitable for in-engine sprite overlay (NPCs walking, delivery box, cleaning auntie's cart, posted notices).

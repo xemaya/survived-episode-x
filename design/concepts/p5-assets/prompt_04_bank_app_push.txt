@@ -1,0 +1,50 @@
+A pixel art mock UI for a Chinese office life game: a fullscreen Chinese bank app push notification / warning screen that fills the protagonist's smartphone — triggered when the player's cash drops below ¥4,500 (mortgage threshold). Used as a fullscreen overlay UI within the game's diegetic phone-screen layer.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern app illustration. Mood: cold financial dread, the kind of push notification that ruins your morning.
+
+LAYOUT: Vertical phone-screen mock UI, aspect ratio 1:2 (the canvas is 1024x1024 but design as if it's a 320x640 phone screen — center the design vertically and leave thin black bezel margin all around (40-50 px each side) representing the phone bezel). Status bar at top, then big warning banner, then app body, then action buttons at bottom.
+
+CONTENT (top to bottom of phone screen):
+
+1) STATUS BAR (top 8% of phone screen): light gray #5A7080 background. Tiny pixel icons: signal bars (4-bar), wifi (3-arc), battery (1px outline + 2px fill — only 30% charged, low). Time on right: "08:47". Time on left: small generic carrier text "中国移动".
+
+2) BANK APP HEADER (next 10%): solid muted blue #2C4A6E band. Centered in #E8E0CC pixel-rendered Chinese: "中国某商银行 — 余额提醒". Small house icon in upper-left, small bell icon in upper-right (with a 2x2 #B05050 red badge corner).
+
+3) BIG WARNING ICON (next 18%): centered, a triangular warning sign 一 amber #E0B050 outlined in dark, with a "!" exclamation in #1a1a1a inside. The triangle is exactly the gold-accent allowance (this is the ONE place gold belongs — boss/power element of the moment).
+
+4) WARNING TEXT BLOCK (next 25%): centered Chinese pixel text, light off-white #E8E0CC on the muted blue background:
+   Line 1 (large bold): 「余额低于安全线」
+   Line 2 (medium): 「当前余额：¥4,387.62」
+   Line 3 (small): 「下次房贷扣款：3 天后 ¥4,500」
+   Line 4 (small subtitle, italic-ish): 「请及时存入资金以避免逾期」
+
+5) ACCOUNT DETAILS PANEL (next 22%): light card on #E8E0CC background with #5A7080 borders. Two rows:
+   Row 1: "工资卡 尾号 8847    ¥4,387.62"
+   Row 2: "上次到账：2026-04-25 ¥11,030.00 (工资)"
+   Tiny faded gray text at bottom of panel: "建议存入 ¥1,000 以确保扣款"
+
+6) ACTION BUTTONS (next 12%): two side-by-side rounded-rectangle buttons:
+   Left button (#5A7080 fill, #E8E0CC text): "稍后提醒"
+   Right button (#2C4A6E fill, #E8E0CC text, slight gold-edge outline 1px #E0B050): "立即转账"
+
+7) BOTTOM SAFE-AREA / HOME INDICATOR (final 5%): thin #5A7080 bar with a 30%-width #E8E0CC home gesture line.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (NOT used)
+- 格子间灰蓝 #5A7080 (UI chrome / status bar / borders — dominant 30%)
+- 档案室棕 #7A5838 (NOT used — no wood here)
+- 白炽灯白 #E8E0CC (text, card backgrounds — 25%)
+- 屏幕蓝 #2C4A6E (app theme dominant — 25%)
+- 老板金 #E0B050 (warning triangle ONLY — exactly within 3% pixel coverage budget. NO other gold anywhere.)
+- 家温红 #B05050 (notification bell badge ONLY — 1%)
+- Background outside phone bezel: pure black #0a0a0a (40-50 px frame).
+
+VISUAL JOKES (1-3px subtle):
+- The amount "¥4,387.62" has the cents in slightly faded gray — emphasizing how he's literally counting pennies.
+- A tiny 2x2 px wechat-square notification icon in the status bar — the player got 8 unread messages.
+- The "稍后提醒" button color is brighter than "立即转账" — the UI subtly nudges to delay (because the bank wants you to default a little, then re-engage).
+- Battery is at 30% — the protagonist hasn't charged it overnight.
+
+TITLE BANNER: NONE — this is a fullscreen UI mockup; the bank app header IS the title.
+
+Output: PNG, 1024x1024 with the actual phone-screen mock occupying the centered 320x640-aspect region (with black bezel padding around). 16-bit pixel art. Designed for direct use as an overlay UI sprite, ready for crop/downsample to 320x640 by engine. Consistent with design/concepts/p5-ui/p5_ui_03_phone_wechat_wang.png (chat UI sibling).

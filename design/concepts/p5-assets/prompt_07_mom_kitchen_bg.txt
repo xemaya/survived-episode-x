@@ -1,0 +1,53 @@
+A pixel art scene background for a Chinese office life game: the protagonist's mother's hometown KITCHEN, viewed as a fullscreen background WITHOUT characters in frame (characters will be composited on top by engine). For E52 春节 endgame happy ending Variant A. The same kitchen seen in Sunday WeChat video calls all series long, but now we're physically in it.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Mood: warm, slow, comforting — the only relaxed scene of the entire 52-episode series. Color temperature SIGNIFICANTLY warmer than series default.
+
+LAYOUT: Single composite fullscreen scene illustration — empty kitchen interior, third-person side-view (not first-person). The frame is COMPOSED for character compositing: leave a clear "stage" zone in the lower-center where two characters (mother on left, protagonist on right) will be placed by engine. Do NOT draw any human figures.
+
+CONTENT — kitchen interior (foreground to background):
+- FOREGROUND: a small round wooden dining table (about 3/4 visible, off-center toward bottom-center). On the table: 2 sets of bowls + chopsticks placed for two people (one set on each side — clearly two empty seats); a steamer 蒸笼 with dumplings visible (春节饺子, 8-10 dumpling silhouettes); 2 small tea cups; an empty soup bowl waiting; a tin of soy sauce. Wood is dominant brown #7A5838.
+- 2 empty wooden chairs visible (mother's on left, protagonist's on right) — both empty so engine composites characters in.
+- MID-GROUND LEFT: kitchen counter with a small range hood (油烟机) above; a wall-mounted spice rack (调料挂架) with 5-6 small jars; a hanging paper menu with handwritten Chinese — title says "春节菜单" (legible at full canvas, blurs at downsample), small dishes listed below in 1px Chinese.
+- MID-GROUND RIGHT: a small old CRT TV on a corner table (off, screen black). Small tabletop with 1 mahjong tile leaning against the TV (visual joke).
+- BACK WALL: warm yellowish #C8A85A walls, slightly faded with 1-2px age stain near floor. A wall calendar in upper-right showing "2026 年 1 月 — 大年初三" with day-3 circled in 家温红 #B05050.
+- Window in upper-left: it's evening/dusk outside, cool blue-purple sky (#5A7080 muted) but the inside light is warm. Paper-cut decorations (窗花) stuck on the window — the character "福" in traditional style, shown reversed (upside-down per Chinese tradition for "福到").
+- DOORWAY in upper-back: a small slice of corridor visible, partially lit, suggesting bedroom beyond.
+- FLOOR: terracotta or beige tile, slight pattern.
+- A pair of old slippers near the table — one on each side (waiting for the two people).
+- A small red envelope 红包 visible on a side stool (春节 detail).
+
+LIGHTING (CRITICAL — different tonally from all office scenes):
+- Warm yellow incandescent overhead light (NOT cool fluorescent like office). Single bare bulb suggested.
+- Soft warmth, no harsh shadows. Light pools in #E8E0CC with warm yellow undertone.
+- Window casts a long subtle warm shadow from the table outward.
+- Color temperature significantly warmer than series default.
+- 60% of palette is warm browns and yellows; office cubicle gray-blue is reduced to <10%.
+
+PALETTE (warmer variant, anchored to series palette):
+- 打工人黄 #C8A85A (warm walls, kitchen wood tones — 30%)
+- 档案室棕 #7A5838 (table, chairs, range hood, wood furniture — 35% dominant)
+- 白炽灯白 #E8E0CC (light pools, paper menu, kitchen counter — 15%)
+- 家温红 #B05050 (warmth red — paper-cut 窗花, calendar 大年初三 mark, red envelope — max 5%)
+- 格子间灰蓝 #5A7080 (window dusk sky, shadow accents only — 8%)
+- 屏幕蓝 #2C4A6E (TV screen black border only — 1%)
+- 老板金 #E0B050 (max 1%, ONLY on 1-2 mahjong tile and the red-envelope corner trim — strict)
+
+VISUAL JOKES (1-3px subtle):
+- The paper-cut "福" is correctly upside-down (per tradition — 福 倒 = 福 到).
+- The wall calendar's previous month (December) page hangs slightly visible behind the current page — tiny circled 1px word "辞职" with a strikethrough (easter egg: he had considered quitting, didn't).
+- One slipper has a 1px hole at the toe (mom's old slipper — she didn't replace it).
+- The mahjong tile near the TV is the "中" tile — visual joke (中 = "middle" / "win") for endgame.
+- Steam wisps 1-2px rising from the steamer 蒸笼.
+- The window paper-cut shows tiny scissor marks (handmade, not store-bought).
+
+DESIGN GUARDRAILS:
+- DO NOT add characters — leave the stage clear for engine composite.
+- DO NOT over-saturate; warm but not "filter glow". Real apartment, real wear, real warmth.
+- DO NOT add modern decor (no smart home / no fancy decor). It's a 1980s-built apartment with worn 2010s updates.
+- DO NOT add any office-system overlays (no mug 5-frame, no monitor, no sticky notes).
+
+TITLE BANNER (lower 1/16 of canvas, warm brown #7A5838 band, off-white #E8E0CC text):
+中文: 「老家厨房 — 大年初三」
+English: "Hometown kitchen — 3rd day of Spring Festival"
+
+Output: PNG, 1024x1024, single composite scene illustration, 16-bit pixel art with warm tonal palette, designed as a CHARACTER-LESS background ready for engine to composite mom + protagonist sprites on top. Consistent with design/concepts/p5-ui/p5_ui_05_endgame_mom_kitchen.png (which DOES include figures), but THIS asset is the empty-stage version for re-use across multiple endgame beats.

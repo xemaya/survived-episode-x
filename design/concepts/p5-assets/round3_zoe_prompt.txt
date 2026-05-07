@@ -1,0 +1,57 @@
+A pixel art character portrait for a Chinese office life game: NPC `zoe` — Zoe (HR), 30 yo female, HR specialist. The "I'm here to listen but actually here to execute" archetype. Half-body portrait (head + torso + folder), facing 3/4 toward viewer.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: corporate HR — sympathetic on the surface, processing the layoff list on the inside. The classic Chinese HR aesthetic.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO meeting room, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas.
+
+THE CHARACTER — Zoe (30):
+- Chinese woman, 30 years old, average build, slightly taller (or carries herself tall).
+- Hair: ALWAYS PULLED UP into a neat low bun (per npcs.md "头发盘起来"), dark brown #5a5552 with 1-2px gloss highlight, NO bangs, NO loose strands (severely controlled).
+- FACE: oval, slightly young-looking despite efforts — there's a "学生气" (student/youthful) feel to it that no amount of HR-grooming hides.
+- Wearing GLASSES — but per art-bible §5.2 HR archetype anchor: EMPTY-FRAME GLASSES (no lenses!). The glasses are 12-15 px wide black plastic frames showing CLEARLY EMPTY eye holes — you can see her eyes through them with NO visible glass distortion. This is her trademark visual joke.
+- EYE EXPRESSION: practiced sympathy + calculation. Slight downward angle of the inner brow (the "I understand" tilt) but the eyes themselves are FLAT.
+- Mouth: a small closed-mouth practiced smile — both corners up 1-2px, but eyes do NOT crinkle.
+
+OUTFIT:
+- BLACK BUSINESS BLAZER (#1a1a1a near-black) — the HR uniform per npcs.md "永远穿黑色西装外套（HR 制服）". Tailored, single-breasted.
+- White-cream blouse (#E8E0CC) underneath — round-neck collar visible at the V of the blazer.
+- A SMALL COMPANY MASCOT KEYCHAIN clipped to her work badge (1-2 px small character figure — a generic company-mascot blob in 屏幕蓝 #2C4A6E). Per npcs.md "工牌上挂着公司吉祥物钥匙圈" — meta-joke that HR herself is also being PUA'd.
+- Employee lanyard with badge VISIBLE at chest.
+- A small simple silver watch on left wrist.
+
+KEY PROP / SILHOUETTE ANCHOR:
+- A FOLDER TUCKED UNDER HER LEFT ARM (the HR archetype anchor per art-bible §5.2). The folder is 18-22 px tall, light off-white #E8E0CC with a 1-2px black spine. It's a BINDING FOLDER full of HR forms — illegible 1px Chinese on the visible cover.
+- Her right hand at chest height holds a small pen (1px black + 1px silver clip) — at-the-ready for signatures.
+
+BODY LANGUAGE:
+- Standing erect, perfectly LEVEL SHOULDERS (per art-bible §5.2 HR anchor).
+- Slight forward lean of the head 1-2px (practiced "I'm listening to you").
+- Body weight even.
+- The folder under her arm is the absolutely consistent signature.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 15%)
+- 格子间灰蓝 #5A7080 (NOT dominant — 5%)
+- 档案室棕 #7A5838 (NOT used — 0%)
+- 白炽灯白 #E8E0CC (blouse, folder cover, light highlights — 20%)
+- 屏幕蓝 #2C4A6E (mascot keychain — 3%)
+- 老板金 #E0B050 (NOT used — 0%. Zoe doesn't have power; she carries it.)
+- Black #1a1a1a (blazer dominant, hair, glasses frames — 35%)
+- Hair dark #5a5552 (12%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- THE EMPTY GLASSES are the loudest joke — no glass visible, just frames. Per art-bible §5.2 strict.
+- A 1-2px small green plant element on her badge (1px green leaf 4a7050) — per npcs.md "工位有绿色植物" she carries that motif.
+- Her hair bun is so tightly controlled there's a 1px shine where it pulls — practiced precision.
+- The folder spine has 1-2px illegible label tape — could be "员工档案" or "离职申请", reader cannot tell.
+
+DESIGN GUARDRAILS:
+- Empty-frame glasses are MANDATORY — no lenses. This is the art-bible hard anchor for HR archetype.
+- The folder under arm is mandatory silhouette anchor.
+- DO NOT make her look mean / villainous. Practiced sympathy is the right note — she IS smiling, but the smile is HOLLOW.
+- DO NOT add scenery, meeting room BG — PURE WHITE BG ONLY.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

@@ -1,0 +1,25 @@
+A pixel art tea room background for a Chinese office life game — break-room scene ready for sprite overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — base layer, NOT finished illustration:
+- NO title text, NO labels, NO captions
+- NO water sign-in sheet (that's a sprite overlay)
+- NO NPC at the dispenser (overlay)
+- NO mug/cup on counter (overlay)
+- NO break-room crack (4 progressive levels are R-sheet sprites overlaid)
+- NO clock with specific time
+- NO posted notices on the wall
+
+LAYOUT — interior view of a small office tea room:
+- 3/4 angle into a corner space, slightly compressed perspective
+- Center: hot/cold water dispenser (gray-blue body #5A7080, blue water bottle on top, dispenser nozzles, no labels)
+- Counter top below dispenser: laminate counter (#7A5838 wood-tone) — bare, no mugs/items
+- Wall behind dispenser: painted cream (#E8E0CC), no posters, no notices
+- Side wall (left): a small fridge (gray-blue), nothing magnetic on it
+- Floor: tile pattern, slightly darker than corridor (#5A7080)
+- Single fluorescent light overhead (white tube horizontal)
+- Subtle 1px highlight on dispenser metal trim
+- THE only stylistic exception per art-bible §6: room corners use 4px rounded curves (vs everywhere else's 0-radius right angles) — softer space because it's the office's only escape
+
+PALETTE: 灰蓝 #5A7080 (dispenser body + counter accent + floor — dominant), 棕 #7A5838 (counter wood top), 白 #E8E0CC (walls, fluorescent light), 屏幕蓝 #2C4A6E (water bottle + cool accents), no gold, no red, faint 茶绿 #4A6A4A (only on a single houseplant sprig if any).
+
+Output: PNG, 1024x1024, single composite tea-room background. Empty of NPCs and small props. Suitable for in-engine sprite overlay (sign-in sheet on wall, NPCs at dispenser, mugs on counter, break-room crack progression, mold spots on wall — all sprites overlaid).

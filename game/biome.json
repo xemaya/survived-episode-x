@@ -8,7 +8,11 @@
       "src-tauri/target",
       "src-tauri/gen",
       "public/sprites",
-      "src/generated"
+      "src/generated",
+      "qa",
+      "test-results",
+      "playwright-report",
+      ".playwright-cache"
     ]
   },
   "formatter": {

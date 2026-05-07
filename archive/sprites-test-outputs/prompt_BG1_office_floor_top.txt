@@ -1,0 +1,28 @@
+A pixel art top-down office floor map for a Chinese office life game — a CLEAN BACKGROUND PLATE ready for sprite overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — this image is a base layer, NOT a finished illustration:
+- NO title text, NO chapter number ("第 X 集"), NO subtitle, NO compass rose
+- NO decorative borders, NO frame, NO ornamental corners
+- NO labels on rooms, NO Chinese name plates, NO "工位区 / Workstations" type captions
+- NO highlighted-cube workstation, NO sticky notes, NO furniture details on individual desks
+- NO NPC sprites — empty office, all desks unoccupied
+- The background must be paintable beneath sprites; ALL semantic content (NPCs, props, sticky notes, monitors-on-desks) will be overlaid in the engine
+
+LAYOUT — top-down isometric-tilted-ish view of an open-plan corporate office floor:
+- Central area: 16×16 px grid of cubicle workstations arranged in 3-4 horizontal rows of 5-6 desks each
+  - Each workstation = bare desk surface (#7A5838 wood) + cubicle wall partitions (gray-blue #5A7080)
+  - Workstation walls 8px tall, casting subtle 1px shadow toward east
+  - Aisle between workstation rows = 16px wide gray floor
+- Top-left corner: small kitchen/tea-room area (faint water dispenser shape only, NO sign-in sheet)
+- Top-right corner: enclosed office (Boss's), darker tint, NO furniture detail
+- Bottom-left: meeting room with a long table outline (no chairs distinguishable)
+- Bottom-right: HR office area
+- Right edge: hallway running vertically with door outlines
+- Bottom edge: elevator lobby + stairwell hint
+- Floor surface: cool grey-blue tile pattern (#5A7080 with 1px tile grid)
+- Walls: cream/white (#E8E0CC), 2px outlines
+- Lighting: cool fluorescent overhead, no individual lamps drawn
+
+PALETTE: 打工人黄 #C8A85A (none — no people), 灰蓝 #5A7080 (cubicle walls + floor + dominant), 棕 #7A5838 (desk wood), 白 #E8E0CC (walls, floor highlights, paper), 屏幕蓝 #2C4A6E (windows + cool accents), 紫灰 #3A3050 (Boss office tint area only).
+
+Output: PNG, 1024x1024, single composite background plate. Top-down view. Empty of all character/prop content. Cubicle grid visible but all desks bare. Suitable for in-engine sprite overlay (NPCs, sticky notes, coffee cups will be added programmatically on top).

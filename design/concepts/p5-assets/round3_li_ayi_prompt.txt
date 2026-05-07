@@ -1,0 +1,58 @@
+A pixel art character portrait for a Chinese office life game: NPC `li_ayi` — 李阿姨 (Cleaning Auntie Li), ~50 yo female, the office cleaning lady (外包公司). She moves through the office once a day and is the only person whose world the KPI system doesn't touch. Half-body portrait, 3/4 facing.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: ambient, real, quietly competent — the woman whose presence is so consistent everyone forgot to thank her.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO mop bucket cart, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas. (Mop is held but only the upper portion visible — handle peeks above her shoulder.)
+
+THE CHARACTER — Li Ayi (~50):
+- Chinese woman, ~50 years old.
+- BUILD ANCHOR (per art-bible §5.2 cleaning archetype): SHORT AND WIDE silhouette — +4 px wider, -6 px shorter than other female NPCs. This is her core silhouette joke. She's stocky, grounded.
+- Hair: dark with 1-2px gray strands at temples, cut short and practical (NOT styled — utilitarian). Wisps of hair pulled back simply.
+- FACE: rounder, weathered with 2-3px sun lines across forehead, slight crow's feet 1-2px around eyes, healthy weight (not skinny).
+- Skin: 打工人黄 #C8A85A slightly more saturated (she's outdoors more on her commute).
+- Mouth: NEUTRAL working face. NOT smiling, NOT frowning — the practiced "I'm just cleaning" face. Eyes slightly down (looking at where she's wiping).
+- A tiny 1-2px mole on her chin (consistent with cleaning-auntie archetype).
+
+OUTFIT:
+- LIGHT BLUE CLEANING UNIFORM (蓝色清洁服) — color #5A7080 lighter variant. A loose work blouse top, no buttons-up-to-the-throat (it's a service-tier uniform, comfortable). Plain.
+- A small EXTERNAL CONTRACTOR BADGE clipped to the front of her uniform — per npcs.md "工牌挂在外面（外包公司的工牌，不是本公司）". The badge is 4-5px small white rectangle with 1px illegible Chinese (CONTRACTOR, not 本公司).
+- RUBBER GLOVES on both hands — light gray-blue #5A7080 with 1-2px highlight. Visible at her wrists.
+- A simple gray-blue cap or head cover (#5A7080 deeper), partially visible at the top of her head.
+- No watch (per character: she doesn't measure time the same way office workers do).
+
+KEY PROP / SILHOUETTE ANCHOR:
+- Per art-bible §5.2: "MOP AS THIRD LEG OF SILHOUETTE". A WOODEN MOP HANDLE held in her right hand, extending diagonally upward to the upper-right of the frame. The handle is light brown #7A5838, 4-5 px wide, going from her hand up past her shoulder. The mop head is OFF-FRAME (we just see the handle slope) — this is the silhouette signature.
+
+BODY LANGUAGE:
+- Standing slightly slouched (her body language says "I've been on my feet for 6 hours").
+- One hand holds mop, other hand is at her hip (or wiping motion 2px hint).
+- Body weight on one foot.
+- Slight ground-staring eye direction — she's not looking up at office workers.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 18%)
+- 格子间灰蓝 #5A7080 (uniform dominant + gloves + cap — 35%)
+- 档案室棕 #7A5838 (mop handle, belt — 8%)
+- 白炽灯白 #E8E0CC (badge background, light pools — 12%)
+- 屏幕蓝 #2C4A6E (NOT used — 0%)
+- 老板金 #E0B050 (NOT used — 0%. Li Ayi is anti-power.)
+- Black #1a1a1a (hair, badge clip — 12%)
+- Gray hair temples #aab0ad (4%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- A 1-2px small phone clip-on at her uniform pocket — per npcs.md "围裙手机屏家庭像素画" — the screen shows 1-2 px family figures (a granddaughter perhaps). Illegible at scale, evocative at full canvas.
+- A 1-2px small kid-photo silhouette on her contractor badge — per npcs.md "车上贴着她孙女的照片".
+- Her gloves have 1-2px scuff marks — actually-used, not new.
+- A drop of cleaning solution at the mop head 1-2px (off-frame — implied by 1px droplet near edge).
+
+DESIGN GUARDRAILS (per spec — 食堂阿姨 / cleaning archetype):
+- DO NOT make her warmly maternal / "the wise auntie who heals you". She's flavor — present but not narrative.
+- DO NOT add halo / spotlight / healing light. Flat overhead fluorescent.
+- DO NOT have her smile broadly. Neutral working face — looking down/away.
+- DO NOT make her look at the player/camera.
+- The wide-and-short silhouette + diagonal mop handle = her SIGNATURE. Both must read at glance.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

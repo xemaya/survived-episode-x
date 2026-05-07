@@ -1,0 +1,23 @@
+A pixel art meeting room background for a Chinese office life game — conference room ready for sprite overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — base layer, NOT finished illustration:
+- NO title text, NO labels, NO captions
+- NO marker text on the whiteboard (whiteboard layers 1-4 are R-sheet sprites overlaid)
+- NO NPCs at the table (overlay)
+- NO papers / coffee cups / laptops on the table (overlay)
+- NO clock with specific time
+- NO projector content
+
+LAYOUT — interior view of a generic corporate meeting room, slight 3/4 angle:
+- Center: long rectangular conference table (#7A5838 wood top, dark legs)
+- Around table: 6-8 office chairs (gray-blue #5A7080), all empty, pulled in to the table
+- Back wall: large blank whiteboard with metal frame, completely white surface (no marker writing — that's sprite overlay)
+- Side walls: cream (#E8E0CC) painted, single horizontal trim line
+- Ceiling: 2 fluorescent light bars overhead (white tubes)
+- Floor: same grey-blue tile pattern as the rest of the office
+- Far end of table: presenter spot (slightly raised, suggesting where Boss stands)
+- Subtle 1px shadow under table edges and chairs
+
+PALETTE: 灰蓝 #5A7080 (chair plastic + dominant cool tone), 棕 #7A5838 (table top + chair seat), 白 #E8E0CC (walls + whiteboard surface + fluorescent light), 屏幕蓝 #2C4A6E (faint cool accents on chair frame metal), no gold, no red.
+
+Output: PNG, 1024x1024, single composite meeting-room background. Empty of NPCs and content. Suitable for in-engine sprite overlay (NPCs at chairs, whiteboard layered marker drawings, papers on table, meeting-running indicator — all sprites added on top).

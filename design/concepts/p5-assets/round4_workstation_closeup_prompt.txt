@@ -1,0 +1,49 @@
+A pixel art workstation close-up background for a Chinese office life game — single empty cubicle viewed from a slight 3/4 angle, ready for sprite + prop overlay by engine. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学 (funeral-as-festival). This is a BASE-LAYER scene background — most "stuff" is added programmatically as sprite overlays.
+
+CRITICAL CONSTRAINTS — base layer ONLY:
+- NO title text, NO labels, NO captions, NO Chinese names, NO English subtitle, NO banner
+- NO sticky notes (sprite overlay)
+- NO coffee/thermos cup on desk (sprite overlay)
+- NO computer screen content (just bare bezel — content is sprite overlay)
+- NO NPC at desk (sprite overlay)
+- NO calendar / mug / phone props on the desk surface (all are sprite overlays)
+- The desk surface, monitor bezel, chair, cubicle walls, overhead light, floor are PERMANENT background
+
+⚠️ ROUND-4 SPECIFIC NEGATIVE HINTS (the 2026-05-07 fix):
+- NO mini "HR portal" sub-monitor on the desk surface.
+- NO secondary screen below or beside the main monitor.
+- NO second smaller display, NO laptop, NO tablet, NO mini-CRT, NO desk-mounted dashboard panel.
+- NO "人力资源" / "HR" / "门户" / "portal" sign or badge anywhere on the desk or monitor.
+- The desk surface BELOW and BESIDE the main monitor must be EMPTY — just plain wood with subtle grain. Engine fills props here.
+- Only ONE monitor on the desk, centered on a stand. No second monitor anywhere in the cubicle.
+
+LAYOUT — single workstation close-up, slight 3/4 angle showing desk depth:
+- Center: a single workstation occupying ~60% of frame.
+  - Wood desk surface (#7A5838) with subtle 1-2px horizontal grain lines, COMPLETELY EMPTY of props.
+  - ONE bare grey-blue (#5A7080) plastic monitor bezel, centered on the desk on a small stand. Screen blank dark blue (#2C4A6E) — JUST the bezel + blank screen, NO content, NO sub-frame, NO HR portal mock-up.
+  - Black office chair (swivel chair with 5-caster wheel base) pulled in slightly, chairback visible behind desk edge.
+  - Desk drawer pedestal under right side of desk (3 small drawers visible, generic gray-blue).
+  - Cubicle wall partitions on LEFT and RIGHT (3/4 height, gray-blue #5A7080), bare with corkboard texture (faint gray dots, NO pinned papers — sprite overlay).
+- Background: cubicle wall acting as the back of the workstation, with corkboard texture (faint gray dots, NO papers).
+- Top: ONE single fluorescent light tube overhead (white tube + 2px metal end caps), slight horizontal glow.
+- Floor visible at bottom edge: grey-blue tile pattern (square tiles, 8-12 px each).
+- Soft 1-2px shadow under desk edge.
+
+STRICT COLOR PALETTE:
+- 灰蓝 #5A7080 (cubicle walls + monitor bezel + floor — dominant ~50%)
+- 棕 #7A5838 (desk wood — ~20%)
+- 白 #E8E0CC (overhead light glow, paper-pale corkboard backing — ~15%)
+- 屏幕蓝 #2C4A6E (blank monitor screen + bezel highlight — ~10%)
+- 老板金 #E0B050 (max 1% — only on chair caster wheel reflection or 1px detail)
+- Black #1a1a1a (chair body, drawer outlines, monitor stand — ~5%)
+- NO warning red, NO secondary monitor color, NO "HR portal" element
+
+VISUAL JOKES (1-3px subtle, OK at base-layer level):
+- A 1-2px crack in one floor tile (the cubicle has been here a while)
+- The fluorescent tube has a 1px flicker shadow on one end (it's about to die)
+- A 2-3px coffee ring stain on the desk surface (from previous occupants — this is the only mark on the desk)
+- The cubicle wall has a 1-2px tear in the corkboard fabric (years of pinning)
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE. NO CHINESE TITLE. NO ENGLISH SUBTITLE.
+
+Output: PNG, 1024x1024, single composite empty cubicle workstation background. Empty desk + chair + ONE main monitor (bare bezel + blank dark blue screen) + cubicle walls + drawer pedestal + overhead light + floor. Designed for engine to overlay player NPC sprite, sticky notes, coffee mug, monitor screen content, sticky lifecycle props on top of this base. Consistent with prior reference sheets. Replaces previous workstation_closeup.png which had an unwanted mini "HR portal" sub-monitor on the desk surface.

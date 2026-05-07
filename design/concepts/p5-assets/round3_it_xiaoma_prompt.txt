@@ -1,0 +1,59 @@
+A pixel art character portrait for a Chinese office life game: NPC `it_xiaoma` — IT 小马 (IT Xiaoma), 28 yo male, the in-house IT support guy. The "已派单 v23 等零件 v2" running gag character. He fixes the tea-room coffee machine 47 times a year and never blames anyone. Half-body portrait, 3/4 facing.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: tired-young-IT — the guy who has solved every problem 50 times before and gets blamed for problems he didn't make.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO desk, NO server rack, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas.
+
+THE CHARACTER — IT Xiaoma (28):
+- Chinese male, 28 years old, slim build, slightly hunched (his computer time + tool kit + commute).
+- Hair: short black, slightly disheveled (NOT styled, but not unkempt — "I rolled out of bed and made it work"). 1-2px hair-cowlick at the back.
+- FACE: thin features, 1-2px slight stubble (didn't shave today), 2-3px eye bags (he's the IT — he stays late to push security patches). Slight 1-2px tiredness lines.
+- Skin: 打工人黄 #C8A85A slightly desaturated (he's mostly indoors).
+- Mouth: a SLIGHT WRY SMILE — corner up 1px, the "I've heard the same complaint 20 times this week" face. Calm.
+- Eye expression: looking off-camera slightly down — he's mid-thought about a fix. NOT making eye contact with viewer.
+
+OUTFIT (signature anchor):
+- BLACK HOODIE (#1a1a1a near-black) per npcs.md "永远穿黑色帽 T". The hood is DOWN (resting on his back/shoulders) but visible as a 1-2px raised silhouette element.
+- DARK BLUE JEANS (#2C4A6E darker variant) visible at waist if half-body framing extends.
+- Sneakers (off-frame, but if shown they're black/gray).
+- Employee BADGE clipped to HIP / WAIST POCKET (NOT chest) — per npcs.md "工牌挂在裤腰上（不愿挂胸前——他想保持'我不属于这里'姿态)". The badge is 4-5px small white rectangle with 1px illegible Chinese, hanging from his belt loop.
+
+KEY PROP / SILHOUETTE ANCHOR:
+- A TOOL POUCH / TECH BAG slung over one shoulder — per npcs.md "背一个机修包（里面装螺丝刀 / 网线 / 各种插头）". The bag is 18-22 px wide, dark gray-blue #5A7080, with 1-2px small tools visible peeking out (a 1px screwdriver tip, a 1-2px ethernet cable end, a 1-2px USB connector). The bag strap crosses his chest diagonally.
+- His right hand may be holding a small SCREWDRIVER (3-4px) at chest height — at-the-ready posture.
+- Or alternatively: his left hand holds a WIFI ROUTER or POWER STRIP (4-5px small box with cables — 1-2px wires).
+
+BODY LANGUAGE:
+- Slightly hunched (-1-2px from straight) — IT posture.
+- One hand holding tool, other in pocket (visible if framing extends).
+- Body weight on one foot.
+- Casual NOT-MILITARY posture — he's not performing.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 15%)
+- 格子间灰蓝 #5A7080 (tool bag, hoodie shadows — 18%)
+- 档案室棕 #7A5838 (NOT used — 0%)
+- 白炽灯白 #E8E0CC (light highlights, badge, ethernet cable end — 8%)
+- 屏幕蓝 #2C4A6E (jeans dominant — 15%)
+- 老板金 #E0B050 (NOT used — 0%. IT Xiaoma is service tier.)
+- Black #1a1a1a (hoodie dominant + screwdriver + hair — 35%)
+- Hair dark #5a5552 (5%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- His tool bag has 1-2px velcro-strap detail showing wear.
+- His badge is hung at the WAIST not the CHEST — the silhouette joke.
+- A 1-2px small WIRE/CABLE peeking out of his bag (different colored from the rest — maybe 1px green or yellow).
+- His hoodie has a 1-2px coffee/oil stain on the front (he's been on his knees fixing things).
+- A 1-2px tiny "ZONE" sticker on his bag (illegible) — IT-conference swag.
+
+DESIGN GUARDRAILS:
+- His silhouette is anti-formal: hoodie + crossbody bag. This is the "I do tech, I don't perform corporate" signal.
+- Badge at WAIST is mandatory silhouette anchor.
+- DO NOT make him look like a stylized hacker / cyberpunk character. He's a real young Chinese IT support guy. Tired, normal, slightly cool.
+- DO NOT add server rack / dual monitors / "matrix code" BG — PURE WHITE BG ONLY.
+- His tool bag must be visible / readable as crossbody bag silhouette.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

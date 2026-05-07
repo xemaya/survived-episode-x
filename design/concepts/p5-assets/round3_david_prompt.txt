@@ -1,0 +1,55 @@
+A pixel art character portrait for a Chinese office life game: NPC `david` — David (大伟), 35 yo male, the 卷王 (tryhard archetype) who performs hustle while being internally panicked. Half-body portrait, 3/4 facing slightly forward (he leans toward the viewer — that's his anchor).
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. Visual identity goal: "first glance recognition, second glance indictment" — the man who looks productive 24/7 and is one push from breakdown.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO desk, NO chair, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas.
+
+THE CHARACTER — David (35):
+- Chinese male, 35 years old, slightly tall (+2 px above average), spine UNNATURALLY VERTICAL — that's his core silhouette joke. Posture is military-perfect, like he's permanently being graded.
+- Neck pushes FORWARD 2-3 px from shoulders (the "checking-Excel-too-close" silhouette). Spine straight, neck angled forward at ¬shape. This is his trademark.
+- Hair: short black with VISIBLE STYLED PRODUCT (1-2px wet-look highlight on the top), neatly side-parted. NOT messy. He cares about his hair.
+- FACE: thin angular features, sharp jawline with 1-2px stubble shadow (he didn't sleep well). EYE BAGS 3-4px deep — black under-eye circles signal chronic 11pm-finish. Eyes hyper-alert, looking slightly OFF and UP (toward whoever might be passing by his desk).
+- Mouth: a fake half-smile — single corner pulled up 2px while the other is flat. The "I'm-doing-fine-tone-but-not" smile.
+
+OUTFIT:
+- A WHITE SHIRT (#E8E0CC light off-white), top button UNDONE (the "I have 松弛感 but actually I'm cooked" anchor — per npcs.md). Sleeves are ROLLED UP TO ELBOWS — 2-3px crease lines visible.
+- Dark gray slacks (#1a1a1a near-black) visible if half-body extends low enough.
+- Brown belt (#7A5838) 1-2 px visible at waist.
+- Necktie LOOSE, slightly crooked — 1-2px asymmetry.
+- Employee lanyard with multiple badges + KPI screenshots clipped to it (1-2px stack of small white rectangles).
+
+KEY PROP / SILHOUETTE ANCHOR:
+- A STAINLESS-STEEL THERMOS in his right hand, raised toward his mouth — this is 枸杞养生茶 (his ironic survival ritual: cares about health while ruining health). The thermos is 25-30 px tall, off-white #E8E0CC body with subtle horizontal banding.
+- The thermos has a tiny 1-2px steam wisp rising — he just opened it.
+
+BODY LANGUAGE:
+- Standing perfectly upright, leaning forward 2px from waist (curiosity / vigilance).
+- Hands held at chest height — one with thermos, the other half-holding a small stack of POST-IT NOTES (2-3px yellow squares with illegible 1px Chinese characters).
+- The post-it stack signal: "I'm so productive I've scribbled all over them".
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — slightly desaturated, fluorescent-pallor — 12%)
+- 格子间灰蓝 #5A7080 (necktie + minor accent — 8%)
+- 档案室棕 #7A5838 (belt + post-it small stripe — 4%)
+- 白炽灯白 #E8E0CC (white shirt dominant + thermos — 25%)
+- 屏幕蓝 #2C4A6E (necktie main color — 8%)
+- 老板金 #E0B050 (NOT used — 0%. David is NOT a power character — he aspires.)
+- Black #1a1a1a (slacks, hair, eye-bag shadow — 25%)
+- Hair gray-black #5a5552 (5%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- A tiny 1-2px sweat bead on his temple (he's hot from running between meetings).
+- A loose hair strand on his shoulder he hasn't noticed (1px gray line).
+- His thermos has a tiny "枸杞" (1px sticker, illegible at scale, evocative at full canvas).
+- His post-it stack has 1px scribble that COULD be Chinese — illegible.
+
+DESIGN GUARDRAILS:
+- DO NOT make him look genuinely confident. The cracks must show — eye bags, asymmetric smile, neck-forward strain.
+- DO NOT add halo / spotlight / heroic backlighting.
+- DO NOT add background, desk, scenery, decoration — PURE WHITE BG ONLY.
+- The vertical-spine + neck-forward silhouette must read at glance.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

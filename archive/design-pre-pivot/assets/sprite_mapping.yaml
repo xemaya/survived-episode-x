@@ -1,0 +1,515 @@
+# sprite_mapping.yaml — ASSET-ID ↔ sprite file mapping
+#
+# Single source of truth. Drives tools/asset_map.py reconciliation against
+# design/assets/asset-manifest.md (172 specced) and assets/sprites/ (actual files).
+#
+# Status values:
+#   done         — all spec frames present
+#   partial      — some frames present, spec asks for more
+#   pending      — not yet generated
+#   deferred     — out of MVP scope (VS / Alpha tier / OQ blocked)
+#   cross_ref    — covered by another ASSET-ID; see notes
+#   not_visual   — config / shader / programmatic / audio (no PNG to map)
+#
+# Sheet ID refers to the generation sheet that produced these sprites.
+
+mappings:
+
+  # ============================================================
+  # Sheet J — HUD Workstation Props (already generated + sliced)
+  # ============================================================
+  ASSET-001: { name: Sticky Note Default,        files: [hud/sticky_blank.png],     sheet: J, status: done }
+  ASSET-002: { name: Sticky Note Crossed-Out,    files: [hud/sticky_crossed.png],   sheet: J, status: done }
+  ASSET-003: { name: Sticky Note Overtime,       files: [hud/sticky_overtime.png],  sheet: J, status: done }
+  ASSET-004: { name: Sticky Note Folded Corner,  files: [hud/sticky_folded.png],    sheet: J, status: done }
+  ASSET-005:
+    name: Coffee Cup Liquid States 5 variants
+    files:
+      - hud/coffee_full.png
+      - hud/coffee_three_quarter.png
+      - hud/coffee_half.png
+      - hud/coffee_empty.png
+    sheet: J
+    spec_frames: 5
+    actual_frames: 4
+    status: partial
+    notes: Sheet J provides 4 frames; spec expects 5. Empty frame includes stain ring. Add explicit 1/4 frame in v02 if needed.
+  ASSET-006: { name: Coffee Stain Ring,          files: [hud/coffee_empty.png],     sheet: J, status: partial, notes: "Embedded in coffee_empty (stain visible beneath empty cup). Standalone stain ring sprite optional." }
+  ASSET-007:
+    name: Monitor Data Display 5 variants
+    files:
+      - hud/monitor_idle.png
+      - hud/monitor_working.png
+      - hud/monitor_warning.png
+      - hud/monitor_critical.png
+    sheet: J
+    spec_frames: 5
+    actual_frames: 4
+    status: partial
+    notes: Sheet J provides 4 states (idle/working/warning/critical). Spec's 5th state (locked/forbidden/blank) can be added in v02.
+  ASSET-015: { name: Workstation Desk Surface,   files: [hud/desk_surface.png],     sheet: J, status: done }
+  ASSET-019: { name: Active Workstation Chair,   files: [hud/chair_active.png],     sheet: J, status: done }
+  ASSET-021: { name: Monitor Bezel Frame,        files: [hud/monitor_bezel.png],    sheet: J, status: done }
+  ASSET-012: { name: Empty Chair (LEFT),         files: [hud/chair_empty.png],      sheet: J, status: done }
+
+  # ============================================================
+  # Sheet K — Calendar / Attendance / Notice (pending generation)
+  # ============================================================
+  ASSET-008:
+    name: Attendance Board 8 variants
+    files:
+      - hud/attendance_day_normal.png
+      - hud/attendance_day_busy.png
+      - hud/attendance_overtime.png
+      - hud/attendance_weekend.png
+      - hud/attendance_kpi_review.png
+      - hud/attendance_day_off.png
+      - hud/attendance_gameover.png
+      - hud/attendance_main_menu.png
+    sheet: K
+    status: pending
+  ASSET-009:
+    name: Desk Calendar 24x24 month variants
+    files:
+      - hud/calendar_month_day_1.png
+      - hud/calendar_mid_week.png
+      - hud/calendar_month_end.png
+      - hud/calendar_weekend_marked.png
+    sheet: K
+    spec_frames: 31
+    actual_frames: 4
+    status: partial
+    notes: Sheet K provides 4 representative frames (day_1 / mid_week / month_end / weekend). Per-day frames can be parametric tinting if needed.
+  ASSET-016: { name: Anniversary Banner Variant, files: [hud/banner_anniversary.png], sheet: K, status: pending }
+  ASSET-017:
+    name: Notice Board Aging 4 variants
+    files:
+      - hud/notice_board_fresh.png
+      - hud/notice_board_faded.png
+      - hud/notice_board_ancient.png
+    sheet: K
+    spec_frames: 4
+    actual_frames: 3
+    status: partial
+    notes: Sheet K provides 3 fade levels (fresh/faded/ancient). 4th interim level can be added if needed.
+
+  # ============================================================
+  # Sheet L+M — NPC Faces (pending generation, 8 NPC × 4 phase = 32 spec, sheet has 36 incl. OtherDept)
+  # ============================================================
+  ASSET-010:
+    name: NPC Expression 8x4 atlas (32 portraits)
+    files:
+      - npc/faces/tryhard_neutral.png
+      - npc/faces/tryhard_warmup.png
+      - npc/faces/tryhard_tension.png
+      - npc/faces/tryhard_farewell.png
+      - npc/faces/slacker_neutral.png
+      - npc/faces/slacker_warmup.png
+      - npc/faces/slacker_tension.png
+      - npc/faces/slacker_farewell.png
+      - npc/faces/toady_neutral.png
+      - npc/faces/toady_warmup.png
+      - npc/faces/toady_tension.png
+      - npc/faces/toady_farewell.png
+      - npc/faces/rookie_neutral.png
+      - npc/faces/rookie_warmup.png
+      - npc/faces/rookie_tension.png
+      - npc/faces/rookie_farewell.png
+      - npc/faces/veteran_neutral.png
+      - npc/faces/veteran_warmup.png
+      - npc/faces/veteran_tension.png
+      - npc/faces/veteran_farewell.png
+      - npc/faces/auntie_neutral.png
+      - npc/faces/auntie_warmup.png
+      - npc/faces/auntie_tension.png
+      - npc/faces/auntie_farewell.png
+      - npc/faces/boss_neutral.png
+      - npc/faces/boss_warmup.png
+      - npc/faces/boss_tension.png
+      - npc/faces/boss_farewell.png
+      - npc/faces/hr_neutral.png
+      - npc/faces/hr_warmup.png
+      - npc/faces/hr_tension.png
+      - npc/faces/hr_farewell.png
+    sheets: [L, M]
+    spec_frames: 32
+    actual_frames: 32
+    status: pending
+    notes: Sheet M includes 4 extra OtherDept Rep frames (other_dept_*) beyond spec's 8 NPCs.
+
+  # ============================================================
+  # Sheet N1+N2 — NPC Positions (pending, 8 NPC × 4 station = 32 spec)
+  # ============================================================
+  ASSET-011:
+    name: NPC Position 8x4 atlas (32 frames)
+    files:
+      - npc/positions/tryhard_at_desk_sit.png
+      - npc/positions/tryhard_at_desk_stand.png
+      - npc/positions/tryhard_walking.png
+      - npc/positions/tryhard_at_boss_office.png
+      - npc/positions/slacker_at_desk_sit.png
+      - npc/positions/slacker_at_desk_stand.png
+      - npc/positions/slacker_walking.png
+      - npc/positions/slacker_at_tea_room.png
+      - npc/positions/toady_at_desk_sit.png
+      - npc/positions/toady_at_desk_stand.png
+      - npc/positions/toady_walking.png
+      - npc/positions/toady_at_boss_office.png
+      - npc/positions/rookie_at_desk_sit.png
+      - npc/positions/rookie_at_desk_stand.png
+      - npc/positions/rookie_walking.png
+      - npc/positions/rookie_at_meeting_room.png
+      - npc/positions/veteran_at_desk_sit.png
+      - npc/positions/veteran_at_desk_stand.png
+      - npc/positions/veteran_walking.png
+      - npc/positions/veteran_at_tea_room.png
+      - npc/positions/auntie_mopping.png
+      - npc/positions/auntie_standing.png
+      - npc/positions/auntie_walking.png
+      - npc/positions/auntie_at_hallway.png
+      - npc/positions/boss_at_desk_sit.png
+      - npc/positions/boss_at_desk_stand.png
+      - npc/positions/boss_walking.png
+      - npc/positions/boss_at_meeting_room.png
+      - npc/positions/hr_at_desk_sit.png
+      - npc/positions/hr_at_desk_stand.png
+      - npc/positions/hr_walking.png
+      - npc/positions/hr_at_meeting_room.png
+    sheets: [N1, N2]
+    spec_frames: 32
+    actual_frames: 32
+    status: pending
+
+  # ============================================================
+  # Sheet S — NPC Lifecycle (LEAVING_ANNOUNCED + walking + xisang)
+  # ============================================================
+  ASSET-066:
+    name: NPC LEAVING_ANNOUNCED Visual Overlay (8 NPCs)
+    files:
+      - npc/lifecycle/tryhard_leaving.png
+      - npc/lifecycle/slacker_leaving.png
+      - npc/lifecycle/toady_leaving.png
+      - npc/lifecycle/rookie_leaving.png
+      - npc/lifecycle/veteran_leaving.png
+      - npc/lifecycle/auntie_leaving.png
+      - npc/lifecycle/boss_leaving.png
+      - npc/lifecycle/hr_leaving.png
+      - npc/lifecycle/other_dept_leaving.png
+    sheet: S
+    spec_frames: 8
+    actual_frames: 9
+    status: pending
+    notes: Sheet S includes OtherDept Rep beyond spec's 8.
+  ASSET-070:
+    name: NPC Walking Cycle (4-frame side view)
+    files:
+      - npc/lifecycle/walk_cycle_1.png
+      - npc/lifecycle/walk_cycle_2.png
+      - npc/lifecycle/walk_cycle_3.png
+    sheet: S
+    spec_frames: 4
+    actual_frames: 3
+    status: partial
+    notes: 3-frame loop (1 ↔ 2 ↔ 3 ↔ 2 ↔ ...) covers most cycle needs; add 4th if smoother loop required.
+  ASSET-072:
+    name: NPC 喜丧 Trigger Frames
+    files:
+      - npc/lifecycle/xisang_smile.png
+      - npc/lifecycle/xisang_bow.png
+    sheet: S
+    spec_frames: 16
+    actual_frames: 2
+    status: partial
+    notes: Sheet S provides 2 representative xisang frames (smile/bow). Per-archetype xisang × 2 (16 total) is Alpha-tier scope.
+  ASSET-075: { name: NPC Talk Animation (mouth open/close), files: [npc/lifecycle/talk_mouth_open.png, npc/lifecycle/talk_mouth_closed.png], sheet: S, status: pending }
+
+  # ============================================================
+  # Sheet O — KPI Review + GameOver UI
+  # ============================================================
+  ASSET-077: { name: KPI Review Screen Background,        files: [ui/kpi_review/kpi_review_bg.png],          sheet: O, status: program_drawn }
+  ASSET-078: { name: KPI Breakdown Three-Row Panel Frame, files: [ui/kpi_review/kpi_three_row_panel.png],    sheet: O, status: program_drawn }
+  ASSET-079: { name: KPI Capacity vs Threshold Number,    files: [ui/kpi_review/kpi_capacity_threshold.png], sheet: O, status: program_drawn }
+  ASSET-080: { name: GAMEOVER Termination Certificate BG, files: [ui/kpi_review/gameover_certificate_bg.png],sheet: O, status: program_drawn }
+  ASSET-081: { name: Termination Stamp (恭喜晋升),         files: [ui/kpi_review/ironic_promotion_stamp.png], sheet: O, status: program_drawn }
+  ASSET-083: { name: Archive List Row Sprite Frame,       files: [ui/kpi_review/archive_list_row.png],       sheet: O, status: program_drawn }
+  ASSET-085: { name: Archive Cap-Reached Notice Banner,   files: [ui/kpi_review/archive_cap_banner.png],     sheet: O, status: program_drawn }
+  ASSET-086: { name: Archive Delete Confirm Dialog,       files: [ui/kpi_review/archive_delete_confirm.png], sheet: O, status: program_drawn }
+  ASSET-088: { name: Settlement Locked State Indicator,   files: [ui/kpi_review/settlement_locked.png],      sheet: O, status: program_drawn }
+  ASSET-082:
+    name: KPI Review Confirm Button (Skip / Continue) 4 states
+    files:
+      - ui/kpi_review/confirm_button_normal.png
+      - ui/kpi_review/confirm_button_hover.png
+      - ui/kpi_review/confirm_button_pressed.png
+      - ui/kpi_review/confirm_button_disabled.png
+    sheet: O
+    status: program_drawn
+  ASSET-119: { name: Skip Hint Strip,                     files: [ui/kpi_review/skip_hint_strip.png, ui/recap/skip_hint_strip.png], sheets: [O, Q], status: program_drawn, notes: "Generated in both O and Q sheets; either will satisfy. Prefer the higher-quality one after review." }
+
+  # ============================================================
+  # Sheet P — Main Menu / Pause / Settings UI
+  # ============================================================
+  ASSET-093: { name: Main Menu Background,               files: [ui/menu/main_menu_bg.png],            sheet: P, status: program_drawn }
+  ASSET-094: { name: Main Menu Buttons (4 entries),      files: [ui/menu/main_menu_buttons.png],       sheet: P, status: pending, notes: "Single composite of 4-button stack. Spec ASSET-094 originally cross-ref to ASSET-049; this is a tighter custom version." }
+  ASSET-095: { name: Pause Overlay Background (摸鱼中),  files: [ui/menu/pause_overlay.png],           sheet: P, status: program_drawn }
+  ASSET-096: { name: Settings Screen Background,         files: [ui/menu/settings_bg.png],             sheet: P, status: program_drawn }
+  ASSET-097: { name: Settings Group Panel Frame,         files: [ui/menu/settings_group_audio.png, ui/menu/settings_group_language.png], sheet: P, spec_frames: 4, actual_frames: 2, status: program_drawn, notes: "Sheet P provides 2 of 4 group panels (audio/language). Operation/density panels can reuse same frame styling." }
+  ASSET-098: { name: Volume Knob/Slider Sprite,          files: [ui/menu/volume_slider.png],           sheet: P, status: program_drawn }
+  ASSET-099: { name: Locale Selector Dropdown,           files: [ui/menu/locale_dropdown.png],         sheet: P, status: program_drawn }
+  ASSET-100: { name: Narrative Density Toggle,           files: [ui/menu/narrative_density_toggle.png],sheet: P, status: program_drawn }
+  ASSET-102: { name: Keymap Row Sprite,                  files: [ui/menu/keymap_row.png],              sheet: P, status: program_drawn }
+  ASSET-105: { name: Confirm Quit Dialog,                files: [ui/menu/confirm_quit_dialog.png],     sheet: P, status: program_drawn }
+  ASSET-106: { name: Tooltip Sprite,                     files: [ui/menu/tooltip.png],                 sheet: P, status: program_drawn }
+  ASSET-107: { name: Settings Group Icon Stamps,         files: [ui/menu/settings_group_icons.png],    sheet: P, status: program_drawn, notes: "Composite of 4 icons in single cell; can be split via post-processing if needed individually." }
+
+  # ============================================================
+  # Sheet Q — Daily/Weekly Recap UI
+  # ============================================================
+  ASSET-113: { name: Daily Recap Screen Background,      files: [ui/recap/daily_recap_bg.png],         sheet: Q, status: program_drawn }
+  ASSET-114: { name: Weekly Recap Screen Background,     files: [ui/recap/weekly_recap_bg.png],        sheet: Q, status: program_drawn }
+  ASSET-115: { name: HR Header Strip,                    files: [ui/recap/hr_header_strip.png],        sheet: Q, status: program_drawn }
+  ASSET-116: { name: Effort Three-Dimension Visualization,files: [ui/recap/effort_3d_visualization.png],sheet: Q, status: program_drawn }
+  ASSET-117: { name: Event List Row,                     files: [ui/recap/event_list_row.png],         sheet: Q, status: program_drawn }
+  ASSET-118: { name: KPI Prediction Reference Strip,     files: [ui/recap/kpi_prediction_strip.png],   sheet: Q, status: program_drawn }
+  ASSET-120: { name: Daily Recap Body Container Frame,   files: [ui/recap/daily_body_container.png],   sheet: Q, status: program_drawn }
+  ASSET-121: { name: Weekly Recap Body Container Frame,  files: [ui/recap/weekly_body_container.png],  sheet: Q, status: program_drawn }
+  ASSET-122: { name: Recap Fade-In Animation Frames,     files: [ui/recap/recap_fade_in_frame.png],    sheet: Q, status: program_drawn, notes: "Single representative frame; full fade-in is programmatic via tween, not multi-frame." }
+  ASSET-123: { name: AP/Energy Daily Summary Row,        files: [ui/recap/ap_energy_summary_row.png],  sheet: Q, status: program_drawn }
+  ASSET-124: { name: Recap Calendar Mini Glyph,          files: [ui/recap/calendar_mini_glyph.png],    sheet: Q, status: program_drawn }
+
+  # ============================================================
+  # Sheet R — Lighting Environment
+  # ============================================================
+  ASSET-029:
+    name: Break Room Crack 4 levels
+    files:
+      - environment/break_room_crack_lvl1.png
+      - environment/break_room_crack_lvl2.png
+      - environment/break_room_crack_lvl3.png
+      - environment/break_room_crack_lvl4.png
+    sheet: R
+    status: pending
+  ASSET-031: { name: Boss Office Fake Plant,             files: [environment/boss_fake_plant.png],     sheet: R, status: pending }
+  ASSET-032: { name: Tea Room Water Sign-In,             files: [environment/tea_room_signin.png],     sheet: R, status: pending }
+  ASSET-033:
+    name: Hallway Delivery Box 2 variants
+    files:
+      - environment/hallway_box_clean.png
+      - environment/hallway_box_stepped.png
+    sheet: R
+    status: pending
+  ASSET-034:
+    name: Meeting Room Whiteboard 4 layers
+    files:
+      - environment/whiteboard_layer1.png
+      - environment/whiteboard_layer2.png
+      - environment/whiteboard_layer3.png
+      - environment/whiteboard_layer4.png
+    sheet: R
+    status: pending
+  ASSET-039: { name: Fluorescent Light Tube,             files: [environment/fluorescent_tube.png],    sheet: R, status: pending }
+  ASSET-040: { name: Boss Office Purple Edge Light,      files: [environment/boss_purple_edge.png],    sheet: R, status: pending }
+  ASSET-037: { name: Steam Particle (VS scope),          files: [environment/steam_particle.png],      sheet: R, status: pending, notes: "VS scope but specced; usable as single-frame particle sprite." }
+  ASSET-038: { name: Dust Mote Particle (VS scope),      files: [environment/dust_mote.png],           sheet: R, status: pending, notes: "VS scope but specced; usable as single-frame particle sprite." }
+
+  # ============================================================
+  # Sheet T — Card Play / Dialogue UI
+  # ============================================================
+  ASSET-043:
+    name: Card Background (3 AP cost variants)
+    files:
+      - ui/card/card_frame_1ap.png
+      - ui/card/card_frame_2ap.png
+      - ui/card/card_frame_3ap.png
+    sheet: T
+    status: program_drawn
+  ASSET-044: { name: Card Front Face (per-card content), files: [cards/offense, cards/defense],          sheets: [H, I], status: done, notes: "Already covered by reference sheets H + I (18 cards). Sheet T provides frame template; per-card content uses H/I." }
+  ASSET-045: { name: Card Selected/Hover Overlay,        files: [ui/card/card_hover_overlay.png],      sheet: T, status: program_drawn }
+  ASSET-046: { name: Card Disabled State Overlay,        files: [ui/card/card_disabled_overlay.png],   sheet: T, status: program_drawn }
+  ASSET-047: { name: Dialogue Background Frame (9-slice),files: [ui/card/dialogue_9slice.png],         sheet: T, status: program_drawn }
+  ASSET-048: { name: Dialogue Speaker Name Plate,        files: [ui/card/speaker_name_plate.png],      sheet: T, status: program_drawn }
+  ASSET-049:
+    name: Choice Button Sprites (4 states)
+    files:
+      - ui/card/choice_button_normal.png
+      - ui/card/choice_button_hover.png
+      - ui/card/choice_button_pressed.png
+      - ui/card/choice_button_disabled.png
+    sheet: T
+    status: program_drawn
+    notes: Cross-referenced from spec ASSET-094/104/082; this is the single canonical 4-state set.
+  ASSET-050:
+    name: AP Slot Icons (filled / empty)
+    files:
+      - ui/card/ap_slot_filled.png
+      - ui/card/ap_slot_empty.png
+    sheet: T
+    status: program_drawn
+  ASSET-053: { name: Choice Indicator Bullet,            files: [ui/card/dialogue_continue_arrow.png], sheet: T, status: program_drawn, notes: "Continue arrow ▼ doubles as choice indicator." }
+  ASSET-056: { name: Card Empty Slot Placeholder,        files: [ui/card/card_empty_slot.png],         sheet: T, status: program_drawn }
+  ASSET-057: { name: Dialogue Continue Indicator (▼),    files: [ui/card/dialogue_continue_arrow.png], sheet: T, status: program_drawn }
+  ASSET-063: { name: Card Front Generic Icon Set (8-12), files: [ui/card/card_front_icon_set.png],     sheet: T, status: program_drawn }
+
+  # ============================================================
+  # Sheet U — NPC Event CG Portraits
+  # ============================================================
+  ASSET-041:
+    name: NPC Event CG Portrait (8 NPCs × 2 emotions = 16)
+    files:
+      - npc/event_cg/tryhard_calm.png
+      - npc/event_cg/tryhard_agitated.png
+      - npc/event_cg/slacker_calm.png
+      - npc/event_cg/slacker_panicked.png
+      - npc/event_cg/toady_calm.png
+      - npc/event_cg/toady_deferential.png
+      - npc/event_cg/rookie_calm.png
+      - npc/event_cg/rookie_nervous.png
+      - npc/event_cg/veteran_calm.png
+      - npc/event_cg/veteran_knowing.png
+      - npc/event_cg/auntie_calm.png
+      - npc/event_cg/auntie_disapproving.png
+      - npc/event_cg/boss_calm.png
+      - npc/event_cg/boss_commanding.png
+      - npc/event_cg/hr_calm.png
+      - npc/event_cg/hr_officious.png
+    sheet: U
+    status: pending
+    notes: 16 portraits cover the 8 main NPCs × 2 emotions. OQ-CPU-01 was BLOCKING for asset production scope; treat U sheet as the unblocking placeholder set.
+  ASSET-042: { name: NPC Interactive Portrait (8 NPCs × 1 state), files: [npc/event_cg], sheet: U, status: pending, notes: "Spec asks 1 state per NPC; the 'calm' frames from ASSET-041 satisfy this." }
+
+  # ============================================================
+  # Sheet V — Misc / Animation / Cumulative (pending generation)
+  # ============================================================
+  ASSET-013:
+    name: Sticky Note Lifecycle Sprite Set
+    files:
+      - hud/sticky_lifecycle_1.png
+      - hud/sticky_lifecycle_2.png
+      - hud/sticky_lifecycle_3.png
+      - hud/sticky_lifecycle_4.png
+    sheet: V
+    spec_frames: 9
+    actual_frames: 4
+    status: pending
+    notes: Sheet V provides 4 progressive lifecycle states (empty → overflow). Per-AP-spent fine-grained 9 frames is Alpha-tier scope.
+  ASSET-020:
+    name: Desk Stain Cumulative 5 levels
+    files:
+      - hud/desk_stain_lvl1.png
+      - hud/desk_stain_lvl2.png
+      - hud/desk_stain_lvl3.png
+      - hud/desk_stain_lvl4.png
+      - hud/desk_stain_lvl5.png
+    sheet: V
+    status: pending
+  ASSET-054:
+    name: Card Played Animation 4 frames
+    files:
+      - hud/card_played_1.png
+      - hud/card_played_2.png
+      - hud/card_played_3.png
+      - hud/card_played_4.png
+    sheet: V
+    status: pending
+  ASSET-058: { name: Speaker Portrait Frame (rounded rectangle), files: [hud/speaker_portrait_frame.png], sheet: V, status: pending }
+  ASSET-073: { name: NPC LEFT Lifecycle Workplace Cleanup,      files: [hud/cleared_desk.png],            sheet: V, status: pending }
+  ASSET-084: { name: Archive Screen Background,                  files: [hud/archive_screen_bg.png],        sheet: V, status: pending }
+
+  # ============================================================
+  # Pre-existing reference sprites (already in repo from A-I sheets)
+  # ============================================================
+  ASSET-076: { name: NPC Skin Palette Base LUT, files: [character/turnaround], status: deferred, notes: "Color palette source — derived from existing turnaround reference; LUT generation is a tooling task, not a sprite." }
+  ASSET-071:
+    name: NPC Idle Sit/Stand (sit + stand 2 base poses per NPC)
+    files:
+      - npc/positions/tryhard_at_desk_sit.png
+      - npc/positions/tryhard_at_desk_stand.png
+      - npc/positions/slacker_at_desk_sit.png
+      - npc/positions/slacker_at_desk_stand.png
+      - npc/positions/toady_at_desk_sit.png
+      - npc/positions/toady_at_desk_stand.png
+      - npc/positions/rookie_at_desk_sit.png
+      - npc/positions/rookie_at_desk_stand.png
+      - npc/positions/veteran_at_desk_sit.png
+      - npc/positions/veteran_at_desk_stand.png
+      - npc/positions/auntie_mopping.png
+      - npc/positions/auntie_standing.png
+      - npc/positions/boss_at_desk_sit.png
+      - npc/positions/boss_at_desk_stand.png
+      - npc/positions/hr_at_desk_sit.png
+      - npc/positions/hr_at_desk_stand.png
+    sheets: [N1, N2]
+    status: done
+    notes: Spec asks 8 NPC × 2 poses (16 frames) — fully covered by sit/stand columns of N1+N2 position sheets.
+  ASSET-069: { name: NPC Clothing Color Palette Variants, status: cross_ref, ref: ASSET-076, notes: "LUT-derived; produced by palette swap shader, not standalone sprites." }
+  ASSET-090: { name: KPI Review Skippable Indicator, files: [ui/kpi_review/settlement_locked.png], status: cross_ref, ref: ASSET-088, notes: "Reuse settlement_locked sprite, possibly inverted color/state in code." }
+  ASSET-103: { name: Keyboard Key Sprite Atlas, files: [ui/menu/keymap_row.png], status: cross_ref, ref: ASSET-102, notes: "Single-row keymap sprite contains a sample key glyph; can be tinted/swapped in code instead of separate atlas." }
+  ASSET-091: { name: HR Word Library Submenu Frame, status: deferred, notes: "Out of MVP minimum-loop scope; revisit in Alpha tier." }
+  ASSET-025: { name: Palette LUT Atlas, status: deferred, notes: "Programmatically generated from palette config (see palette_swap shader), not produced via AI image gen." }
+
+  # ============================================================
+  # Cross-references (no own sprite; resolved via referenced ASSET)
+  # ============================================================
+  ASSET-027: { name: Desk Stain (cross-ref ASSET-020),       status: cross_ref, ref: ASSET-020 }
+  ASSET-028: { name: Notice Board Aging (cross-ref 017),     status: cross_ref, ref: ASSET-017 }
+  ASSET-030: { name: Anniversary Banner (cross-ref 016),     status: cross_ref, ref: ASSET-016 }
+  ASSET-062: { name: Numeric Only Flash (cross-ref 014),     status: cross_ref, ref: ASSET-014 }
+  ASSET-065: { name: NPC Atlas (cross-ref 011),              status: cross_ref, ref: ASSET-011 }
+  ASSET-067: { name: NPC LEFT Empty Chair (cross-ref 012),   status: cross_ref, ref: ASSET-012 }
+  ASSET-092: { name: KPI Review Anchor SFX (cross-ref),      status: cross_ref, ref: ASSET-167 }
+  ASSET-094: { name: Main Menu Button (cross-ref 049),       status: cross_ref, ref: ASSET-049, notes: "Spec said cross-ref but Sheet P also produced custom version; either works." }
+  ASSET-101: { name: Remap Screen BG (reuse 096),            status: cross_ref, ref: ASSET-096 }
+  ASSET-104: { name: Reset to Defaults Button (cross-ref),   status: cross_ref, ref: ASSET-049 }
+  ASSET-109: { name: Monitor Warning (cross-ref 007 frame 2),status: cross_ref, ref: ASSET-007 }
+  ASSET-110: { name: Attendance KPI_REVIEW (cross-ref 008),  status: cross_ref, ref: ASSET-008 }
+  ASSET-111: { name: Numeric Flash (cross-ref 014),          status: cross_ref, ref: ASSET-014 }
+  ASSET-112: { name: NPC Expression Cue (cross-ref 010),     status: cross_ref, ref: ASSET-010 }
+
+  # ============================================================
+  # Configuration / Shader / Code-only — not visual sprites
+  # ============================================================
+  ASSET-014: { name: HUD Numeric Flash Caption Theme,        status: not_visual, notes: "Theme .tres + 8px pixel font; not a PNG." }
+  ASSET-018: { name: HUD Z-Layer Configuration,              status: not_visual }
+  ASSET-022: { name: HUD Boundary Marker (debug),            status: not_visual }
+  ASSET-023: { name: CanvasModulate 8 sub-mode preset,       status: not_visual }
+  ASSET-024: { name: Palette Swap Shader,                    status: not_visual }
+  # ASSET-025 declared below in Pre-existing section (deferred)
+  ASSET-026: { name: Dither Overlay Shader,                  status: not_visual }
+  ASSET-035: { name: CanvasModulate Tween Easing Config,     status: not_visual }
+  ASSET-036: { name: Tonemapper Configuration,               status: not_visual }
+  ASSET-051: { name: Card Hand Layout (scene config),        status: not_visual }
+  ASSET-052: { name: Long Event Background (programmatic),   status: not_visual }
+  ASSET-055: { name: Long Event Background Wash (config),    status: not_visual }
+  ASSET-060: { name: Subject-Inversion Lint Strings,         status: not_visual }
+  ASSET-061: { name: Card Hand Disabled BG (config),         status: not_visual }
+  ASSET-064: { name: Hand Card Container Theme,              status: not_visual }
+  ASSET-074: { name: NPC Lifecycle Visual Marker (config),   status: not_visual }
+  ASSET-087: { name: KPI Review Transition Fade (programmatic), status: not_visual }
+
+  # ============================================================
+  # Deferred (VS / Alpha tier / OQ blocked)
+  # ============================================================
+  ASSET-059: { name: NPC LEFT Lifecycle CG Variant,          status: deferred, notes: "OQ-CPU-05 pending decision." }
+  ASSET-068: { name: NPC RETURNED Visual Marker,             status: deferred, notes: "VS scope." }
+  ASSET-089: { name: Run Summary Detail Panel,               status: deferred, notes: "VS expansion." }
+  # ASSET-090, ASSET-091 declared below in Pre-existing section (cross_ref / deferred)
+  # ASSET-103 declared below in Pre-existing section (cross_ref)
+  ASSET-108: { name: Sticky Note Notification Variant,       status: cross_ref, ref: ASSET-001, notes: "Augmentation of HUD sticky notes; reuse." }
+
+  # ============================================================
+  # Backgrounds — bare scene plates for sprite overlay
+  # (NOT in original asset-manifest spec — added 2026-05-04 strategy revision)
+  # No ASSET-NNN id; tracked here for traceability only.
+  # ============================================================
+  # The 8 bare background plates live at assets/sprites/backgrounds/
+  # office_floor_top.png, workstation_closeup.png, tea_room.png,
+  # meeting_room.png, boss_office.png, hallway.png, main_menu.png, kpi_review.png
+  # See assets/sprites/backgrounds/README.md for usage.
+
+  # ============================================================
+  # Audio (Sheet ID: A — audio out of this image-gen plan)
+  # ============================================================
+  ASSET-125: { name: Audio Bus Configuration,               status: not_visual, notes: "Audio asset (deferred per user)." }
+  # ASSET-126..172 are all audio / event-script SFX / scene-day-flow audio,
+  # uniformly not_visual. Listing all 47 entries individually is noise.
+  # asset_map.py infers audio status from the asset-manifest.md range 125..172.

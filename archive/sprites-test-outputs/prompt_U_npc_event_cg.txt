@@ -1,0 +1,52 @@
+A pixel art NPC event CG portrait sheet for a Chinese office life game — 8 NPCs × 2 emotional states = 16 medium-shot portrait CGs in a 4x4 grid. Style: SFC/16-bit pixel art with slightly more detail than the small-icon NPC atlases (these are larger event-CG portraits), still SFC/16-bit aesthetic. Mood: dark humor / 喜丧美学. Consistent with character_sheet_player_v01.png style — these are the "cinematic" event portraits used during long dialog events, larger than the diegetic HUD faces. Each portrait shows shoulders + head with more facial expression detail.
+
+LAYOUT — 4x4 grid on cream/beige background (#E8E0CC). Each cell shows ONE NPC at ONE emotional state, framed in a 1px portrait border (mimicking corporate ID photo aesthetic). Each cell labeled with Chinese NPC name + emotion + English in pixel font below.
+
+THE 16 PORTRAITS (top-left to bottom-right):
+
+ROW 1 — 卷王 + 摆烂族 (each at 2 emotions):
+1. 卷王 平静 / Tryhard Calm — head-and-shoulders portrait, slight forward lean, perfect tie, eye bags 3px, mouth flat, small forced smile, focused-mid-task energy
+2. 卷王 激动 / Tryhard Agitated — same portrait but jaw clenched, sweat bead 1px, tie noticeably loosened, eyes slightly wider, "I missed a deadline" energy
+3. 摆烂族 平静 / Slacker Calm — head-and-shoulders, dropped shoulder, half-lidded eyes, faint smug smile, phone reflection on face, "leave me alone" energy
+4. 摆烂族 慌张 / Slacker Panicked — same portrait but bolt upright (still slight slouch), eyes wide open, mouth open in "oh no", phone hidden behind back, "Boss noticed" energy
+
+ROW 2 — 谄媚族 + 新人:
+5. 谄媚族 平静 / Toady Calm — head-and-shoulders, oval face, chin pushed forward 2px, hands clasped at chest visible, mild agreeing smile
+6. 谄媚族 卑顺 / Toady Deferential — exaggerated nod-bow, mouth wide in "yes-yes-yes", hands ultra-clasped, brown-nose energy peaked
+7. 新人 平静 / Rookie Calm — head-and-shoulders, narrow build, lanyard askew, neutral confused expression, mouth slightly open
+8. 新人 紧张 / Rookie Nervous — same but eyes wide with worry, mouth flat in suppressed panic, fingers visible gripping notepad tightly, lanyard trembling
+
+ROW 3 — 老油条同行 + 阿姨:
+9. 老油条 平静 / Veteran Calm — head-and-shoulders, similar to player but rounder thermos visible at chest, faint knowing smile, slight squint, "I've seen this before" energy
+10. 老油条 会意 / Veteran Knowing — same but eyebrow raised, half-smile widened, slight nod direction, raises thermos in subtle salute
+11. 阿姨 平静 / Auntie Calm — head-and-shoulders, short-wide framing, blue-gray apron, hair in tight bun, mouth flat, eyes neutral, surveying mode
+12. 阿姨 不悦 / Auntie Disapproving — same but with single raised eyebrow, slight scowl, mop handle just visible at shoulder, "you're making my floor messy" energy
+
+ROW 4 — Boss + HR:
+13. Boss 平静 / Boss Calm — head-and-shoulders, top +8px taller framing, hands behind back implied, perfect wide tie, gold tie clip catches light, mouth straight horizontal, assessing stare
+14. Boss 命令 / Boss Commanding — same but mouth open mid-direction, finger visible pointing toward viewer, eye line angled down 5° harder, gold tie clip extra-prominent (max 3% pixel coverage)
+15. HR 平静 / HR Calm — head-and-shoulders, level shoulders, tan folder visible under arm, EMPTY-FRAME glasses (no lenses!), green plant leaf at frame edge, professional neutral smile
+16. HR 公事公办 / HR Officious — same but folder OPENED in front of her, expression of cheerful efficiency reading from termination paper, plant leaf wilted in this frame
+
+PALETTE: 打工人黄 #C8A85A (skin), 灰蓝 #5A7080 (clothing, dominant), 棕 #7A5838 (hair, folders, accents), 白 #E8E0CC (background, paper, shirt highlight), 屏幕蓝 #2C4A6E (Slacker phone reflection), 老板金 #E0B050 (max 3% — Boss tie clip + HR badge), 警告红 #C83428 (Tryhard tie color), 阿姨蓝灰 #6890a0 (Auntie apron).
+
+VISUAL JOKES (1-3 px subtle):
+- Tryhard's "Calm" has microsweat already (1px) — calm is a relative concept for him
+- Slacker's "Calm" phone reflection is brighter than his "Panicked" (when panicked he hides it)
+- Toady's "Deferential" hands clasp tighter than knuckles allow (1px white pressure points)
+- Rookie's "Nervous" notepad has ink smudge (gripped too long)
+- Veteran's two emotions look 80% the same — his knowing-ness is constant
+- Auntie's "Disapproving" eyebrow is the only dramatic facial change in either of her frames
+- Boss's "Commanding" finger points slightly up — power gesture
+- HR's plant ALIVE in Calm, WILTED in Officious — same plant, different times of day
+
+CRITICAL CONSTRAINTS:
+- These are larger portrait CGs than the L/M sheet diegetic faces — more facial detail allowed
+- All 8 NPCs maintain silhouette identity from prior reference sheets
+- 2 emotions per NPC must be readable as state shift (not just micro-expression)
+- Emotional states do NOT include heroic/triumphant variants — these are workplace tensions
+- Each portrait framed in 1px corporate-ID-photo border, label below
+
+TOP TITLE BANNER: "事件 CG · NPC 立绘 / Event CG · NPC Portrait" pixel font, centered, dark cubicle blue text on cream.
+
+Output: PNG, 1024x1024, single composite 4x4 portrait sheet, ready to be cropped into individual NPC event-CG sprites for long dialog events.

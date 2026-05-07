@@ -1,0 +1,57 @@
+A pixel art UI mockup for a Chinese office life game: "the protagonist's smartphone screen at 2:14 AM in his bedroom — a WeChat notification from 王总监 (boss) saying tomorrow's 9 AM meeting is now 8 AM." This locks the phone overlay UI for the engine.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. Mood: dark humor / 喜丧美学.
+
+LAYOUT: Single full-canvas image. The view is the protagonist's smartphone screen taking up the central focus of 1024x1024 canvas. The phone is in PORTRAIT mode (so the screen is in roughly 9:16 aspect ratio, centered, with small surrounding bedroom periphery visible as faint context). Around the phone: faint outline of the protagonist's hand holding the phone in a dark bedroom (warm yellow lamp light from the right edge, dark blanket below).
+
+PHONE SCREEN CONTENTS (PRECISE pixel art rendering of WeChat-style chat UI):
+
+TOP STATUS BAR (black background, white pixel text):
+- LEFT: time "02:14"
+- RIGHT: signal bars + WiFi icon + battery icon (pixel-perfect rendering of typical Chinese phone status bar)
+
+WeChat conversation HEADER (light gray, just below status bar):
+- LEFT: back arrow icon
+- CENTER: "王总监" (boss's name, large bold pixel font)
+- RIGHT: 3-dot menu icon
+
+CONVERSATION AREA (dominant of screen, light beige-ish #E8E0CC background):
+- Single message bubble from 王总监 (left-aligned, white speech bubble with pointer, dark navy text):
+  「明早 9 点的会改成 8 点了，记得参加哈。」
+- Timestamp above message: "02:14"
+- A small avatar to the left of the message bubble: generic boss silhouette circle with the character "王" inside
+
+REPLY AREA AT BOTTOM — CRITICAL FOR CHOICE RENDERING:
+A horizontal text input area (gray, "输入消息..." placeholder in light gray Chinese), and BELOW or BESIDE it, 3 quick-reply option buttons stacked vertically OR in a row, each ≤ 4 Chinese characters, in pixel-art button style with rounded corners:
+- Button 1 (top, light blue with prominent border): 「已收到」(3 chars)
+- Button 2 (middle, gray): 「假装睡着」(4 chars)
+- Button 3 (bottom, dark): 「定闹钟提前」(5 chars)
+Each button has clear "tap me" affordance — slight raised border + golden 1px outline on the recommended one.
+
+INTERNAL THOUGHT WATERMARK (small italic, semi-transparent, overlaid on the conversation area as a faint background watermark, NOT part of the actual phone UI):
+"凌晨 2 点。表演 alive。"
+
+CONTEXT AROUND THE PHONE (faint, not prominent):
+The phone is held in 笑天's hand (visible thumb partially in lower-right corner). Behind the phone, the dark bedroom is visible: a pillow corner, the corner of a dark blanket, a bedside lamp emitting warm yellow light from the right edge. A glass of half-drunk water on the nightstand.
+
+PALETTE:
+- 格子间灰蓝 #5A7080 (bedroom dim, phone's outer body)
+- 白炽灯白 #E8E0CC (phone screen background)
+- 打工人黄 #C8A85A (warm bedside lamp glow on right edge of canvas)
+- 档案室棕 #7A5838 (blanket, nightstand wood)
+- 屏幕蓝 #2C4A6E (text in WeChat messages, header bar)
+- 老板金 #E0B050 (gold accent — max 2%, only on the recommended reply button outline)
+- A tiny use of WeChat green #00C853 (max 1% coverage, on small WeChat icon detail)
+
+VISUAL JOKES:
+- The lock-screen wallpaper visible in faint reflection on the screen edge: a tiny silhouette of Mt. Fuji (笑天 8 年前去过日本)
+- The hand holding the phone is slightly trembling (subtle 1px offset in the hand outline)
+- The "对方正在输入..." indicator briefly visible just above 王总监's bubble — implying he might send more
+- A single mosquito speck near the bedside lamp (1px)
+- The bedside table has a tiny pill bottle silhouette (subtle, "焦虑" implication)
+
+TITLE BANNER (very thin, lower 1/16 of canvas):
+中文: 「凌晨 2:14。表演 alive。」
+English: "2:14 AM. Performing alive."
+
+Output: PNG, 1024x1024, UI mockup of phone screen with bedroom periphery, 16-bit pixel art aesthetic, demonstrating phone overlay sub-mode for the game engine.

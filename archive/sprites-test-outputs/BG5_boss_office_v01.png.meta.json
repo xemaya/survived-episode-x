@@ -1,0 +1,26 @@
+{
+  "model": "gpt-image-2",
+  "quality": "low",
+  "size": "1024x1024",
+  "prompt_file": "assets/sprites/test_outputs/prompt_BG5_boss_office.txt",
+  "prompt_chars": 2029,
+  "elapsed_sec": 82.5,
+  "ts": "2026-05-04 13:31:21",
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 738,
+    "prompt_tokens_details": {
+      "cached_tokens_details": {}
+    },
+    "completion_tokens_details": {},
+    "input_tokens": 542,
+    "output_tokens": 196,
+    "input_tokens_details": {
+      "text_tokens": 542,
+      "cached_tokens_details": {}
+    },
+    "claude_cache_creation_5_m_tokens": 0,
+    "claude_cache_creation_1_h_tokens": 0
+  }
+}

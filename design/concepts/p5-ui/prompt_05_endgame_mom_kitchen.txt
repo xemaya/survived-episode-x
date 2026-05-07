@@ -1,0 +1,73 @@
+A pixel art scene illustration for a Chinese office life game: "Spring Festival, the protagonist returns home to his mother's kitchen — endgame happy ending scene." This is the rare warm tonal moment of the entire series, contrasting with all the cold cubicle scenes.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. Mood: warm, slow, comforting — the only relaxed moment.
+
+LAYOUT: Single composite image. View from inside the mother's kitchen, looking across a small wooden round table (中国传统家庭小圆桌). Mother is standing on the LEFT side, leaning slightly forward, holding out a bowl of soup with both hands. The protagonist sits on the RIGHT side at the table, in 3/4 view (we see his profile + a bit of his back).
+
+MOTHER (foreground LEFT — first time NPC physical appearance in the game):
+A Chinese woman, 58 years old.
+- Salt-and-pepper hair, no dye
+- Wearing a dark navy/maroon knit sweater (the same one viewed in WeChat video calls throughout the game)
+- Reading glasses pushed up on her forehead
+- Hands a bit weathered from years of work
+- Holding a ceramic soup bowl with rising steam (1-2px steam wisp)
+- Warm but slightly anxious expression (mother who hasn't seen son in a year)
+- Slightly hunched body language
+
+PROTAGONIST (foreground RIGHT — at the table):
+Same character anchor as throughout game.
+- Plain GRAY POLO shirt (the same gray polo from work, visual continuity — he hasn't changed)
+- 32 years old Chinese male
+- 3/4 profile view (we see his right side + face partially)
+- Sitting at the table, hands resting on his lap (NOT on a phone, NOT on a mug)
+- A slight, genuine smile — first such smile of the entire series (subtle, 1-2px upturn)
+- His stainless steel thermos NOT visible (he's not at office, no need)
+
+ENVIRONMENT — mother's kitchen:
+- Small round wooden dining table (about 3/4 visible) with placed bowls and chopsticks
+- On the table: a bowl with chopsticks already placed for protagonist; tea cups; the soup bowl mother is bringing; a steamer with dumplings (春节饺子)
+- Behind mother: a kitchen counter with a small range hood (油烟机), a wall-mounted spice rack (调料挂架), a hanging menu with handwritten Chinese characters spelling "春节菜单"
+- Behind protagonist: a window showing it's evening / dusk outside, with paper-cut decorations 窗花 stuck on the window
+- Calendar on the wall: showing date in late January or early February, with red pen circling 大年初三
+- Walls: warm yellowish color, slightly faded from years
+- A small TV on a corner table (off, just an old CRT)
+
+LIGHTING (CRITICAL — different tonally from all office scenes):
+- Warm yellow incandescent overhead light (NOT cool fluorescent like office)
+- Soft warmth, no harsh shadows
+- Light from the kitchen counter window casts a long warm shadow
+- Color temperature significantly warmer than series default
+
+VISUAL CONTRAST WITH OFFICE SCENES (this is the design intent):
+- The only scene where 笑天 looks relaxed
+- Warm browns and yellows dominate
+- No diegetic UI props (no mug 5-frame, no monitor, no sticky notes — kitchen has no game-system overlays)
+- 60% palette is warm browns and yellows, less of the cubicle gray-blue
+
+PALETTE (warmer variant, but anchored to series palette):
+- 打工人黄 #C8A85A (warm walls, kitchen tones — now 30% of frame)
+- 档案室棕 #7A5838 (wood furniture dominant 40%)
+- 白炽灯白 #E8E0CC (light pools, kitchen counters, paper)
+- A NEW warm accent for this scene: 家温红 (warmth red) #B05050 (max 5% — used on mother's sweater accent + paper-cut window decorations)
+- 格子间灰蓝 #5A7080 used minimally (just shadow accents, ~10%)
+- 老板金 #E0B050 (max 1%, only on a Mahjong tile or red envelope subtle detail)
+
+VISUAL JOKES (subtle):
+- The window paper-cut decoration shows the character "福" (good fortune) in traditional style
+- A wall calendar's previous month (December) has tiny circled words "辞职" crossed out — easter egg, the protagonist had considered quitting but didn't
+- Mother's reading glasses are slightly smudged (1px detail)
+- On the table corner, the protagonist's phone is visible but FACE DOWN (he's not checking it — vs office where always face up)
+- A single old slipper poking out from under mother's chair
+
+DIALOG (in speech bubble emerging from mother — same speech bubble style as office scenes):
+A speech bubble (light beige fill #E8E0CC, dark brown outline #7A5838, 2px border) emerging from above mother's head. Inside, in pixel-rendered Chinese:
+「天天，吃了吗？」
+
+INTERNAL THOUGHT WATERMARK (small italic, faded, near protagonist's head):
+"妈，吃了。"
+
+TITLE BANNER (lower 1/16 of canvas, warm brown band):
+中文: 「妈，吃了。」
+English: "Mom, I ate."
+
+Output: PNG, 1024x1024, single composite scene illustration, 16-bit pixel art aesthetic with warm tonal palette, demonstrating the endgame happy ending scene type (which differs significantly from office scenes — important for engine scene-type taxonomy decision).

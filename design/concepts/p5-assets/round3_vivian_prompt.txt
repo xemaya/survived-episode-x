@@ -1,0 +1,58 @@
+A pixel art character portrait for a Chinese office life game: NPC `vivian` — Vivian (前台), 28 yo female, the front desk receptionist. Half-body portrait (head + torso), facing 3/4 toward viewer with the practiced "professional warm smile."
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: corporate-front-desk warmth that is practiced down to micro-pixels — the smile that fooled nobody after week 3.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO front desk, NO fruit bowl (different sprite), NO scenery, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas.
+
+THE CHARACTER — Vivian (28):
+- Chinese woman, 28 years old, average build, average height.
+- Hair: shoulder-length straight, dark brown #5a5552, neatly styled with 1-2px gloss highlight at the crown (she does her hair every morning).
+- Light makeup applied: subtle eye liner 1px, RED LIPSTICK (#B05050 warmth red, max 3 pixels for the lip only — strict). Per npcs.md "永远画淡妆 + 红色口红".
+- FACE: oval, even features, small "professional courtesy" smile — both corners up 1-2px, but eyes do NOT crinkle (it's a TRAINED smile, not a genuine one).
+- Eyebrows: slightly raised in the "ready to greet" position.
+
+OUTFIT:
+- A DARK GRAY-BLUE BLAZER (#5A7080 base, 2-3px lighter at lapels) — slightly tailored, this is "Chanel-style" knockoff per npcs.md "永远穿香奈儿风外套（其实是淘宝货）".
+- Underneath: a white-cream blouse (#E8E0CC) with a small bow at the collar (1-2px detail).
+- A pearl-style necklace (3-4 px small white dots) — fake pearls, off-white #E8E0CC.
+- Employee lanyard hidden under blazer — only the strap visible at neck.
+- A thin silver watch on left wrist (visible if half-body framing extends).
+
+KEY PROP / SILHOUETTE ANCHOR:
+- A small business card / desk phone receiver in her left hand (raised slightly toward her ear) — she's mid-handle of "你好，公司前台". The phone receiver is 8-10px thin black handset with a 1-2px coiled cable.
+- Or alternatively: hands clasped together at chest height (both options work — the brief just needs PROFESSIONAL POSE).
+
+BODY LANGUAGE:
+- Standing or seated half-body, perfectly aligned (front-desk training).
+- Slight tilt forward of the head (welcoming).
+- Shoulders relaxed but level.
+- Body weight even — she has practiced this pose 1000s of times.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 18%)
+- 格子间灰蓝 #5A7080 (blazer — 30%)
+- 档案室棕 #7A5838 (NOT used — no wood here)
+- 白炽灯白 #E8E0CC (blouse + pearl necklace + light pools — 20%)
+- 屏幕蓝 #2C4A6E (NOT used — 0%)
+- 老板金 #E0B050 (NOT used — 0%. Vivian is service tier, not power.)
+- 家温红 #B05050 (LIPSTICK ONLY — strict <2% pixel)
+- Black #1a1a1a (phone receiver, hair shadow — 12%)
+- Hair dark #5a5552 (10%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- Her smile lines look 1-2px MORE pronounced near the corners — practiced to muscle memory level.
+- Her pearl necklace has 1px gradient — fake pearl tell.
+- A tiny 1-2px ink stain on her index finger (she still uses pen for visitor logs).
+- Her lipstick is slightly faded at the inner corner of her mouth — she's been on shift since 9am.
+
+DESIGN GUARDRAILS:
+- Her smile must NOT feel genuine. It's a trained service smile. Eyes flat.
+- DO NOT make her look young/anime-cute. She's 28, real woman.
+- DO NOT add front desk furniture, fruit bowl (different sprite), name plate, plants — PURE WHITE BG ONLY.
+- DO NOT add background of any kind.
+- Lipstick is the only warmth-red — strict <2% pixel coverage.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

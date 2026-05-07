@@ -1,0 +1,60 @@
+A pixel art NPC position atlas for a Chinese office life game — 5 NPC archetypes × 4 station positions = 20 full-body sprite cells in a 5x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. Consistent with A_npc_archetypes_v01.png and N1_npc_positions_set1_v01.png — same characters at same scale.
+
+LAYOUT — 5 rows × 4 cols grid on cream/beige background (#E8E0CC). Each row is one NPC across 4 station positions (left to right: AT_DESK_SIT → AT_DESK_STAND → WALKING → AT_OTHER_LOCATION). Each cell shows the FULL BODY of the NPC. Each cell labeled below in pixel font.
+
+THE 5 NPCs (one per row, top to bottom):
+
+ROW 1 — 老油条同行 / VETERAN COWORKER:
+Recurring: similar to player but rounder thermos (cylinder 2px wider), orange folder, slippers under desk
+1. 老油条 在工位 / Veteran At Desk Sit — relaxed sitting, leaning back slightly, thermos prominently on desk, slippers visible
+2. 老油条 站工位 / Veteran At Desk Stand — standing leaning on cubicle edge, thermos in hand, looking out window (visible in distance)
+3. 老油条 走动 / Veteran Walking — unhurried side-view stroll, thermos in left hand, free hand in pocket
+4. 老油条 在茶水间 / Veteran At Tea Room — refilling thermos at hot water dispenser, knowing smile at viewer
+
+ROW 2 — 清洁阿姨 / CLEANING AUNTIE:
+Recurring: short-wide build (+4 width, -6 height), mop as third silhouette element, blue-gray apron, hair bun
+5. 阿姨 拖地 / Auntie Mopping (At Desk = mopping near a workstation) — bent at slight angle, mopping floor near a workstation
+6. 阿姨 站立 / Auntie Standing — leaning on mop like a staff, surveying mess, mop bucket beside her
+7. 阿姨 走动 / Auntie Walking — pushing mop bucket on wheels, slow purposeful gait, side view
+8. 阿姨 在走廊 / Auntie At Hallway — emptying trash bin into larger cart, single fluorescent light overhead, hallway perspective
+
+ROW 3 — Boss / BOSS:
+Recurring: top +8px taller, hands clasped behind back, widest tie, gold tie clip 1px
+9. Boss 在办公室坐 / Boss At Desk Sit — seated at large executive desk, hands flat on desk surface, gold tie clip catches light, fake plant behind
+10. Boss 站办公室 / Boss At Desk Stand — standing with hands behind back, looking out office window (city skyline pixel hint)
+11. Boss 巡视 / Boss Walking — power walk through cubicle area, side view, others' heads down as he passes
+12. Boss 在会议室 / Boss At Meeting Room — standing at head of meeting table, pointing at whiteboard with extended hand
+
+ROW 4 — HR / HR:
+Recurring: level shoulders, tan folder under right arm, EMPTY-FRAME glasses (no lenses!), green plant on her desk
+13. HR 在工位 / HR At Desk Sit — sitting at neat desk, "人才/Talent" mug visible, plant on desk corner, computer screen showing form
+14. HR 站工位 / HR At Desk Stand — standing organizing folder contents, calm professional posture
+15. HR 走动 / HR Walking — measured walking pace, side view, folder under arm, business smile
+16. HR 在会议室 / HR At Meeting Room — standing at head of small private meeting table, folder open in front, two empty chairs facing her
+
+ROW 5 — 隔壁部门代表 / OTHER DEPT REP:
+Recurring: BLUE uniform (#3a5a85), prominent badge, walking forward lean
+17. 隔壁部门 在工位 / OtherDept At Desk Sit — sitting in OUR cubicle (visiting), uncomfortable, folder on lap, ready to leave
+18. 隔壁部门 站工位 / OtherDept At Desk Stand — standing presenting folder to invisible recipient, polite smile
+19. 隔壁部门 走动 / OtherDept Walking — purposeful walking with proposal folder in both hands, side view
+20. 隔壁部门 在走廊 / OtherDept At Hallway — checking floor map sign, looking lost but maintaining polite exterior
+
+PALETTE: 打工人黄 #C8A85A, 灰蓝 #5A7080 (main), 棕 #7A5838 (wood, hair, folders), 白 #E8E0CC (paper, shirt, bg), 屏幕蓝 #2C4A6E (monitors, windows), 老板金 #E0B050 (max 3% — Boss tie clip, HR badge accent), 警告红 #C83428, 部门蓝 #3a5a85 (Other Dept ONLY), 阿姨蓝灰 #6890a0 (auntie apron tint).
+
+VISUAL JOKES (1-3 px subtle):
+- Boss at desk: paperweight is shaped like a tiny gold cube
+- HR at meeting: the two empty chairs facing her have name placards
+- Auntie at hallway: she has earphones in (the only NPC truly relaxed)
+- Other Dept at hallway: the floor map he's looking at is upside-down
+- Veteran at tea room: there's a second thermos on the dispenser already, waiting
+
+CRITICAL CONSTRAINTS:
+- All 5 NPCs maintain silhouette identity across stations
+- Walking cells show side-view profile
+- Each station reflects the NPC's character (Boss surveys / HR keeps order / Auntie observes from outside / Veteran knows the system / Other Dept never quite belongs)
+- Other Dept Rep ONLY uses #3a5a85 — color-segregation is the design joke
+- Each cell visually framed but borderless
+
+TOP TITLE BANNER: "NPC 站位 · 第二组 / NPC Position Atlas · Set 2" pixel font, centered, dark cubicle blue text.
+
+Output: PNG, 1024x1024, single composite 5x4 position sheet, ready to be cropped into individual NPC full-body sprites.

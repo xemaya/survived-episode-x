@@ -1,0 +1,12 @@
+{
+  "shot_id": "S1",
+  "model": "veo3-fast",
+  "prompt": "Top-down view of a Chinese office floorplan. Slow cinematic camera dolly-down through 8 seconds: from a high bird's-eye view of the entire floor, descending toward a single central cubicle where a lone office worker sits. As the camera approaches, a warm golden bloom intensifies from above — like a heavenly spotlight on the chosen worker. Other cubicles dim into shadow. Promo-trailer mood: triumphant, glowing. SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette in 格子间灰蓝 #5A7080 / 白炽灯白 #E8E0CC / 档案室棕 #7A5838 / 老板金 #E0B050 / 屏幕蓝 #2C4A6E / 打工人黄 #C8A85A. Indie game cutscene, dark-humor 喜丧美学 (funeral-as-festival) tone.",
+  "status": "completed",
+  "task_id": "task_tkv7DBflG9hTlw7VAZRHXW5ARRqWxDYj",
+  "video_url": "https://comet-api-bucket.s3.us-east-1.amazonaws.com/videos/task_tkv7DBflG9hTlw7VAZRHXW5ARRqWxDYj.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAX2ZLYGRJV3PGWZUZ%2F20260504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260504T053449Z&X-Amz-Expires=259200&X-Amz-SignedHeaders=host&response-content-type=video%2Fmp4&x-id=GetObject&X-Amz-Signature=007393c594ad3822ce129b61282025767fae83acdeb11a7d916028db631be451",
+  "download_path": "/Users/huanghaibin/Workspace/games/survived-episode-x/output/clips/S1.mp4",
+  "last_error": null,
+  "created_at": 1777872742.894389,
+  "updated_at": 1777873041.7630022
+}

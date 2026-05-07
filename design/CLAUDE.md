@@ -1,38 +1,51 @@
 # Design Directory
 
-When authoring or editing files in this directory, follow these standards.
+> Updated 2026-05-06 — design pivot (2026-05-05) cleanup. 老的 GDD / asset specs 已移到 `archive/design-pre-pivot/`. 本目录 only contains **active source of truth**.
 
-## GDD Files (`design/gdd/`)
+## 当前 active 目录
 
-Every GDD must include all **8 required sections** in this order:
-1. Overview — one-paragraph summary
-2. Player Fantasy — intended feeling and experience
-3. Detailed Rules — unambiguous mechanics
-4. Formulas — all math defined with variables
-5. Edge Cases — unusual situations handled
-6. Dependencies — other systems listed
-7. Tuning Knobs — configurable values identified
-8. Acceptance Criteria — testable success conditions
+```
+design/
+├── CLAUDE.md                           ← 本文件
+├── vertical-slice/                     ← 设计 + worker briefs + ink content + AVG architecture
+├── concepts/                           ← W5 reference images + prompts
+├── registry/
+│   └── entities.yaml                   ← 数值常量 (KPI 阈值 / 病倒 cap / hero count / etc)
+└── art/
+    ├── art-bible.md                    ← 视觉层 authoritative (§7.1/§7.4/§7.5/§8 已 deprecated, see amendments)
+    └── art-bible-avg-amendments.md     ← AVG 时代 deprecation 标记
+```
 
-**File naming:** `[system-slug].md` (e.g. `movement-system.md`, `combat-system.md`)
+## Source of truth 优先级
 
-**Systems index:** `design/gdd/systems-index.md` — update when adding a new GDD.
+1. **`vertical-slice/avg-architecture.md`** — AVG 时代 dialog UI + daily pressure spec (post-pivot canonical)
+2. **`vertical-slice/protagonist.md` / `tone-bible.md` / `npcs.md` / `series-structure.md`** — 设计骨架
+3. **`vertical-slice/season-1-arc.md` / `season-2-arc.md` / `season-3-arc.md`** — 内容 outline
+4. **`vertical-slice/episode-N.ink`** + **`daily-choices.ink`** — 内容实装 (W3 写)
+5. **`art/art-bible.md`** — 视觉层 (色板 / 字体 / 剪影 / 道具 / 喜丧美学); UI/UX 部分见 amendments
+6. **`registry/entities.yaml`** — 数值常量
+7. **`concepts/`** — visual reference (W5 prompts + p5_ui sample images)
 
-**Design order:** Foundation → Core → Feature → Presentation → Polish
+## Worker briefs + iteration logs
 
-**Validation:** Run `/design-review [path]` after authoring any GDD.
-Run `/review-all-gdds` after completing a set of related GDDs.
+`vertical-slice/` 含全部 worker briefs (`*-handoff.md` / `*-task-queue.md`) + iteration responses (`*-round-N-response.md` / `*-round-N-reply.md`) + bug-tracking (`p5-qa-bug-reports.md`)。详 `vertical-slice/gm-worker-roster.md`。
 
-## Quick Specs (`design/quick-specs/`)
+## Archived (不 active)
 
-Lightweight specs for tuning changes, minor mechanics, or balance adjustments.
-Use `/quick-design` to author.
+`archive/design-pre-pivot/` 包含 27 个 Godot+卡牌时代 GDDs + Godot 时代 asset specs。**默认不读取**，详 `archive/design-pre-pivot/README.md`。
 
-## UX Specs (`design/ux/`)
+## 写作风格
 
-- Per-screen specs: `design/ux/[screen-name].md`
-- HUD design: `design/ux/hud.md`
-- Interaction pattern library: `design/ux/interaction-patterns.md`
-- Accessibility requirements: `design/ux/accessibility-requirements.md`
+`vertical-slice/` 内 doc 简洁直接, 少 ceremony:
+- 不要重写 5 段 overview / 8 段 spec 那种 GDD format
+- 直接写 What + Why + How
+- 决策后直接 inline, 不要 ADR 文件
+- worker 可读 + 实操即可
 
-Use `/ux-design` to author. Validate with `/ux-review` before passing to `/team-ui`.
+详见 `CLAUDE.md` 根项目 file 的 "工作风格" 节。
+
+## 不要做的事
+
+- ✗ 不要在 `design/` 根创建新目录（`gdd/` / `assets/` / `quick-specs/` / `ux/` 等）—— 都进 `vertical-slice/`
+- ✗ 不要 reference `archive/design-pre-pivot/` 的内容作为 spec 依据（仅历史 trail 用）
+- ✗ 不要写新 GDD format 文档（8 段 overview / spec / formulas / etc）—— 写 inline 简洁 doc 在 `vertical-slice/`

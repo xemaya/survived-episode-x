@@ -1,0 +1,31 @@
+A pixel art icon for a Chinese office life game: a single smartphone in face-up position lying on a wooden cubicle desk, screen black/off (idle state). To be used as a workstation prop layer that the player can tap.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Visual identity goal: "first glance recognition, second glance indictment" — a familiar Chinese office aesthetic that quietly broadcasts dread. Mood: dark humor / 喜丧美学 (funeral-as-festival).
+
+LAYOUT: Single isolated prop sprite, centered in canvas, surrounded by transparent / very thin desk sliver context only on bottom 1/8 of canvas. The phone occupies the central 60% of the canvas; rest is empty / minimal desk surface so engine can composite onto workstation BG.
+
+CONTENT:
+- Phone is a generic black flat smartphone (NO real-world brand, NO logo, NO Apple bite). Roughly 6:13 aspect ratio body.
+- Top-down 3/4 angle view (slight tilt so we see the right edge thickness, ~2px).
+- Visible features: large black screen (turned OFF — pure dark, very faint reflection), thin 1px white plastic bezel around screen, single physical home button at bottom (subtle dark gray circle), 2px speaker grill slot at top, micro front-camera dot 1px to the right of speaker.
+- The phone case has a faint vinyl sticker visible in the bottom-right corner: a 4×3 px Mt. Fuji silhouette (continuity hint — protagonist's "8 年前去日本" memory). The sticker is muted, not glowing.
+- Phone shadow falling 2-3px to the lower-right onto the desk.
+- Background: only a tiny strip of wooden cubicle desk surface (使用 #7A5838 棕) at the bottom 1/8 of canvas — wood grain shown with 1-2px horizontal lines. Above the desk strip, neutral light off-white #E8E0CC.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin highlight — N/A here, no skin)
+- 格子间灰蓝 #5A7080 (NO usage in this asset — pure prop)
+- 档案室棕 #7A5838 (desk surface — dominant 25%)
+- 白炽灯白 #E8E0CC (background light pool / phone sticker accent)
+- 屏幕蓝 #2C4A6E (NOT used here — phone is OFF)
+- 老板金 #E0B050 (NOT used — strict 0% on this prop)
+- Phone body uses near-black #1a1a1a with 1-2 px highlights at #4a4a4a for plastic edge.
+
+VISUAL JOKES (1-3px subtle):
+- 1px reflection on top-left corner of screen suggesting fluorescent overhead light pool.
+- A 2x2 px dust speck on the screen (he hasn't cleaned it).
+- The Mt. Fuji sticker has a 1px crack — old, edges peeling.
+
+NO TITLE BANNER (this is a prop sprite, not a scene illustration).
+
+Output: PNG, 1024x1024, single isolated prop sprite on minimal desk-strip background, 16-bit pixel art aesthetic, ready to be downsampled to 256x256 or 64x128 for in-game prop layer use. Consistent with prior reference sheets, especially design/concepts/p5-ui/p5_ui_01_workstation_monday_morning.png.

@@ -1,0 +1,51 @@
+A pixel art prop and animation sheet for a Chinese office life game — 16 misc HUD/UI/animation elements arranged in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. Consistent with prior reference sheets like J_hud_workstation_props_v01.png, K_calendar_attendance_v01.png, T_card_dialogue_ui_v01.png.
+
+LAYOUT — 4x4 grid on cream/beige background (#E8E0CC). Each cell shows ONE element, centered, with subtle 1px drop shadow. Each cell labeled with Chinese + English in pixel font BELOW the prop.
+
+THE 16 ELEMENTS (top-left to bottom-right):
+
+ROW 1 — 桌面渍累积 (Desk Stain Cumulative levels 1-4):
+1. 桌面渍 一阶 / Desk Stain Lvl 1 — wood desk surface (#7A5838) with single faint coffee ring barely visible (1px brown), starting state
+2. 桌面渍 二阶 / Desk Stain Lvl 2 — same desk with one clear coffee ring + small splash dot, "yesterday's mug" state
+3. 桌面渍 三阶 / Desk Stain Lvl 3 — desk with 3 overlapping rings + small crumb specks, "this week" state
+4. 桌面渍 四阶 / Desk Stain Lvl 4 — desk with 5+ overlapping rings densely packed + dried splash patterns, faintly amber-tinted wood
+
+ROW 2 — 桌面渍 5 阶 + 卡牌打出动画 (Stain lvl 5 + Card Played Animation frames 1-3):
+5. 桌面渍 五阶 / Desk Stain Lvl 5 — desk almost entirely covered in coffee history, "this is my desk now" state, single new mug placed on top, multiple rings visible underneath
+6. 卡牌打出 一 / Card Played Frame 1 — player's hand reaching to grab card from hand area, side view, card glowing very faintly with 1px highlight
+7. 卡牌打出 二 / Card Played Frame 2 — card mid-air, lifted to chest height, slight motion blur (1px trail), face partly visible
+8. 卡牌打出 三 / Card Played Frame 3 — card slammed face-down on desk, small impact dust 2px around edges, hand still on top of card
+
+ROW 3 — 卡牌打出 4 + 便签生命周期 (Card Played frame 4 + Sticky Lifecycle 1-3):
+9. 卡牌打出 四 / Card Played Frame 4 — card sitting flat on desk, bureaucratic red stamp "已记录 / FILED" 1px dotted appears overlaid, hand removed, paper crumple at corner
+10. 便签生命周期 一 / Sticky Lifecycle 1 — cubicle wall mostly empty, only 2 yellow Post-its tacked up, "fresh start" state
+11. 便签生命周期 二 / Sticky Lifecycle 2 — cubicle wall with 6-8 stickies in slight disarray, "few days in" state
+12. 便签生命周期 三 / Sticky Lifecycle 3 — cubicle wall fully covered ~12-15 stickies, some overlapping, "month in progress" state
+
+ROW 4 — 便签 4 + 三个独立 props:
+13. 便签生命周期 四 / Sticky Lifecycle 4 — overflow state: ~20 stickies covering wall AND spilling onto monitor edge + keyboard area, total visual chaos
+14. 说话人立绘框 / Speaker Portrait Frame — empty rounded-rect (BUT 0-radius!) frame for NPC portrait compositing: 1px dark border, cream interior, small "[NPC]" placeholder label inside in muted text
+15. 档案屏背景 / Archive Screen BG — full-screen mockup miniature: archive view with vertical list of name+date entries, header "人事档案 / PERSONNEL ARCHIVE", scroll indicator on right, footer "200/200" cap notice
+16. LEFT 清空桌 / Cleared Desk — workstation after NPC has been laid off: desk surface bare except for monitor outline + dust outline of where keyboard used to be, empty chair pulled out, 1 forgotten paper scrap
+
+PALETTE: 打工人黄 #C8A85A (sticky notes), 灰蓝 #5A7080 (cubicle/UI), 棕 #7A5838 (desk wood, stains), 白 #E8E0CC (background, paper, wall), 屏幕蓝 #2C4A6E (monitor edges, archive header), 老板金 #E0B050 (max 3% — sticky note base, "filed" stamp accent), 警告红 #C83428 (filed stamp tint).
+
+VISUAL JOKES (1-3 px subtle):
+- Desk Stain Lvl 5: the "new mug" placed on top is slightly off-axis, suggesting today's mug joins the parade
+- Card Played Frame 4 stamp "已记录 / FILED" is the same dot-matrix red as the GAMEOVER ironic stamp — visual echo
+- Sticky Lifecycle 4: one sticky is on the chair (literally falling off the wall)
+- Speaker Portrait Frame placeholder text reads "[姓名]" not just "NPC" — even the placeholder is bureaucratic
+- Archive Screen 200/200 cap label is slightly bolder (the cap is the point)
+- LEFT Cleared Desk: forgotten paper scrap is a corner of a Post-it (the only thing they left behind was bureaucratic detritus)
+
+CRITICAL CONSTRAINTS:
+- Stain progression must be readable as time-decay sequence
+- Card played 4-frame animation should loop visually (frame 4 returns to "ready" feel)
+- Sticky lifecycle progression visually conveys "month accumulates"
+- LEFT cleared desk uses absence as visual: dust outlines mark what was there
+- All right-angle 0-radius shapes per UI motif
+- Each cell visually framed but borderless
+
+TOP TITLE BANNER: "杂项 · 动画 · 累积 / Misc · Animation · Cumulative" pixel font, centered, dark cubicle blue text on cream.
+
+Output: PNG, 1024x1024, single composite 4x4 sprite sheet, ready to be cropped into individual sprites.

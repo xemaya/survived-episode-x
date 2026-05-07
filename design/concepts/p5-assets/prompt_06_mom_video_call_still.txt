@@ -1,0 +1,55 @@
+A pixel art character portrait for a Chinese office life game: the protagonist's MOTHER on a Sunday 8:30 PM WeChat video call — this is the still image that appears INSIDE the phone screen when the player accepts the call. Tightly framed, mom + small slice of her hometown kitchen background. Designed to crop into a 240x320 phone-screen-inset rectangle.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Mood: warm but quietly anxious — the brief soft moment in a cold office series, but framed within the cold phone bezel.
+
+LAYOUT: Vertical 3:4 aspect ratio inset region centered in canvas (occupying ~480×640 within the 1024×1024). Outside that region: pure black #0a0a0a phone bezel (so it reads as "this is what's inside the phone"). Within the region: mom takes up 70% (head, shoulders, top of torso), kitchen BG fills the rest. Above her head, ~1/8 of inset, a thin overlay: WeChat video-call HUD (top status bar with "妈妈" name + 通话时长 "00:42" + small video-call icons).
+
+THE MOTHER (foreground, ~70% of frame):
+- A Chinese woman, 58 years old (per design spec; this is her FIRST visual appearance in the game).
+- Salt-and-pepper hair, NOT dyed, slightly wavy, pulled back simply (no styling).
+- Wearing a dark navy/maroon knit sweater (warmth red #B05050 mixed with cubicle gray-blue, suggesting a worn home cardigan). The same sweater she wears every video call.
+- Reading glasses pushed up onto her forehead (she pushed them up to look at the camera; signature visual marker).
+- Hands a bit weathered, not visible in this tight shot but if any sliver — knuckles are slightly darker from years of work.
+- Slightly hunched forward toward the camera (close to phone screen because old eyes).
+- Expression: warm but slightly anxious — small upturn at corner of mouth (1-2px), eyebrows neutral. Definitely not "filtered influencer" perfect.
+- Skin tone uses 打工人黄 #C8A85A but slightly warmer.
+- Slight overhead warm yellow light catches her hair at the top — 1-2px highlights.
+
+KITCHEN BACKGROUND (behind mom, ~30% of frame):
+- A bit of wall-mounted spice rack (调料挂架) in the upper-left corner — 4-5 small jars in a row.
+- A bit of range hood (油烟机) edge in the upper-right.
+- Wall paint: warm yellowish faded #C8A85A.
+- A handwritten paper menu pinned to the wall behind her left shoulder, with illegible 1px Chinese characters (we read "today's dishes" intent, not literal).
+- A calendar in the lower-right with a small day number visible.
+
+WeChat VIDEO-CALL HUD OVERLAY (top of inset, 1/8 height):
+- Semi-transparent dark band #1a1a1a at 70% opacity.
+- Left: contact name in #E8E0CC pixel Chinese: "妈妈"
+- Center: small green camera icon (#4a7050) + duration "00:42".
+- Right: 3 tiny circular call-control buttons (mute/flip/end) in #5A7080.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin, kitchen wall — 20%)
+- 格子间灰蓝 #5A7080 (HUD elements, sweater shadow — 10%)
+- 档案室棕 #7A5838 (calendar, paper menu — 8%)
+- 白炽灯白 #E8E0CC (light pools, hair highlights, HUD text — 15%)
+- 屏幕蓝 #2C4A6E (sweater base — 15%)
+- 老板金 #E0B050 (NOT used — mom has no power motif. 0%.)
+- 家温红 #B05050 (sweater accent, calendar marking — 8%)
+- Hair gray #aab0ad and dark hair #5a5552 (12%)
+
+DESIGN GUARDRAILS (per design brief — mom-specific):
+- DO NOT apply heroic / saturated / "filter" lighting to mom. She's warm but real. NOT fake.
+- DO NOT make her smile too brightly — small upturn 1-2px max.
+- She must read as 58, not 45. Visible reading glasses, salt-and-pepper hair, slight under-eye softness 1-2px.
+- DO NOT add father/family photos in the BG (per character note: 爸爸 8 年前去世了 — never referenced).
+- Her body language: leaning toward camera (old eyes); not posed.
+
+VISUAL JOKES (1-3px subtle):
+- Her reading glasses are slightly smudged (1px detail at one lens corner).
+- A tiny 2x2 px steaming bowl on the kitchen counter behind her (she just cooked).
+- The wall calendar visible has Sunday circled in red — this Sunday is today's call.
+
+TITLE BANNER: NONE — this is a phone-screen inset image, no caption.
+
+Output: PNG, 1024x1024 with the phone-screen-inset 3:4 region centered (~480×640) and the rest pure black bezel. 16-bit pixel art. Will be cropped + downsampled to 240×320 for in-game use as phone-screen mom video call still. Consistent with design/concepts/p5-ui/p5_ui_05_endgame_mom_kitchen.png mom anchor, but tighter framing.

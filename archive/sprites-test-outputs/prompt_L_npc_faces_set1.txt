@@ -1,0 +1,51 @@
+A pixel art NPC expression atlas for a Chinese office life game — 4 NPC archetypes × 4 emotional phases = 16 head-and-shoulders portraits in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. Consistent with prior reference sheets like A_npc_archetypes_v01.png — same characters, same proportions.
+
+LAYOUT — 4x4 grid on a clean cream/beige background (#E8E0CC). Each row is one NPC archetype across 4 phases (left to right: NEUTRAL → WARMUP → TENSION → FAREWELL). Each cell shows the NPC's head and shoulders centered, with subtle 1px drop shadow. Each cell labeled with Chinese phase name + NPC name in pixel font below.
+
+THE 4 NPCs (one per row, top to bottom):
+
+ROW 1 — 卷王 / TRYHARD:
+Recurring features: spine pushed +2px straighter than human-normal, perfectly knotted red tie, pronounced 3px eye bags beneath both eyes, single cold coffee on desk just visible at bottom of frame, navy blue shirt
+1. 卷王 中性 / Tryhard Neutral — staring straight ahead at unseen monitor, mouth flat, slight forward lean
+2. 卷王 预热 / Tryhard Warmup — eyes narrow, mouth pressed thin, one finger raised mid-typing motion
+3. 卷王 紧张 / Tryhard Tension — pupils dilated, jaw clenched, sweat bead 1px on temple, tie noticeably tighter
+4. 卷王 告别 / Tryhard Farewell — frozen mid-handshake gesture, mouth in tight forced smile but eyes empty, holding small cardboard box
+
+ROW 2 — 摆烂族 / SLACKER:
+Recurring features: one shoulder dropped 4px lower than the other, leaning back posture, phone reflection visible on face (faint blue tint), wrinkled gray shirt
+5. 摆烂族 中性 / Slacker Neutral — gazing at ceiling vacantly, mouth slightly open, one earphone visible
+6. 摆烂族 预热 / Slacker Warmup — fake-typing pose with hands hovering over keyboard, eyes still elsewhere
+7. 摆烂族 紧张 / Slacker Tension — sudden bolt-upright posture (still leaning slightly), mouth open mid-gasp, phone hidden behind back
+8. 摆烂族 告别 / Slacker Farewell — relaxed grin, hands in pockets, posture finally upright but for the wrong reason
+
+ROW 3 — 谄媚族 / TOADY:
+Recurring features: oval face shape, chin pushed forward 2px, hands clasped together at chest height, business card holder peeking from breast pocket
+9. 谄媚族 中性 / Toady Neutral — agreeing "ohhh" mouth shape, head tilted slightly toward speaker
+10. 谄媚族 预热 / Toady Warmup — exaggerated nod-bow combo, mouth wider open in "yes yes yes"
+11. 谄媚族 紧张 / Toady Tension — eyes wide, mouth flat in stunned silence, hands still clasped but knuckles white
+12. 谄媚族 告别 / Toady Farewell — bowing deeply at 45 degrees, hands offering business card, oily smile
+
+ROW 4 — 新人 / ROOKIE:
+Recurring features: narrow build, slightly long neck, employee lanyard tangled or askew, oversized shirt collar, hands often clasped between knees (visible at bottom)
+13. 新人 中性 / Rookie Neutral — bewildered expression, eyes slightly wide, mouth small and uncertain
+14. 新人 预热 / Rookie Warmup — earnest nod with notebook visible, pen poised, brow furrowed in concentration
+15. 新人 紧张 / Rookie Tension — frozen with pen mid-air, mouth slightly open, lanyard visibly trembling (1px offset)
+16. 新人 告别 / Rookie Farewell — sad small smile, lanyard removed and held in hand, eyes downcast
+
+PALETTE: 打工人黄 #C8A85A (skin), 灰蓝 #5A7080 (dominant cubicle/clothing), 棕 #7A5838 (hair, accents), 白 #E8E0CC (background, shirt highlight), 屏幕蓝 #2C4A6E (phone reflection on Slacker), 老板金 #E0B050 (max 3% only on Tryhard tie pin if any), 警告红 #C83428 (Tryhard tie color).
+
+VISUAL JOKES (1-3 px subtle):
+- Tryhard's tie gets visibly tighter across the 4 phases (knot moves up 1px each phase)
+- Slacker's phone reflection on face fades by phase 4 (he stopped pretending)
+- Toady's shoulder posture mirrors whoever he's facing (same way each phase)
+- Rookie's lanyard angle gets more crooked across phases (slowly losing it)
+
+CRITICAL CONSTRAINTS:
+- 4 NPCs must be silhouette-distinct at thumbnail (Tryhard upright / Slacker leaning / Toady oval/clasped / Rookie narrow/long-neck)
+- 4 phases must be readable as emotional progression even without color
+- NO heroic styling — these are office co-workers, not party members
+- Each cell visually framed but borderless (just portrait on cream, label below)
+
+TOP TITLE BANNER: "NPC 表情 · 第一组 / NPC Expression Atlas · Set 1" pixel font, centered, dark cubicle blue text.
+
+Output: PNG, 1024x1024, single composite 4x4 expression sheet, ready to be cropped into individual NPC portrait sprites for the diegetic HUD layer.

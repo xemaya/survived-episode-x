@@ -1,0 +1,76 @@
+A pixel art UI mockup for a Chinese office life game: "the protagonist's monitor screen at the end of the month — HR system email opened, showing the KPI evaluation result." This is the only non-diegetic modal in the game, framed as 笑天 reading his own email on his work computer.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. Mood: dark humor / 喜丧美学 — corporate dread peak.
+
+LAYOUT: Single full-canvas image. The view is the protagonist's computer monitor screen taking up roughly 85% of the 1024x1024 canvas (in 4:3-ish monitor aspect ratio, centered, framed as "fullscreen view of his email"). Around the monitor: faint workstation periphery visible (cubicle wall edges, mug at the very bottom edge, a sticky note corner). The monitor IS the focus.
+
+MONITOR SCREEN CONTENTS — KPI Review Email UI (Chinese corporate email client rendered in pixel art):
+
+TOP — Email client window header (Outlook/Foxmail-style, gray title bar):
+- "收件箱 — 陈笑天@company.cn"
+- Window controls (minimize, maximize, close) on right (3 small pixel buttons)
+
+EMAIL HEADER fields (just below title bar, light gray panel):
+- 主题: "本月 KPI 评估通报 [HR-OA-2026-05-31]"
+- 发件人: "HR 系统通知 <noreply@hr-system.company.cn>"
+- 收件人: "陈笑天 <chen.xt@company.cn>"
+- 日期: "2026-05-31 周日 09:32"
+- A generic system avatar (question mark silhouette in a circle) next to the sender
+
+EMAIL BODY (large center area, white #E8E0CC background, pixel-rendered Chinese text large enough to read):
+
+═══════════════════════════════════════
+            月末 KPI 评估通报
+═══════════════════════════════════════
+
+陈笑天先生：
+
+· 本月 KPI 累积分数：105 分
+· 系统评估您的付出度为：
+  「标准达标」
+· 下月阈值调整：100 → 105
+
+· 系统注释：
+  「每个员工都将根据自己的最佳表现，
+   承担更高的责任。」
+
+  ——这是您的 reward。
+
+═══════════════════════════════════════
+
+Below the body — 3 PIXEL ART BUTTON ROW:
+- Button 1 (large, prominent, golden-outlined): 「已读」
+- Button 2 (medium, gray): 「打印归档」
+- Button 3 (medium, gray): 「转发上级」
+
+Below the buttons, a tiny disclaimer text in italic gray:
+「本邮件由系统自动发送，请勿回复」
+
+PERIPHERAL CONTEXT (faint, around the monitor edges):
+- Bottom edge: 笑天's mug visible, EMPTY state (lid open, no steam — state is low after a long month)
+- Top-right edge: A wall clock showing 9:32 AM, Sunday calendar marker
+- Left edge: A NEW second sticky note has appeared on the cubicle wall: "下个月又是周一" (handwritten in pen, freshly added beside the original "活到周五")
+
+INTERNAL THOUGHT WATERMARK (very faded italic, overlaid as a transparent ghost text on the email's blank corner):
+"我懂。"
+
+PALETTE:
+- 白炽灯白 #E8E0CC (email background dominant)
+- 屏幕蓝 #2C4A6E (email text, monitor glow)
+- 格子间灰蓝 #5A7080 (header bars, monitor bezel, cubicle periphery)
+- 档案室棕 #7A5838 (desk surface visible at bottom edge)
+- 打工人黄 #C8A85A (sticky notes peripheral)
+- 老板金 #E0B050 (gold accent — max 3%, on the "已读" button outline + the system disclaimer underline)
+
+VISUAL JOKES:
+- The system avatar is a generic question mark silhouette — no human face
+- The "From" address: "noreply@hr-system" emphasized — impersonal
+- A small "Microsoft Word - 草稿.docx" tab visible at the bottom of the email client window (笑天 had a draft email open earlier, never sent)
+- The cursor (I-beam pixel art) hovering above the "已读" button — about to click
+- The wall clock visible on top-right shows precisely 9:32 — Sunday morning, KPI Review reveal hour
+
+TITLE BANNER (very thin, lower 1/16 of canvas):
+中文: 「本月评估通报。已读。」
+English: "Monthly evaluation. Acknowledged."
+
+Output: PNG, 1024x1024, monitor screen UI mockup with workstation periphery, 16-bit pixel art aesthetic, demonstrating the one explicit modal scene type (KPI Review email) for the game engine.

@@ -1,0 +1,95 @@
+A pixel art character sheet for a Chinese office life game: 陈笑天 (Chen Xiaotian, the protagonist) in his post-design-pivot look — gray polo, NO tie, stainless steel thermos cup. Replaces the older navy-suit + red-tie turnaround sheet (which is now incorrect per design pivot 2026-05-05). Single composite character sheet with 6 facial expressions on top half + 4 body poses on bottom half.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. NOT smooth modern illustration. Mood: weary, neutral, "已经在这待了很久" — the conscious-conspirator who is mostly tired.
+
+LAYOUT: Single 1024×1024 composite, divided into 2 horizontal bands by a thin 2px #5A7080 line at mid-height.
+- TOP BAND (upper 40%): 6 expression heads in a 3×2 grid (3 cols × 2 rows). Each head ~340×200 area. Each cell labeled at bottom in 1px Chinese + English.
+- BOTTOM BAND (lower 55%): 4 full body poses in a 4×1 horizontal row. Each pose ~256×500 area. Each labeled at bottom.
+- Top of canvas (5%): TITLE BANNER.
+
+THE CHARACTER ANCHOR — 陈笑天 (32, the protagonist's POST-PIVOT look):
+- Chinese male, 32 years old (NOT late 30s — corrected per protagonist.md spec).
+- Height: average, NOT tall. Slight stoop in shoulder line (-3 px from upright reference) — tired posture.
+- Hair: short black, plain office cut, NO product/shine. Slight bedhead 1-2px on top.
+- Build: average, slightly soft middle (he's 32 and sits all day).
+- Skin tone: 打工人黄 #C8A85A, slightly muted (fluorescent-lit pallor 1-2 px desaturation).
+- Face features: average symmetric, slight tiredness ring under eyes (1-2px), neutral mouth.
+- A small 1-2px stubble shadow at jaw (he didn't shave perfectly this morning).
+
+OUTFIT (CRITICAL — REPLACES old navy-suit anchor):
+- GRAY POLO SHIRT (灰色 polo) — color #5A7080 (cubicle gray-blue, slightly more gray). Plain, 3-button placket at top, short sleeves. NO logo.
+- NO TIE, NO BLAZER, NO SUIT JACKET. (This is the pivot — explicitly NO navy suit, NO red tie.)
+- Plain dark trousers (#1a1a1a near-black with slight 4a4a4a highlight).
+- Brown belt #7A5838 (1-2 px visible at waist).
+- Office-casual black shoes #1a1a1a (when feet shown).
+- Employee lanyard with badge around neck (generic gray, with a 1px Chinese name tag illegible at scale).
+
+KEY PROP (must be visible — silhouette anchor):
+- STAINLESS STEEL THERMOS CUP (不锈钢保温杯) permanently held in his LEFT hand. ~3px raised silhouette protrusion. Color: bright #E8E0CC + 1px #5A7080 shadow side, with a darker base ring. This is HIS signature contour element.
+- Thermos has a small 1-2px sticker (a 富士山 Mt. Fuji silhouette — continuity with phone sticker).
+- DO NOT include the older navy-suit thermos cup variant.
+
+TOP BAND — 6 EXPRESSIONS (3×2 grid, each is a head + upper-shoulders crop):
+
+E1 (top-left): NEUTRAL — the default office face. Mouth flat, eyes neutral, eyebrows level. The "I am here, processing" face. ~70% of game time.
+LABEL: "01 平静"
+
+E2 (top-mid): SLIGHTLY FROWNING — the "noticing something stupid is happening" face. Eyebrows ↓ 1px, mouth corner down 1px. NOT angry, mildly inconvenienced.
+LABEL: "02 微皱眉"
+
+E3 (top-right): TIRED — eyes half-lidded, dark circles 2px stronger. The "after lunch, before nap" face. Mouth flat.
+LABEL: "03 困倦"
+
+E4 (bottom-left): SLIGHT SMILE (forced, professional) — the "yes, manager" smile. Mouth corner up 1px on one side only (asymmetric, the dead-eyed professional smile). Eyes do NOT smile.
+LABEL: "04 公事微笑"
+
+E5 (bottom-mid): GENUINE SMALL SMILE — the rare moment (mom's video call / a colleague joke land). Both mouth corners up 1px, eyes very slightly crinkle 1px. Should feel different from E4. Still subtle, NEVER big.
+LABEL: "05 真笑(罕见)"
+
+E6 (bottom-right): RESIGNED — the deep-breath face. Eyes closed for a frame (or half-lidded), mouth flat with a slight downturn 1px. The "I'll do the overtime" face.
+LABEL: "06 认命"
+
+BOTTOM BAND — 4 POSES (4×1 row, full body):
+
+P1 (left): STANDING NEUTRAL — facing 3/4 toward viewer, both arms at sides, thermos in left hand. Default standing pose.
+LABEL: "P1 站立"
+
+P2: SITTING AT DESK — 3/4 view, seated in office chair, thermos placed on desk in front, hands on keyboard (suggested by 2px hint at bottom of frame). Slight slouch.
+LABEL: "P2 坐工位"
+
+P3: WALKING — mid-stride, side view, thermos in left hand, lanyard slightly swinging. Speed implied: slow / unhurried.
+LABEL: "P3 走路"
+
+P4: HOLDING THERMOS UP — looking down INTO the thermos lid (he's checking how much hot water is left). Slight head tilt forward. The "morning ritual" pose.
+LABEL: "P4 看保温杯"
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 15%)
+- 格子间灰蓝 #5A7080 (gray polo dominant + thermos shadow + BG cubicle hint — 30%)
+- 档案室棕 #7A5838 (belt + minor accent — 4%)
+- 白炽灯白 #E8E0CC (thermos body + light pools + label backgrounds — 22%)
+- 屏幕蓝 #2C4A6E (NOT used much — small monitor-glow accent in P2 only)
+- 老板金 #E0B050 (MAX 2% — ONLY on the lanyard badge clip, tiny detail. NO gold on outfit. He has no power motif.)
+- 家温红 #B05050 (NOT used — STRICT ZERO. The old red tie is GONE. No red on this character.)
+- Black trousers/shoes #1a1a1a + highlight #4a4a4a (15%)
+- Hair dark #5a5552 (8%)
+
+DESIGN GUARDRAILS (CRITICAL — pivot enforcement):
+- DO NOT include navy suit. DO NOT include red tie. DO NOT include white dress shirt+tie combo. ANY of these = HARD FAIL.
+- DO NOT show him in heroic / determined / "ready for challenge" pose. He is tired, neutral.
+- DO NOT make him look "consciously co-conspirator" with a knowing smirk on the face — gameplay POV is over-shoulder, this sheet is for rare in-cutscene moments. Default expression is PLAIN.
+- The thermos must be visible in EVERY pose AND at least 4/6 expression heads.
+- He must read as 32, NOT 38. Slight stubble + flat hair, no deep wrinkle lines.
+
+VISUAL JOKES (1-3px subtle):
+- His lanyard badge has a 1px crooked photo (the company photo from 5 years ago when he had hair gel).
+- The thermos has a 1-2px dent on one side (it's been with him 4 years).
+- In P2 (sitting), the desk has a 2x2 px green plant corner visible (the 小绿萝 from spec — previous employee left it).
+- In P4 (looking into thermos), the inside of the thermos has 1-2px steam wisp (still warm).
+- The Mt. Fuji sticker on the thermos has a 1px crack (old).
+
+TITLE BANNER (top 5% of canvas, dark gray #5A7080 band, #E8E0CC text):
+中文: 「陈笑天 — 灰色 polo 版"
+English: "Chen Xiaotian — gray polo turnaround (replaces v01 navy)"
+
+Output: PNG, 1024x1024, single composite character sheet (6 expression heads top + 4 body poses bottom). 16-bit pixel art. Replaces the older `B_three_view_v01.png` and `character_sheet_player_v01.png`. Consistent with assets/sprites/STYLE_GUIDE.md §1.3 player anchor — but with the 2026-05-05 pivot edits applied.

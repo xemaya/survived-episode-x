@@ -1,0 +1,53 @@
+A pixel art character portrait for a Chinese office life game: NPC `lisa` — Lisa, 30 yo female, joined the company same week as the protagonist 笑天, ambient quiet-suffering colleague who mirrors but doesn't perform. Half-body portrait (head + torso), 3/4 facing.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Visual identity goal: "first glance recognition, second glance indictment" — quiet female office worker who does the work but doesn't perform it.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO floor, NO shadow on floor, NO desk, NO chair, NO furniture, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas. The white BG must be PURE #FFFFFF (no cream, no off-white, no gradient) so it can be alpha-keyed in post-processing.
+
+THE CHARACTER — Lisa, 30:
+- Chinese woman, 30 years old, average build, average height.
+- Hair: shoulder-length, straight or slightly wavy, dark brown #5a5552, NO bangs (styled simply, no salon flourish). This is her S1 long-hair anchor (S2 E7+ she cuts it short — that's a future variant).
+- FACE: oval, soft features, slight under-eye softness 1-2px, neutral expression — the quiet "我懂但我不说" face. Small, tight-lipped warm smile (1-2px upturn corner). NOT performing.
+- Eye expression: looking slightly downward / off-camera — she's not making eye contact with the viewer; she's mid-thought.
+
+OUTFIT:
+- GRAY POLO SHIRT (灰色 polo) — color #5A7080. Plain, 3-button placket at top, short sleeves. NO logo. (Visual mirror to protagonist's gray polo — they joined same week.)
+- Dark jeans (#1a1a1a near black with subtle 4a4a4a highlight) visible at waist if half-body framing extends.
+- Simple silver-tone watch on left wrist.
+- Employee lanyard with badge around neck.
+- A subtle hair tie around her wrist (1-2px pixel detail) — she ties hair back when typing.
+
+KEY PROP / SILHOUETTE ANCHOR:
+- A milk-tea cup (奶茶杯) HELD in her right hand, slightly raised toward her face. The cup is 25-30 px tall: warm beige #C8A85A body with a 2px-wide brown #7A5838 lid + a 1px straw protruding. (Per character note: she drinks 奶茶 not coffee — visual signature.)
+- The cup has a faint 1-2px droplet of condensation on the side.
+
+BODY LANGUAGE:
+- Standing or seated half-body posture, slight slouch (-2px), one shoulder dropped slightly.
+- NOT military-perfect, NOT energized — quiet contained posture.
+
+STRICT COLOR PALETTE (only):
+- 打工人黄 #C8A85A (skin + milk-tea cup body — 18%)
+- 格子间灰蓝 #5A7080 (gray polo dominant — 30%)
+- 档案室棕 #7A5838 (cup lid + minor accent — 5%)
+- 白炽灯白 #E8E0CC (light highlights on hair / face — 10%)
+- 屏幕蓝 #2C4A6E (NOT used — 0%)
+- 老板金 #E0B050 (NOT used — 0%. Lisa has no power motif.)
+- Black #1a1a1a (jeans, hair shadow — 12%)
+- Hair dark #5a5552 (15%)
+- The rest: PURE WHITE #FFFFFF background.
+
+VISUAL JOKES (1-3px subtle):
+- Her watch face has 1px tiny line — set to 17:01 (mirror of protagonist "活到周五" mood).
+- A 1-2px mole on her left jawline (consistent female-NPC subtle marker).
+- Her lanyard has a tiny doll keychain (2x2 px小玩偶) — per npcs.md "桌上放着一只玩偶".
+
+DESIGN GUARDRAILS (CRITICAL — per Pillar 4 design):
+- DO NOT make her look heroic / determined / "ready to fight the system". She's quiet, contained, gentle.
+- DO NOT make her smile broadly. Tight 1-2px upturn maximum.
+- DO NOT add cute/anime stylization. She's a real 30 yo office woman, not a manhua character.
+- DO NOT add background, scenery, floor, shadow, decoration, label, frame — PURE WHITE BG ONLY.
+- The milk-tea cup is the silhouette anchor — must read clearly.
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE BACKGROUND ready for chroma-key alpha removal in post-processing. 16-bit pixel art aesthetic. To be downsampled to 64×96 (interactive close-up) and 32×48 (LOD 0 sprite) by post-processing. Consistent with assets/sprites/STYLE_GUIDE.md NPC archetype roster (Lisa is not a 9-archetype — this is her named-NPC anchor sheet).

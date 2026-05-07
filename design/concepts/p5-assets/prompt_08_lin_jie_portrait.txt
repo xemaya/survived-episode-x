@@ -1,0 +1,66 @@
+A pixel art character portrait for a Chinese office life game: 林姐 (Lin jie) — the Customer Success team lead, neighboring department, 42 years old. Used in S3 finale Path A as her first appearance. She's the "another way to live" proof — quietly competent, NOT a hero, NOT a mentor. Half-body portrait (head + torso + waist), facing slightly 3/4.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. NOT a heroic / spotlight portrait. Mood: low-key, real, weekday-mid-afternoon-tired, the kind of office mid-manager who actually does work but doesn't perform it.
+
+LAYOUT: Vertical 1:2 aspect — single character on neutral light off-white #E8E0CC background with subtle workspace hint behind. Designed to crop to 256×512. Lin jie centered, 80% of vertical fill, head at top 20%, waist at bottom 80%.
+
+THE CHARACTER — 林姐 (CS team lead, 42):
+- Chinese woman, 42 years old, average build, 中等身高.
+- Hair: shoulder-length, simply cut, dark with 1-2px gray strands at temples (not dyed brown, not styled). Pulled half-back behind one ear.
+- FACE: oval, slight tiredness lines under eyes (1-2px), neutral expression — the "我了解" mid-management face. NOT smiling broadly. Calm and a little bored.
+- Eye expression: steady, looking slightly off-camera (not making eye contact with viewer — she's reading something).
+- A tiny small mole near her left jawline (1px detail, signature).
+
+OUTFIT (visual signature — must read at glance):
+- BLACK BUSINESS SUIT JACKET (single-breasted, classic cut). Color #1a1a1a with 1-2px highlights at #4a4a4a.
+- Plain white-ish blouse underneath, #E8E0CC.
+- BUT WEARING SNEAKERS (visible at the bottom edge of the portrait if shown) — gray running shoes (#5A7080), CLEARLY out of place with the formal jacket. This is her core silhouette joke. If full-body crop doesn't include feet, hint at shoe via lower-frame subtle stance.
+- Lanyard with company badge around neck — generic gray.
+- A simple silver-tone watch on her left wrist.
+
+KEY PROP (must be visible — silhouette anchor):
+- She's HOLDING A RED FOLDER (客户合同 / 红色文件夹). Color: 家温红 #B05050. Folder is held against her chest with both hands, pressed slightly. The folder takes ~25% of the portrait area — clearly the focal silhouette element.
+- The folder has a small 1px gold-trim corner clip (#E0B050) — within gold budget.
+- A small handwritten label sticker on folder reads "重要" (illegible at downsample, readable at full canvas).
+
+BODY LANGUAGE:
+- Standing, slight relaxed posture (NOT military-perfect).
+- Slight tilt of head (~5 degrees) suggesting she's mid-thought, not posing.
+- Body weight on one leg subtly.
+- Walking speed implied SLOW — she doesn't rush.
+
+BACKGROUND (subtle hint, 20% visual weight):
+- Soft cubicle wall behind her (#5A7080 light texture).
+- A tiny edge of her workstation visible: 1-2 px slice of a desk corner with a daughter's photo frame (small, 8x10 px) showing a tiny pixel of a child — visible at full canvas, blurs at downsample. The photo is the "she's a mom" subtle anchor.
+- NO sun-spotlight, NO halo, NO heroic backlighting.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 18%)
+- 格子间灰蓝 #5A7080 (sneakers, BG cubicle wall, lanyard — 12%)
+- 档案室棕 #7A5838 (NOT used — no wood)
+- 白炽灯白 #E8E0CC (BG, blouse, light highlights — 30%)
+- 屏幕蓝 #2C4A6E (NOT dominant — small accent only)
+- 老板金 #E0B050 (MAX 2% — ONLY on watch face + folder corner clip)
+- 家温红 #B05050 (red folder dominant accent — 15%)
+- Black suit #1a1a1a (15%)
+- Hair dark #5a5552 + 1px gray strands #aab0ad (8%)
+
+DESIGN GUARDRAILS (per brief — Lin jie禁忌):
+- DO NOT make her into a "career woman hero" with spotlight / saturation / strong-pose drama. She's low-key competent.
+- DO NOT make her smile broadly or look "knowing/smug". Neutral, mid-thought.
+- DO NOT add executive/power motifs. She's a mid-manager who survives by NOT being flashy.
+- DO NOT show her in conversation or with another character — solo portrait only.
+- The black-suit-with-sneakers contrast is the ENTIRE silhouette joke — make sure the sneakers read clearly even at icon size.
+- The red folder MUST be visible and clearly red — her ID prop.
+
+VISUAL JOKES (1-3px subtle):
+- Her sneakers have a slight scuff (1-2px) — she actually walks in them, not for show.
+- Her suit jacket has 1px crease at the elbow — real wear, not pristine.
+- The "重要" sticker on the folder is slightly crooked (she doesn't perfect it).
+- A 1-2px coffee stain on the cuff of her sleeve.
+
+TITLE BANNER (lower 1/16 of canvas, off-white #E8E0CC band with #7A5838 outline):
+中文: 「客户成功部 林姐 — 黑西装 + 运动鞋」
+English: "CS Lead Lin — black suit, sneakers"
+
+Output: PNG, 1024x1024 with character-portrait region designed for 1:2 crop to 256×512. 16-bit pixel art. Solo portrait, ready for engine to use as Lin jie's立绘 sprite. Consistent with prior NPC reference sheets (especially assets/sprites/STYLE_GUIDE.md §1.4 NPC archetype silhouettes), but Lin jie is NOT in the existing 9-NPC archetype roster — she's #10.

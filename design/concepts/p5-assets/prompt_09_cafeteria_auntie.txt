@@ -1,0 +1,68 @@
+A pixel art character portrait for a Chinese office life game: 食堂阿姨 (cafeteria auntie) — ambient flavor NPC, ~50 years old. She works at the company canteen, NOT a registered NPC, just the human face of the cafeteria scene. Half-body portrait, behind a stainless steel serving counter, in mid-action of doling out food (the 抖三下勺子 — three-shake ladle move).
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. Mood: ambient, real, NOT warm-and-healing. She just works here. Slight dark humor undertone (the universal Chinese cafeteria experience).
+
+LAYOUT: Vertical 1:2 aspect — character behind cafeteria counter, neutral pale-blue cafeteria back wall. Designed to crop to 256×512. Auntie occupies central 70% vertical fill, the stainless serving counter takes lower 25%.
+
+THE CHARACTER — 食堂阿姨 (cafeteria auntie, ~50):
+- Chinese woman, ~50 years old.
+- Round-ish face, average to slightly stocky build, 平凡 not stylized.
+- Hair: under a disposable food-service head cap (一次性头巾) — the cap is light blue #E8E0CC tinted. A few wisps of dark hair visible at the side, with 1-2px gray strands.
+- Skin: 打工人黄 #C8A85A, slightly weathered with 1-2px laugh-lines around eyes.
+- FACE: neutral working expression, NOT smiling, NOT frowning — the practiced "I do this 200 times a day" face. Eyes slightly down toward the food.
+- NO mask (per spec — post-pandemic, most people don't wear masks anymore).
+
+OUTFIT (silhouette anchor — must read at glance):
+- BLUE FOOD-SERVICE UNIFORM (蓝色食堂工服) — apron-style top, color 屏幕蓝 #2C4A6E. The uniform has light food stains visible (1-2 px in 2-3 spots).
+- White-ish #E8E0CC undershirt collar peeking at neck.
+- Plastic apron over the uniform — light gray-blue #5A7080.
+- Disposable head cap (head turban-cap style) — also light #E8E0CC.
+- Plastic gloves on both hands, light cream-white.
+
+KEY PROP / ACTION (must be visible — silhouette anchor):
+- She is HOLDING A METAL LADLE 勺子 in mid-action — caught at the moment of the 3-shake. The ladle is angled diagonally, 3 small motion lines (1px each) emanating from it suggesting the shake.
+- The ladle has a tiny portion of food (西红柿炒蛋 — tomato-egg, 1-2 px of yellow + red mix) at the bowl end.
+- Below the ladle, an empty student-style metal lunch tray ready to receive (steel #5A7080).
+- Behind her: rectangular stainless-steel hot-food trays in the counter (3 visible, with various dishes — red tomato-egg / brown braised pork / green vegetable / each in 4-5 px).
+
+BODY LANGUAGE:
+- Standing behind the counter, slightly leaning forward to dispense food.
+- Right arm raised mid-shake, left arm steadying the tray-side.
+- Slight tilt of head as she eyes the portion.
+- NOT performative, NOT cute. Just doing her shift.
+
+BACKGROUND (cafeteria hint, 20% visual weight):
+- Plain pale-blue tiled wall behind her #5A7080 (institutional cafeteria look).
+- A small wall-mounted menu board upper-left with 4-5 dishes in 1-2px Chinese (illegible at downsample).
+- A tiny digital clock on the wall showing "11:47" (lunch rush) — 1-2 px digits.
+- NO heroic lighting. Flat fluorescent overhead.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin — 15%)
+- 格子间灰蓝 #5A7080 (apron over-layer, BG wall, counter steel — 25%)
+- 档案室棕 #7A5838 (food braised pork accent — 5%)
+- 白炽灯白 #E8E0CC (head cap, undershirt, gloves, light pools — 25%)
+- 屏幕蓝 #2C4A6E (uniform dominant — 18%)
+- 老板金 #E0B050 (NOT used — 0%. She is anti-power.)
+- 家温红 #B05050 (food accent — tomato in ladle + tray — 5%)
+- Hair dark #5a5552 (3%)
+- Tiny green #4a7050 (vegetable in tray — 2%)
+
+DESIGN GUARDRAILS (per spec —食堂阿姨禁忌):
+- DO NOT paint her as "warm-healing maternal figure". She is FLAVOR. She just works here.
+- DO NOT add a halo / spotlight / special filter — flat overhead fluorescent only.
+- DO NOT have her smile broadly. Neutral working face.
+- DO NOT make her look at the player/camera. Her gaze is on the food / tray.
+- The 抖三下勺子 motion lines MUST be visible — that's her one signature gesture (per spec).
+
+VISUAL JOKES (1-3px subtle):
+- 1-2px food splatter mark on her apron — a real cafeteria detail.
+- The wall menu has one dish circled at the corner — "今日特价" sticker that's been there 6 months (faded).
+- The wall clock shows 11:47 — peak lunch rush, she has 2 hours of this ahead.
+- A tiny line of music notes 1-2px floating near her head — she sometimes hums old songs (per character note: "再见再见再见"). Just 2-3 quarter-note shapes drifting.
+
+TITLE BANNER (lower 1/16 of canvas, off-white #E8E0CC band with #7A5838 outline):
+中文: 「食堂阿姨 — 抖三下」
+English: "Cafeteria auntie — three shakes"
+
+Output: PNG, 1024x1024 with character-portrait region designed for 1:2 crop to 256×512. 16-bit pixel art. Solo portrait, ambient-NPC vibe (NOT main-cast prominence). Ready for engine to use in food-court daily-choice scenes. Consistent with prior reference sheets — uses the SAME "background NPC" treatment as 李阿姨 cleaning auntie archetype but with different costume + signature gesture.

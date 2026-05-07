@@ -1,0 +1,34 @@
+A pixel art icon for a Chinese office life game: a smartphone face-up on a cubicle desk with a small RED notification badge glowing on the screen edge — the phone is "off" but a push has just landed. Used as a state variant of phone_face_up: the player should look.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector. Mood: dark humor / 喜丧美学 — the badge is a tiny red dot of dread on an otherwise dead-quiet screen.
+
+LAYOUT: Single isolated prop sprite, centered in canvas, occupying central 60%. Bottom 1/8 of canvas has minimal wooden desk surface strip. Rest is light off-white background.
+
+CONTENT:
+- Phone face-up, top-down 3/4 angle view. Generic black flat smartphone (no brand, no logo).
+- Visible features: large black screen (mostly OFF — but now showing a faint banner notification at the top), thin 1px white plastic bezel, home button at bottom, speaker grill at top.
+- NEW vs phone_face_up: a small notification banner near the top of the screen — 5x12 px rectangle in #E8E0CC (banner background), with two text-like rows of 1px Chinese pixel-glyphs (illegible at this scale but suggesting "微信" + sender name). At the upper-right corner of the banner is a tiny 3x3 px solid RED dot (#B05050 warmth-red) representing the badge — this is the visual focal point.
+- The screen edge has a 1px subtle warmth-red glow halo around the badge area (suggests the "push just arrived" moment, ~2px outward).
+- Phone case has the same Mt. Fuji vinyl sticker in the bottom-right corner (4x3 px) for continuity with phone_face_up.
+- Phone shadow falls 2-3px to the lower-right onto the desk.
+- Background: tiny strip of wooden cubicle desk (#7A5838) at bottom 1/8 with horizontal grain; rest is #E8E0CC.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (NOT used — no skin)
+- 格子间灰蓝 #5A7080 (NOT used)
+- 档案室棕 #7A5838 (desk surface — 25%)
+- 白炽灯白 #E8E0CC (background, banner background)
+- 屏幕蓝 #2C4A6E (NOT used — phone is locked off)
+- 老板金 #E0B050 (NOT used — 0%)
+- 家温红 (warmth red) #B05050 (badge dot ONLY — max 2% pixel coverage, used as dread accent not boss-power)
+- Phone body uses near-black #1a1a1a with 1-2px highlights at #4a4a4a.
+
+VISUAL JOKES (1-3px subtle):
+- The notification banner has the tiny silhouette of a WeChat-style square chat icon (4x4 px, generic green-gray, NOT real WeChat colors — just suggestive).
+- 1px reflection at top-left corner of screen (overhead fluorescent).
+- The red badge dot has a 1px brighter pixel center — suggesting it just lit up.
+- A 2x2 px dust speck on the screen.
+
+NO TITLE BANNER (prop sprite).
+
+Output: PNG, 1024x1024, single isolated prop sprite on minimal desk-strip background, 16-bit pixel art, ready for 256x256 or 64x128 downsample. Consistent with phone_face_up sprite (same body) and design/concepts/p5-ui/p5_ui_03_phone_wechat_wang.png mood.

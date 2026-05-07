@@ -1,0 +1,27 @@
+A pixel art KPI Review background for a Chinese office life game — purple-grey review-room atmosphere, ready for UI overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — base layer, NOT finished illustration:
+- NO title text, NO header ("月度考核 / MONTHLY REVIEW")
+- NO three-row breakdown panel (UI overlay)
+- NO numeric capacity vs threshold display (UI overlay)
+- NO buttons
+- NO punch-clock or receipt-printer drawings (those are SFX-anchor visual events handled by sprite + UI)
+- The mood is bureaucratic, purple-grey, slightly oppressive — "the room where decisions are made about you"
+- This is a permanent backdrop on which all KPI Review UI elements will be programmatically rendered
+
+LAYOUT — interior view of a small bureaucratic review room:
+- 3/4 angle into a corner room, smaller and more enclosed than a meeting room
+- Center: a single small executive desk (sterner than Boss's, more procedural — gray-painted wood) with no items on top
+- Behind desk: a wall-mounted clock with no specific time visible (face is just a circle, hands at neutral position), framed in metal
+- Side walls: filing cabinets (gray-blue #5A7080) lining one wall, each cabinet is just 4-drawer outline, no labels
+- Other side: a single window (small, frosted, no view through it — opaque pale glass)
+- Wall paint: pale purple-grey tint (#3A3050 mixed with cream — pale lavender mood)
+- Floor: dark grey-blue (#5A7080) tile
+- Lighting: cold overhead fluorescent + one harsh purple desk lamp pool
+- ZERO chairs (you don't sit during your review)
+- Subtle 1px shadow under desk + cabinets
+- Composition leaves the central upper portion relatively open for the KPI Review UI panel overlay
+
+PALETTE: 灰蓝 #5A7080 (filing cabinets + floor — dominant), 棕 #7A5838 (desk wood), 白 #E8E0CC (clock face + opaque window glass + small light highlights), 屏幕蓝 #2C4A6E (faint cabinet metal trim), 紫灰 #3A3050 (wall paint mixed pale + the desk-lamp pool — dominant atmospheric), 老板金 #E0B050 (max 1% — only on clock metal frame), faint 警告红 #C83428 (max 0.5% — single red filing-cabinet drawer label dot, the "termination" drawer hint).
+
+Output: PNG, 1024x1024, single composite KPI-Review background. Empty of NPCs and UI. Suitable for in-engine UI overlay (the KPI breakdown panels, capacity/threshold numbers, confirm button, ironic promotion stamp event will all be rendered programmatically on top of this room).

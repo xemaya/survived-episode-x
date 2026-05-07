@@ -9,17 +9,20 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "assets:sync": "node scripts/sync-sprites.mjs",
-    "predev": "pnpm assets:sync",
-    "prebuild": "pnpm assets:sync",
+    "ink:build": "node scripts/ink-build.mjs",
+    "setup:inklecate": "node scripts/setup-inklecate.mjs",
+    "predev": "pnpm assets:sync && pnpm ink:build",
+    "prebuild": "pnpm assets:sync && pnpm ink:build",
     "dev": "vite",
     "build": "vite build",
     "tauri": "tauri",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "verify": "pnpm assets:sync && pnpm tsc && pnpm lint && pnpm test"
+    "verify": "pnpm assets:sync && pnpm ink:build && pnpm tsc && pnpm lint && pnpm test"
   },
   "devDependencies": {
     "@biomejs/biome": "~1.9.4",
+    "@playwright/test": "^1.59.1",
     "@preact/preset-vite": "~2.10.5",
     "@tauri-apps/api": "~2.1.1",
     "@tauri-apps/cli": "~2.1.0",
@@ -32,6 +35,7 @@
   "dependencies": {
     "@tauri-apps/plugin-fs": "~2.0.4",
     "howler": "~2.2.4",
+    "inkjs": "~2.2.5",
     "pixi.js": "~8.5.0",
     "preact": "~10.25.4",
     "zod": "~3.23.8"

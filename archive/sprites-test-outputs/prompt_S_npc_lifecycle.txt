@@ -1,0 +1,53 @@
+A pixel art NPC lifecycle and animation atlas for a Chinese office life game — 16 NPC lifecycle and animation frames in a 4x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. Consistent with reference sheets A_npc_archetypes_v01.png, L_npc_faces_set1_v01.png, M_npc_faces_set2_v01.png — same characters at same scale.
+
+LAYOUT — 4x4 grid on cream/beige background (#E8E0CC). Each cell shows ONE NPC frame (mostly LEAVING_ANNOUNCED state with cardboard box, plus a few animation frames). Each cell labeled with Chinese + English in pixel font below.
+
+THE 16 FRAMES (top-left to bottom-right):
+
+ROW 1 — LEAVING_ANNOUNCED 收纸箱 overlay (4 NPCs):
+1. 卷王 离别 / Tryhard Leaving — full body holding cardboard box of personal items in front of him at chest height, box lid open showing a stress-ball + thermos + framed photo, posture still upright but tie loosened, blank stare
+2. 摆烂族 离别 / Slacker Leaving — full body holding box low at hip-level (lazy carry), box contains phone charger + slippers + hidden snacks, casual smirk, finally upright posture
+3. 谄媚族 离别 / Toady Leaving — full body holding box in formal both-hand offering pose, box neat with business cards + ribbon-tied folder, bowing slightly to invisible person, tearful smile
+4. 新人 离别 / Rookie Leaving — full body holding box awkwardly with both arms wrapped around it, box contains training manual + notebook + new-hire welcome paper, eyes downcast, lanyard clutched separately in one hand
+
+ROW 2 — LEAVING_ANNOUNCED 收纸箱 overlay (4 more NPCs):
+5. 老油条 离别 / Veteran Leaving — full body, box held loosely under one arm, other hand still holding thermos, box has mostly empty space + a single dog-eared book, knowing half-smile (he's been here before)
+6. 阿姨 离别 / Auntie Leaving — full body, no cardboard box (she takes nothing), just removing apron and folding it, mop leaning against wall behind her, expression unchanged from her usual indifference
+7. Boss 离别 / Boss Leaving — full body, NOT carrying box himself (an assistant carries it behind, indicated as small figure), Boss walks ahead with hands in pockets, gold tie clip removed (visible as 1px absence)
+8. HR 离别 / HR Leaving — full body, box is the most organized of all (labeled "HR · 个人物品"), her empty-frame glasses now sit on top of the box, a single termination paper in her own hand (it's hers this time)
+
+ROW 3 — 隔壁部门 + 走路循环 (3 frames):
+9. 隔壁部门代表 离别 / OtherDept Leaving — full body, blue uniform, box held formally, business cards spilling slightly out the top, polite final smile, "see you in another department" energy
+10. 行走循环 1 / Walk Cycle Frame 1 — generic side-view office worker (gray uniform suggesting "any NPC") with both feet on ground, mid-stride, used as base walk frame
+11. 行走循环 2 / Walk Cycle Frame 2 — same figure, leading foot raised, trailing foot pushing off, mid-stride continuation
+12. 行走循环 3 / Walk Cycle Frame 3 — same figure, leading foot down, trailing foot mid-air, opposite phase from frame 1, used cyclically with frame 1
+
+ROW 4 — 谈话嘴型 + 喜丧 (talk mouths + xisang frames):
+13. 谈话 张嘴 / Talk Mouth Open — head-only close-up showing mouth in open "speaking" shape (small oval), used as on-frame for dialogue talking animation
+14. 谈话 闭嘴 / Talk Mouth Closed — same head, mouth in closed straight line, used as off-frame for dialogue talking animation
+15. 喜丧反应 微笑 / Xisang Reaction Smile — close-up of an NPC face (Auntie) showing the unsettling small smile while seeing someone laid off, mouth corners up but eyes empty, "继续擦地" energy
+16. 喜丧反应 鞠躬 / Xisang Reaction Bow — close-up of Toady mid-bow with surreal bright smile aimed at viewer (the laid-off person), the inappropriate cheerful farewell
+
+PALETTE: 打工人黄 #C8A85A (skin), 灰蓝 #5A7080 (clothing dominant), 棕 #7A5838 (cardboard boxes, hair, wood), 白 #E8E0CC (background, paper, shirts), 屏幕蓝 #2C4A6E (Slacker phone reflection), 老板金 #E0B050 (max 3% — Boss tie clip absence indicator, HR badge), 警告红 #C83428, 部门蓝 #3a5a85 (Other Dept ONLY), 阿姨蓝灰 #6890a0 (apron tint).
+
+VISUAL JOKES (1-3 px subtle):
+- Tryhard's box has the framed photo facing OUT, like a final defiance display
+- Slacker's box has hidden snacks suggesting he was always grazing
+- Toady's farewell box has a ribbon as if it's a gift to whoever stays
+- Veteran's box has just one book — he's done this before, packed light
+- Auntie's apron-fold motion looks identical to her wipe motion (continuity is her thing)
+- Boss not carrying his own box says everything about Boss
+- HR's termination paper is HER own (she filed her own dismissal — bureaucratic completionism)
+- Walk cycle frames designed to loop frame 1 ↔ 2 ↔ 3 ↔ 2 ↔ repeat
+
+CRITICAL CONSTRAINTS:
+- All 8 NPCs maintain silhouette identity in their LEAVING frames
+- Walk cycle frames must be readable as a 3-frame loop animation
+- Talk mouth frames are tightly cropped to head only (for use as on/off overlay)
+- Xisang frames capture the "喜丧" — bright smiles in inappropriate moments
+- NO triumph styling — these are bureaucratic farewells, even when sad
+- Each cell visually framed, label below
+
+TOP TITLE BANNER: "NPC 离别 · 动画 · 喜丧 / NPC Lifecycle · Animation · Xisang" pixel font, centered, dark cubicle blue text on cream.
+
+Output: PNG, 1024x1024, single composite 4x4 lifecycle/animation sheet, ready to be cropped into individual sprites for the NPC system.

@@ -1,0 +1,50 @@
+A pixel art scene illustration for a Chinese office life game: "the protagonist's workstation, Monday 9:14 AM, the start of an episode." Visual identity goal: "first glance recognition, second glance indictment" — a familiar Chinese cubicle aesthetic that quietly broadcasts dread.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Mood: dark humor / 喜丧美学 (funeral-as-festival).
+
+LAYOUT: Single composite image, ~16:9 framing within 1024x1024 canvas. Over-shoulder POV from behind the protagonist's swivel chair, looking forward into his cubicle. Cubicle walls visible left and right (格子间灰蓝 #5A7080). Background depth shows neighboring workstations: Lisa's workstation at the diagonal-opposite (visible from 3/4 angle, she is sitting and typing with a ceramic milk-tea cup on her desk); David's workstation directly across (head visible above the cubicle wall, hunched over keyboard); a hallway running off to the upper-left edge.
+
+PROTAGONIST WORKSTATION (foreground, the focus):
+A weary Chinese male office worker, 32 years old. He sits at his desk in 3/4 back view (face partially seen, profile at angle).
+- Plain GRAY POLO shirt (NOT a suit, NOT a tie — critical: 5 gray polos + 5 black polos rotation, today is gray)
+- Black short hair, slightly unkempt
+- Slight hunched body, low visual weight ("已经在这待了很久" feel)
+- Employee lanyard with badge resting on the desk, not worn
+
+DESK PROPS (clearly visible diegetic UI elements — critical for engine architecture):
+- LEFT side of desk: A stainless steel thermos mug, FULL state, with a 1-2px steam wisp above the rim
+- CENTER: Computer monitor (cubicle dimension), screen showing a corporate Chinese intranet portal with header bar and 4-5 menu tiles
+- RIGHT of monitor pinned to the cubicle wall: a single yellow sticky note, 中文 handwritten "活到周五" (4 large characters, must be readable, large pixel font)
+- BELOW monitor on desk surface: a smartphone face-down, no notifications visible
+- LEFT of monitor: A small green plant in a tiny terracotta pot ("前任员工绿萝"), one of its leaves slightly drooped
+- ON desk surface: a pen, a stack of pink sticky note pad, a clean small coffee ring stain (lvl 1 minor)
+- Calendar pinned to cubicle wall left: header "MAY 2026", today's date (Monday May 4) circled with red pen
+
+AMBIENT TIME OF DAY:
+Morning sunlight slanting in from upper-right windows, mixed with cool fluorescent overhead. Workstation is illuminated but not yet "fully on for the day". Monitor screen brightness moderate (just turned on). The hallway has 2 NPCs walking by faintly in the distance.
+
+BACKGROUND PERIPHERY:
+- Front desk reception area visible deep in background through hallway: a fruit bowl visible on the front desk, today filled with APPLES (融资暂停信号)
+- Coffee machine in the break room corner: small "故障维修中" A4 sign taped to it (illegible at distance, just convey "broken machine" state)
+- A whiteboard on a far wall with smudged Chinese writing
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin highlight, fluorescent-lit yellow)
+- 格子间灰蓝 #5A7080 (cubicle walls, dominant 60% of frame)
+- 档案室棕 #7A5838 (desk surface, wood accent)
+- 白炽灯白 #E8E0CC (ceiling lights, paper, light pools, sticky notes)
+- 屏幕蓝 #2C4A6E (monitor glow, distant overtime ambient)
+- 老板金 #E0B050 (gold accent — STRICT max 3% pixel coverage, only on lanyard clip + sticky note thumbtack)
+
+VISUAL JOKES (subtle 1-3px details — 喜丧 triggers):
+- Time on monitor display reads exactly "9:14"
+- The "活到周五" sticky note's edge is slightly curled, indicating it's been there a week
+- A single fly speck near the calendar (1px)
+- David's head visible above wall is hunched even more than 笑天's
+- Lisa's adjacent workstation has an empty milk-tea cup with a pink straw poking up
+
+TITLE BANNER (lower 1/8 of canvas, dark band):
+中文: 「周一上午 9:14。地球继续转动。」
+English: "MONDAY 9:14 AM. The earth keeps turning."
+
+Output: PNG, 1024x1024, single composite scene illustration, 16-bit pixel art aesthetic consistent with prior reference sheets, suitable for use as a UI scene reference and architecture decision baseline.

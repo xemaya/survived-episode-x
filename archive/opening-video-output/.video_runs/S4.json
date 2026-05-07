@@ -1,0 +1,12 @@
+{
+  "shot_id": "S4",
+  "model": "veo3-fast",
+  "prompt": "A Chinese office boss in a navy suit walks slowly past the camera from right to left over 8 seconds, a near-silhouette looming with hands clasped behind his back. As he passes the center frame, he pauses for one beat — a gold tie clip glints. Two coworker silhouettes are visible in the background — one typing furiously (the tryhard), one slumped back with a phone (the slacker). Cold overhead fluorescent on the boss's face. SFC/16-bit pixel art aesthetic, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette in 格子间灰蓝 #5A7080 / 白炽灯白 #E8E0CC / 档案室棕 #7A5838 / 老板金 #E0B050 / 屏幕蓝 #2C4A6E / 打工人黄 #C8A85A. Indie game cutscene, dark-humor 喜丧美学 (funeral-as-festival) tone.",
+  "status": "completed",
+  "task_id": "task_mX5xMKojqqkqliNuXzI6qNhKdm8sExbe",
+  "video_url": "https://comet-api-bucket.s3.us-east-1.amazonaws.com/videos/task_mX5xMKojqqkqliNuXzI6qNhKdm8sExbe.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAX2ZLYGRJV3PGWZUZ%2F20260504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260504T054418Z&X-Amz-Expires=259200&X-Amz-SignedHeaders=host&response-content-type=video%2Fmp4&x-id=GetObject&X-Amz-Signature=c21b77f19f5a069b36b49303bf06caf26206f161f3343ec17f1dcf4bef94ccff",
+  "download_path": "/Users/huanghaibin/Workspace/games/survived-episode-x/output/clips/S4.mp4",
+  "last_error": null,
+  "created_at": 1777873380.667357,
+  "updated_at": 1777873570.216
+}

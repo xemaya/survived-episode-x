@@ -1,0 +1,43 @@
+A pixel art UI element sheet for a Chinese office life game — 12 daily/weekly recap UI elements arranged in a 4x3 grid (4 cols, 3 rows). Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. UI motif: 公司内刊 + 打卡机界面, 0-radius right-angle rectangles, 1px borders, weekly-report aesthetic. Consistent with O_kpi_review_ui_v01.png.
+
+LAYOUT — 4 cols × 3 rows grid on cream/beige background (#E8E0CC). Each cell shows ONE UI element, centered, with 1px border in cubicle gray-blue. Each cell labeled in pixel font below.
+
+THE 12 UI ELEMENTS (top-left to bottom-right):
+
+ROW 1 — Recap screen backgrounds + headers:
+1. 日报背景 / Daily Recap BG — full-screen mockup miniature: white-paper "今日工作日报" form, HR header strip at top with date placeholder, body area for events, footer for AP/Energy summary, 1px borders throughout, no decoration
+2. 周报背景 / Weekly Recap BG — same paper aesthetic but "本周工作周报" header, body area larger to accommodate 5 days of events, mini-calendar week glyph in corner
+3. HR 抬头条 / HR Header Strip — narrow strip "人力资源部 · 工作日报 · 2026/05/03 · 周三", left-aligned department badge + center title + right-aligned date (Chinese day-of-week), copier-printed look
+4. Effort 三维可视化 / Effort 3D Visualization — small pixel-art chart showing 3 axes: 工作量 / 努力 / 关系, each as a labeled bar with small pixel "score" number, the 3 bars in a tiny radar/triangle layout
+
+ROW 2 — Recap content elements:
+5. 事件行样例 / Event List Row — single horizontal row in recap: small icon (event type), event description text middle, AP cost or numeric outcome right, separator 1px line below — designed to repeat 8 times max per recap
+6. KPI 预测条 / KPI Prediction Strip — narrow strip showing predicted month-end performance: gradient bar from green→yellow→red with current marker arrow ▼ pointing down at "偏低 / LOW" zone, label "本月预测 / Forecast"
+7. Skip 提示条 / Skip Hint Strip — narrow strip "按任意键继续 / Press any key", muted pixel text, faint subtle pulse, identical aesthetic to O sheet's Skip Hint
+8. 日报正文容器 / Daily Body Container — empty body frame for daily recap content: 1px border rectangle, faint horizontal grid lines (1px every 8px) like ruled notebook paper, ready for event rows to be placed inside
+
+ROW 3 — Recap variants + summary:
+9. 周报正文容器 / Weekly Body Container — empty body frame for weekly: same 1px border + ruled lines but TALLER, with 5 small vertical day-divider lines suggesting Mon-Fri columns
+10. Recap 淡入帧 / Recap Fade-In Frame — sample animation frame: same daily recap layout but at 50% transparency over previous game scene, demonstrating fade-in mid-state
+11. AP/精力日总结行 / AP Energy Summary Row — single horizontal row: "AP 用 6/8 · 精力剩 3/5" with mini bar visuals (filled/empty cells), pixel-numeric clarity, footer position
+12. 周指示日历小图 / Recap Calendar Mini Glyph — small 7-day calendar widget, 7 small squares in a row representing a week, 5 marked as "worked" (filled) + 2 weekend (open), today indicated with red dot, used in weekly recap header
+
+PALETTE: 打工人黄 #C8A85A, 灰蓝 #5A7080 (UI dominant), 棕 #7A5838 (paper trim, dividers), 白 #E8E0CC (paper, container fill), 屏幕蓝 #2C4A6E (chart accents), 老板金 #E0B050 (max 3% — current-marker arrow, today dot), 警告红 #C83428 (KPI prediction "LOW" zone), 达标绿 #4A7840 (KPI prediction "OK" zone).
+
+VISUAL JOKES (1-3 px subtle):
+- HR Header strip date is always "周三" (Wednesday) — the longest day
+- Effort 3D chart's "关系 / Relationship" axis is always tiny — the metric you forget to invest in
+- KPI Prediction marker always slightly LOWER than expected (never above-target by default)
+- Daily body container ruled lines — hand-drawn (1px wobble) rather than perfect (mocking the corporate form aesthetic)
+- Calendar mini glyph: the "today" dot is always slightly off-center (the lateness of arriving at one's own life)
+
+CRITICAL CONSTRAINTS:
+- All right-angle 0-radius rectangles per UI motif
+- Recap is a "report you're filling out about yourself" aesthetic — bureaucratic, not celebratory
+- No "great job!" iconography — these are quiet records of attendance
+- Prediction strip uses red-yellow-green tri-color WITH shape encoding (arrow direction) for accessibility
+- Each cell visually framed, label below
+
+TOP TITLE BANNER: "日报 · 周报 / Daily · Weekly Recap UI" pixel font, centered, dark cubicle blue text on cream.
+
+Output: PNG, 1024x1024, single composite 4x3 UI element sheet, ready to be cropped into individual UI sprites.

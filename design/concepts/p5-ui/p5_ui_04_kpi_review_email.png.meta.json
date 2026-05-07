@@ -1,0 +1,26 @@
+{
+  "model": "gpt-image-2",
+  "quality": "high",
+  "size": "1024x1024",
+  "prompt_file": "design/concepts/p5-ui/prompt_04_kpi_review_email.txt",
+  "prompt_chars": 3647,
+  "elapsed_sec": 304.7,
+  "ts": "2026-05-05 13:28:44",
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 8100,
+    "prompt_tokens_details": {
+      "cached_tokens_details": {}
+    },
+    "completion_tokens_details": {},
+    "input_tokens": 1076,
+    "output_tokens": 7024,
+    "input_tokens_details": {
+      "text_tokens": 1076,
+      "cached_tokens_details": {}
+    },
+    "claude_cache_creation_5_m_tokens": 0,
+    "claude_cache_creation_1_h_tokens": 0
+  }
+}

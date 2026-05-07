@@ -1,0 +1,26 @@
+{
+  "model": "gpt-image-2",
+  "quality": "high",
+  "size": "1024x1024",
+  "prompt_file": "design/concepts/p5-assets/prompt_02_phone_face_down.txt",
+  "prompt_chars": 2473,
+  "elapsed_sec": 227.8,
+  "ts": "2026-05-05 21:33:01",
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 7718,
+    "prompt_tokens_details": {
+      "cached_tokens_details": {}
+    },
+    "completion_tokens_details": {},
+    "input_tokens": 694,
+    "output_tokens": 7024,
+    "input_tokens_details": {
+      "text_tokens": 694,
+      "cached_tokens_details": {}
+    },
+    "claude_cache_creation_5_m_tokens": 0,
+    "claude_cache_creation_1_h_tokens": 0
+  }
+}

@@ -19,7 +19,7 @@ from pathlib import Path
 
 API_URL = "https://api.deerapi.com/v1/images/generations"
 MODEL = "gpt-image-2"
-TIMEOUT_SEC = 240
+TIMEOUT_SEC = 600
 
 
 def main() -> int:

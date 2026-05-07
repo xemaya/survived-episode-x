@@ -1,0 +1,57 @@
+A pixel art character portrait for a Chinese office life game: NPC `lao_zhou` — 老周 (Old Zhou), 50+ yo male veteran employee. He's been at the company longer than anyone else and has perfected the art of present-but-disengaged. Half-body portrait, 3/4 facing.
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. Mood: weathered office veteran — the man who watches the company churn through 3 generations of new hires while he keeps drinking tea.
+
+LAYOUT: SINGLE ISOLATED CHARACTER on PURE WHITE #FFFFFF background. NO scenery, NO desk, NO floor, NO floor shadow, NO frame, NO title banner, NO label text. Character occupies central 70% of canvas.
+
+THE CHARACTER — Lao Zhou (50+):
+- Chinese male, 50+ years old, slightly soft middle (he sits 8 hours and doesn't fight it), average height.
+- Hair: salt-and-pepper, mostly gray (#aab0ad), thinning at the temples and crown, NEVER dyed (per npcs.md "头发花白没染过" implicit elder anchor). Combed but not styled.
+- FACE: rounded, weathered with 2-3px laugh lines around the eyes (he's smiled and frowned thousands of times — both leave marks). Soft jowl 1-2px.
+- Eye expression: SOFT and AMUSED — he's looking off-camera, slightly down, with a tiny "I've seen this all before" expression. Slight crow's feet 1-2px.
+- Mouth: a closed-mouth small WRY SMILE — one corner up 1px more than the other, like he just heard a joke he's heard 50 times before.
+
+OUTFIT (CRITICAL — visual mirror to protagonist):
+- GRAY POLO SHIRT (灰色 polo) — color #5A7080, SAME as protagonist's polo. Per npcs.md "穿同一件灰色 polo——跟笑天的相似（这是 visual mirror）". This is the visual signal: he's the future protagonist.
+- Plain dark trousers (#1a1a1a near-black) visible if framing extends.
+- Brown leather belt (#7A5838) 1-2px.
+- Employee lanyard with a "司龄 5 年纪念" pen clipped — 1-2px gold (#E0B050) accent — strict <2% pixel.
+- Old-fashioned watch on wrist (#5A7080 with #E8E0CC face).
+
+KEY PROP / SILHOUETTE ANCHOR:
+- A CYLINDRICAL CERAMIC TEA THERMOS (different from protagonist's stainless steel — this is a fatter, more old-school ceramic mug shape) HELD in his LEFT hand at chest height. The thermos is 30+ px tall, slightly WIDER than protagonist's by 2-3 px (visual silhouette difference). Color: warm yellow-cream #C8A85A body with 1-2px blue stripe around middle.
+- The thermos has a "司龄 5 年纪念" tiny illegible label (3-4 px sticker).
+- A 1-2px steam wisp rising — he just refilled hot water.
+
+BODY LANGUAGE:
+- Slight HUNCH in the back/shoulders (-2-3px from straight) — per npcs.md "微弓背". He's relaxed-tired.
+- Body weight on one foot.
+- One hand holds tea, other hand is in his pocket (visible if half-body framing reaches lower).
+- His pose is the OPPOSITE of David — relaxed, slightly tired, not performing.
+
+STRICT COLOR PALETTE:
+- 打工人黄 #C8A85A (skin + thermos body — 22%)
+- 格子间灰蓝 #5A7080 (gray polo — 28%)
+- 档案室棕 #7A5838 (belt + minor — 4%)
+- 白炽灯白 #E8E0CC (light highlights, watch face — 10%)
+- 屏幕蓝 #2C4A6E (1-2px thermos stripe — 2%)
+- 老板金 #E0B050 (pen clip ONLY — strict <2% pixel)
+- Black #1a1a1a (slacks, lanyard — 12%)
+- Hair gray #aab0ad (15%) with darker shadow #5a5552 (5%)
+- Background: PURE WHITE #FFFFFF.
+
+VISUAL JOKES (1-3px subtle):
+- His belt has 1-2px notch wear — he's used the same belt 5+ years.
+- His watch is set to 09:13 — start-of-day time, but it's clearly already lunch (everyone else's clock is later).
+- His sticky note on the lanyard tag has illegible Chinese — could be "过完今天" per npcs.md.
+- 1-2px subtle eye crinkle — wry not glee.
+
+DESIGN GUARDRAILS:
+- His VISUAL MIRROR to protagonist via gray polo is the key signal — same polo, but his is slightly more worn (1-2px wear at collar). Lao Zhou IS what protagonist becomes if he survives.
+- DO NOT make him look depressed / sad / defeated. Wry, weathered, calm — that's the right note.
+- DO NOT add scenery, desk, sticky notes — PURE WHITE BG ONLY.
+- DO NOT make his thermos identical to protagonist's — slightly fatter, slightly different (per npcs.md veteran archetype "rounder thermos cylinder 2px wider").
+
+NO TITLE BANNER. NO LABEL TEXT. NO TEXT ANYWHERE.
+
+Output: PNG, 1024x1024, single isolated character on PURE WHITE background, 16-bit pixel art, ready for chroma-key alpha + downsampling to 64×96 + 32×48.

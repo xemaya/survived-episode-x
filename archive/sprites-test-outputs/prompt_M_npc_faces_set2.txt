@@ -1,0 +1,59 @@
+A pixel art NPC expression atlas for a Chinese office life game — 5 NPC archetypes × 4 emotional phases = 20 head-and-shoulders portraits in a 5x4 grid. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学. Consistent with prior reference sheets like A_npc_archetypes_v01.png and L_npc_faces_set1_v01.png — same characters, same proportions.
+
+LAYOUT — 5 rows × 4 cols grid on cream/beige background (#E8E0CC). Each row is one NPC archetype across 4 phases (left to right: NEUTRAL → WARMUP → TENSION → FAREWELL). Each cell shows the NPC's head and shoulders centered, with subtle 1px drop shadow. Each cell labeled with Chinese phase name + NPC name in pixel font below.
+
+THE 5 NPCs (one per row, top to bottom):
+
+ROW 1 — 老油条同行 / VETERAN COWORKER:
+Recurring features: looks similar to player BUT rounder thermos cup (cylinder 2px wider than player's), orange folder visible (player's is gray), slippers under desk (visible at bottom edge), faint smile lines at eye corners
+1. 老油条 中性 / Veteran Neutral — relaxed, knowing smile, sipping thermos
+2. 老油条 预热 / Veteran Warmup — meaningful eye contact directly at viewer, slight nod
+3. 老油条 紧张 / Veteran Tension — sigh exhalation visible (1px steam from mouth), mild shoulder shrug
+4. 老油条 告别 / Veteran Farewell — bitter half-smile, raises thermos in toast gesture
+
+ROW 2 — 清洁阿姨 / CLEANING AUNTIE:
+Recurring features: short and wide build (+4 width, -6 height vs others), mop handle as third silhouette element on her left, blue-gray cleaning apron, hair in a tight bun, simple gold wedding band on hand (1px)
+5. 阿姨 中性 / Auntie Neutral — face expressionless, wiping a table with a rag, mouth flat
+6. 阿姨 预热 / Auntie Warmup — muttering under breath, mouth in slight scowl, one eyebrow raised
+7. 阿姨 紧张 / Auntie Tension — knowing-smile that says she's seen worse, mop handle leaning toward camera
+8. 阿姨 告别 / Auntie Farewell — completely indifferent face, still wiping, same exact pose as Neutral but with someone else's empty desk visible behind her
+
+ROW 3 — Boss / BOSS:
+Recurring features: silhouette top +8px taller than peers, hands clasped behind back (just visible at sides), widest tie of all NPCs, gold tie clip (1px gold pixel — strict), looking down at viewer (eye line angled down 5°)
+9. Boss 中性 / Boss Neutral — flat assessing stare, mouth straight horizontal line
+10. Boss 预热 / Boss Warmup — fake friendly smile that doesn't reach eyes, head nodding minimally
+11. Boss 紧张 / Boss Tension — mouth pinched silent, single eyebrow raised, gold tie clip catches light (extra 1px)
+12. Boss 告别 / Boss Farewell — turned 3/4 away from viewer, hand mid-wave dismissal, already looking past you
+
+ROW 4 — HR / HR:
+Recurring features: level shoulders (perfectly horizontal), tan folder tucked under right arm, EMPTY-FRAME glasses with NO lenses (just the rim), green plant leaf visible on desk corner, "人才/Talent" mug visible
+13. HR 中性 / HR Neutral — professional neutral smile, mouth corners slightly upturned, eyes blank
+14. HR 预热 / HR Warmup — opens folder slightly, glances down at it, mouth begins forming words
+15. HR 紧张 / HR Tension — small worried frown, fingers gripping folder edge tighter (knuckles 1px lighter)
+16. HR 告别 / HR Farewell — bright cheerful smile that contradicts the situation, holding out termination paper, plant leaf is wilted
+
+ROW 5 — 隔壁部门代表 / OTHER DEPT REP:
+Recurring features: BLUE color scheme uniform (#3a5a85 not #5A7080) distinguishes from main-dept gray, prominent department badge on chest, walking pose (always slight forward lean as if just arrived), polite business-card smile
+17. 隔壁部门 中性 / OtherDept Neutral — polite default smile, business card visibly held out at chest
+18. 隔壁部门 预热 / OtherDept Warmup — handing over a thick folder/proposal, smile widens
+19. 隔壁部门 紧张 / OtherDept Tension — confused mild frown, folder still held, small backward step
+20. 隔壁部门 告别 / OtherDept Farewell — final business-card handover, polite bow, badge slightly more polished
+
+PALETTE: 打工人黄 #C8A85A (skin), 灰蓝 #5A7080 (main dept clothing), 棕 #7A5838 (hair, folders), 白 #E8E0CC (background, shirt highlight), 屏幕蓝 #2C4A6E, 老板金 #E0B050 (max 3% — Boss tie clip + HR badge metal only), 警告红 #C83428, 部门蓝 #3a5a85 (Other Dept Rep ONLY).
+
+VISUAL JOKES (1-3 px subtle):
+- Veteran's thermos steam intensity matches phase (calm in Neutral, anxious in Tension)
+- Auntie's expression NEVER changes between Neutral and Farewell (point: indifference is constant)
+- Boss's "Farewell" pose shows him looking past you — already onto next subordinate
+- HR's plant is alive in Neutral, slightly wilted in Tension, fully wilted in Farewell
+- Other Dept's badge gets shinier across phases (polishing through anxiety)
+
+CRITICAL CONSTRAINTS:
+- 5 NPCs must be silhouette-distinct: Veteran=player-like with thermos / Auntie=short-wide+mop / Boss=tall+hands-back / HR=level+empty-frame-glasses / OtherDept=blue+walking-lean
+- 4 phases readable as emotional progression even without color
+- Auntie deliberately has minimal facial expression change — comedic visual point
+- Each cell visually framed but borderless (just portrait on cream, label below)
+
+TOP TITLE BANNER: "NPC 表情 · 第二组 / NPC Expression Atlas · Set 2" pixel font, centered, dark cubicle blue text.
+
+Output: PNG, 1024x1024, single composite 5x4 expression sheet, ready to be cropped into individual NPC portrait sprites.

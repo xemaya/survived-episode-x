@@ -1,0 +1,59 @@
+A pixel art scene illustration for a Chinese office life game: "Lisa, the protagonist's same-cohort coworker, comes to his cubicle to ask for help with a PowerPoint deck." This is an in-game STORY EVENT scene — dialog and choice rendering must be clearly visible as DIEGETIC UI (no overlay box).
+
+Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing on outlines, limited 16-color palette. NOT vector or smooth modern illustration. Mood: dark humor / 喜丧美学.
+
+LAYOUT: Single composite image. Camera angle: we see the protagonist's desk from 3/4 angle, with LISA standing at the side of the cubicle, leaning slightly toward the desk. The protagonist is at his chair (visible from back-3/4). Lisa is the visual focus — slightly larger framing.
+
+LISA (foreground, character anchor consistent with rookie/新人 archetype):
+A Chinese woman, 24 years old, narrow build, slightly long neck.
+- Recently haircut: short bob (still above shoulders — early-arc Lisa, not yet drastically short)
+- Pastel beige sweater + dark slacks
+- Lanyard slightly tangled around her neck
+- Bewildered but smiling expression — anxious-friendly
+- Holds a blue laptop (ajar, screen visible with a tiny PPT slide deck thumbnail) in front of her, and a ceramic milk-tea cup with pink straw in her other hand
+- Slight hunched-toward-the-desk posture, asking for help body language
+
+PROTAGONIST (background, in chair):
+- 32 years old Chinese male, plain GRAY POLO shirt, NO suit, NO tie
+- Rotated to face Lisa (3/4 back view of his head visible)
+- Hand on the mouse, paused
+- Stainless steel thermos cup on desk to his right
+
+DIALOG RENDERING (CRITICAL — this locks engine architecture):
+A speech bubble (rounded rectangle, 白炽灯白 #E8E0CC fill, 格子间灰蓝 #5A7080 outline 2px border) emerges from Lisa's head pointing-down to her mouth. Inside the speech bubble, in pixel-rendered Chinese (Title-banner-grade font, must be readable):
+「笑天，能帮我看下这 PPT 吗？我下午 5 点要发王总监。」
+The bubble is positioned in the upper-half of the canvas, emerging from above Lisa.
+
+CHOICE RENDERING (CRITICAL — this locks choice system):
+Three sticky note props "float" hover above the protagonist's desk surface (slightly raised/highlighted with 1px golden outline to indicate these are interactive game objects). Each sticky note has 1 short Chinese phrase, hand-written pixel-art style (large readable):
+- Top sticky (yellow, prominent): 「接过来」(3 chars)
+- Middle sticky (blue): 「我也忙」(3 chars)
+- Bottom sticky (faded gray): 「假装没看见」(5 chars)
+The sticky notes float above the desk in front of the protagonist's keyboard, slightly hovering as if "highlighted by the game system".
+Each sticky note has standard pixel-style: rectangle with curled corner, pen scrawl writing.
+
+ENVIRONMENT:
+Same workstation as the standard view. The time visible on monitor edge is "11:47 AM". The mug is at "3/4 full" state. David is now visible at his desk across (leaning back in his chair). Background depth: same cubicle environment.
+
+PALETTE:
+- 打工人黄 #C8A85A (skin highlight)
+- 格子间灰蓝 #5A7080 (cubicle walls dominant)
+- 档案室棕 #7A5838 (desk wood)
+- 白炽灯白 #E8E0CC (sticky notes, speech bubble, paper)
+- 屏幕蓝 #2C4A6E (monitor glow)
+- 老板金 #E0B050 (gold accent — max 3%, only on the highlighted sticky note outline)
+
+VISUAL JOKES (1-3px details):
+- Lisa's milk-tea cup pink straw poking out subtly
+- Behind Lisa's foot, a fragment of carpet pattern shows "格子" (grid)
+- Time on monitor: "11:47" — almost lunch time, the dialog timing is "right before lunch" subtle joke
+- One single fluorescent ceiling light is visibly flickering (1px brighter alternating)
+
+INTERNAL THOUGHT TEXT (small, italic faded, near the protagonist's head — this conveys 笑天's internal voice, NO speech bubble):
+"她每周三找我帮 PPT。"
+
+TITLE BANNER (lower 1/8 of canvas, dark band):
+中文: 「她又来了。」
+English: "She's here again."
+
+Output: PNG, 1024x1024, single composite scene illustration, 16-bit pixel art aesthetic, demonstrating diegetic dialog (speech bubble) + diegetic choice (3 sticky notes on desk).

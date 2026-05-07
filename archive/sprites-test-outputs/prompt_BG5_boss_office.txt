@@ -1,0 +1,25 @@
+A pixel art Boss's office background for a Chinese office life game — executive office ready for sprite overlay. Style: SFC/16-bit pixel art, visible pixel grid, no anti-aliasing, limited 16-color palette. Mood: dark humor / 喜丧美学.
+
+CRITICAL CONSTRAINTS — base layer, NOT finished illustration:
+- NO title text, NO labels, NO captions, NO name plate
+- NO Boss NPC at desk (overlay)
+- NO papers / executive items on desk (overlay)
+- NO assistant figure
+- NO clock with specific time
+- The fake plant SHOULD be present as part of the permanent decor (R-sheet ASSET-031 was the standalone asset; this background INCLUDES it for ambience)
+
+LAYOUT — interior view of a single corner executive office, 3/4 angle:
+- Center: large rectangular executive desk (richer #7A5838 dark wood, polished surface), bare top
+- Behind desk: tall executive chair (dark plastic + chrome, back to viewer/visible silhouette)
+- Behind chair: large window showing a faint city skyline (pixel hint, dark #2C4A6E gradient)
+- Left side: bookshelf (dark wood, generic pixel-blocked book spines, no readable titles)
+- Right side: the fake potted plant (gold-trimmed pot 1px gold accent, plastic leaves)
+- Wall: subtle gray-blue tint (slightly darker than rest of office to suggest "power zone")
+- Lighting: warmer than rest of office — soft yellow desk lamp glow (subtle 老板金 #E0B050 — strict max 3% pixel coverage)
+- Purple edge light (#3A3050) hint near the doorframe (left edge) — Boss-power signifier
+- Floor: same grey-blue tile, slightly darker tone
+- Subtle 1px shadow under desk + chair
+
+PALETTE: 灰蓝 #5A7080 (walls, floor — dominant), 棕 #7A5838 (executive wood, polished), 白 #E8E0CC (small accents, ceiling), 屏幕蓝 #2C4A6E (window city silhouette, glass), 老板金 #E0B050 (max 3% — desk-lamp glow + plant pot trim), 紫灰 #3A3050 (door-edge purple light only), no warning red.
+
+Output: PNG, 1024x1024, single composite Boss-office background. Empty of NPCs. Suitable for in-engine sprite overlay (Boss NPC at chair, papers on desk, summoning-event lighting, etc.).

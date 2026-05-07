@@ -1,3 +1,4 @@
+import { browserFs, hasTauriHost } from './browser-fs';
 import {
   type MetaState,
   type RunState,
@@ -5,7 +6,11 @@ import {
   metaStateSchema,
   runStateSchema,
 } from './schema';
-import { type SaveFs, tauriFs as productionFs } from './tauri-fs';
+import { type SaveFs, tauriFs } from './tauri-fs';
+
+// Auto-pick: Tauri webview → tauriFs (AppData). Plain browser → browserFs (localStorage).
+// Tests inject their own SaveFs via SaveSystem(fs) constructor, bypassing this.
+const productionFs: SaveFs = hasTauriHost() ? tauriFs : browserFs;
 
 const SAVES_DIR = 'saves';
 const CURRENT_RUN_PATH = `${SAVES_DIR}/current_run.save`;
