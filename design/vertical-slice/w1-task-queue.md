@@ -10,6 +10,105 @@
 
 ---
 
+## 🆕 P0 — Endings runtime hook (W3 endings.ink ship 后必做)
+
+### Q-FF · endings runtime + happy ending priority resolver
+
+**Why**: W3 reuse 已 ship `endings.ink` (11 knots, 5 GO + 6 happy variants). W1 需要在 TS runtime 接管 ending divertTo + 复合 happy ending 优先级 resolver.
+
+**Spec**:
+
+A. **TS runtime ending divertTo conditions** (per `endings-round-1-reply.md` §跟 W1 dev 协作):
+```ts
+function checkEndingTrigger(state) {
+  // GO 类 priority highest (前置 check)
+  if (state.sick_count >= 7) return divertTo('game_over_too_sick');
+  if (state.kpi < 50 && state.month <= 3) return divertTo('game_over_appearing_unsuitable');
+  if (state.kpi < 50 && state.month >= 4 && state.month <= 7) return divertTo('game_over_last_in_line');
+  if (state.kpi < 50 && state.month >= 8) return divertTo('game_over_org_restructure');
+  if (state.promotion_candidate_count >= 6) return divertTo('game_over_promoted');
+  // Happy ending: 仅在 month >= 12 + KPI 全月达标 触发
+  if (state.month >= 12 && state.kpi_pass_all_12) {
+    return divertTo(pickHappyEnding(state));
+  }
+  return null;
+}
+
+function pickHappyEnding(state) {
+  // priority A → F (per handoff §3 + endings-round-1-reply.md §复合 priority)
+  if (state.mom_call_count >= 9) return 'happy_ending_mom';
+  if (state.bought_japan_ticket) return 'happy_ending_japan_ticket';
+  if (state.lisa_path === 'A' && state.lisa_msg_count >= 2) return 'happy_ending_lisa_blessing';
+  if (state.intern_score >= 10) return 'happy_ending_called_chen_ge';
+  if (state.npc_score_total < 50) return 'happy_ending_office_quiet';
+  if (state.sick_count >= 6 && state.kpi_pass_all_12) return 'happy_ending_same_party';
+  return 'happy_ending_office_quiet'; // default fallback
+}
+```
+
+B. **Endings.ink load + ChoosePathString**:
+- Add `endings` to `loader.ts EpisodeId` 类型 + `EPISODE_PATHS`
+- Trigger point: in `runtime.ts step()` 顶部 check `checkEndingTrigger(state)`, 若返回 path → `ink.loadStory('endings')` then `ChoosePathString(path)` then return
+
+C. **Archive screen post-ending**:
+- Endings.ink 末 `-> END` 后 ink runtime returns `step.ended=true`
+- Trigger FSM transit to `gameover` state (P0-P4 已实现 Archive + RunSummary, 复用)
+- Save `endingId` to RunSummary for Archive list display
+
+**Files**:
+- `game/src/ink/loader.ts` — add 'endings' EpisodeId
+- `game/src/ink/runtime.ts` — `step()` add `checkEndingTrigger` call + ending dispatch
+- 新建 `game/src/run-meta/ending-resolver.ts` — pure helper for `pickHappyEnding`
+- `game/src/run-meta/archive.ts` — accept `endingId` field
+- `game/src/save/schema.ts` — add `endingId?: string` to RunSummary
+
+**Test**:
+- vitest: `pickHappyEnding` 6 path priority test cases
+- vitest: `checkEndingTrigger` GO 类 5 case + happy 1 case
+- dev: simulate sick_count=7 → 跑 endings.ink → game_over_too_sick stitch render
+
+**Estimate**: 2-3h
+
+**Status**: ⏳ open — W1 next /loop tick
+
+---
+
+## P1 — Audio hook (W7 brief 还没写)
+
+### Q-GG · Audio sting hook for KPI Review cinematic
+
+**Why**: KPI Review cinematic (Q-Q) spec 提到 "PRE_REVEAL_MS=1500 静音停顿 + audio sting P6 hook" — sting 实现 Phase 3 task.
+
+**Spec brief**:
+- Web Audio API singleton mount
+- Tag listener `# audio_sting: kpi_review_reveal` triggers preset .ogg/.mp3
+- 5 preset stings: kpi_review_reveal / kpi_review_path_a_reward / gameover_promoted / happy_ending_mom / happy_ending_office_quiet
+- Audio assets W7 brief (待写) 后 generate / 找 royalty-free
+
+**Estimate**: brief 1h + ship 4h after assets ready
+
+**Status**: ⏳ deferred — wait for audio assets via W7
+
+---
+
+## P2 — Polish (低优先级 / minor)
+
+### Q-HH · apCurrent save schema cleanup
+
+**Why**: AP system 已删 (Q-M Bug #27) but `apCurrent` 仍 z.optional() in schema for backward compat. 现 endings.ink ready + 新一轮 deploy, 可以 retire `apCurrent` field 完全.
+
+**Spec**: schema.ts → remove `apCurrent` field. Migration: existing saves with `apCurrent` field parse cleanly (zod ignores unknown fields by default).
+
+**Estimate**: 15 min
+
+### Q-II · Bug #6 / #7 / #10 follow-up
+
+- Bug #6 (designer scope) — choice label tone sweep, 跟 W3 round 配合
+- Bug #7 (designer scope) — 提前下班 Preact vs ink 设计选择
+- Bug #10 (1-frame paint desync, headless only) — defer until W2 真 reproducer
+
+---
+
 ## ✅ Done (W1 batches 8-21, 2026-05-06)
 
 | ID | Task | Commit |
