@@ -1603,3 +1603,23 @@ Engine-side appears clean. Open items remaining on bug list:
 ### Next round target (R61)
 
 Standard cadence — verify next pickup.
+
+---
+
+## Rounds 61-62 — no new commits, idle
+
+---
+
+## Round 63 — `fix(gh-pages)` BASE_URL prefix regression check
+
+W2 QA Round 63 (2026-05-07). Latest commit: `d880f28 fix(gh-pages): prefix ink JSON paths with BASE_URL for sub-path deploys`. Touches `game/src/ink/loader.ts` (~16 lines) — uses `import.meta.env.BASE_URL` so ink JSON paths resolve correctly when game is deployed at a sub-path (GH Pages: `/repo-name/`).
+
+Smoke 357/357. R57 driver re-run: 4/4 pass — local dev (BASE_URL='/') continues to work. No regressions.
+
+### Round 63 outstanding
+
+Engine clean per latest commit batch. P5 ship-ready. GH Pages deploy path now functional.
+
+### Next round target (R64)
+
+Standard cadence — verify next pickup.

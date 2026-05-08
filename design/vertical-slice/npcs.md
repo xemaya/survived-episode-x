@@ -298,11 +298,11 @@
 
 ---
 
-# 5 龙套 NPC（功能性出场，不需多集弧光）
+# 6 龙套 NPC（功能性出场，不需多集弧光；v2.2 加 §11 实习生小张）
 
-> 龙套 ≠ 装饰。每个龙套都有 1-2 个**剧情功能**，出现就推动事——不出现也不影响主线。深度比 5 主线 NPC 浅一档，但**口头禅 / 视觉锚 / 内在驱动**仍要立得住。
+> 龙套 ≠ 装饰。每个龙套都有 1-2 个**剧情功能**，出现就推动事——不出现也不影响主线。深度比 5 主线 NPC 浅一档（**实习生小张 §11 例外**——他跨 S5-Endgame 8 个 season 全程，深度跟 5 深 NPC 同 tier 但 S5 才入场，所以 编号上归 6th 龙套），但**口头禅 / 视觉锚 / 内在驱动**仍要立得住。
 >
-> （注：食堂阿姨是 ambient flavor 不是龙套——见 §5.5）
+> （注：食堂阿姨是 ambient flavor 不是龙套——见 §5.5；张磊 / 赵丽 是 S4 新人 ambient flavor 不正式注册——见 season-4-arc.md §3.12）
 
 ## 6. 前台 Vivian
 
@@ -492,7 +492,124 @@
 
 ---
 
-## NPC 同框矩阵（10 NPC 间的 cross-interaction）
+## 11. 实习生小张（v2.2 追加 — S5 入场 / S5-Endgame 全程在）
+
+> **添加 motivation**：series-structure.md §5 Endgame Variant D 已 named "实习生小张" 作 trigger NPC，跨 S5-Endgame 有 intern_score 累积 + 跨 series 弧光（S5 入场 → S5-S6 笑天 mentor → S7-S11 ramp-up → S12 试用期评估 → Endgame Variant D "陈哥新年快乐！"）。深度上等同 5 深度 NPC tier（Lisa S1-S3 / David S1-S6 / 等），但**S5 才入场**，归入 6th 龙套 NPC（编号上接 §10 林姐）。
+>
+> 跟 §3.12 张磊 / §5.5 食堂阿姨 区分：**张磊 / 食堂阿姨 = ambient flavor 无 score 系统无 dedicated arc**。实习生小张 = **named NPC + intern_score 系统 + 跨 series 弧光 + Endgame anchor**。
+
+**基本信息**：男，22 岁，刚毕业 / 实习产品助理（跟笑天平级，但实习身份）/ 同部门 / S5 (E20 周一) 入职
+**真名**：张然——但笑天叫他"实习生小张"（笑天对他的"小"称呼跟王总监对笑天的"小笑"是 visual mirror——running gag 复用，详跨series 弧光 §3）
+**Sprite**：`assets/sprites/npc/faces/` intern sprite（2 表情：fresh 期待 / 加班疲惫）
+
+**视觉锚**（**deliberate visual mirror to 笑天**）：
+- 帆布包（不是 David 那种 backpack / 不是笑天那种保温杯单挂）
+- 黑框眼镜（笑天没戴眼镜——但他**视力开始下降**，protagonist.md §10 character note）
+- Polo T 恤（**跟笑天的 5 件 polo 同款相似系列**——visual mirror）
+- 桌面贴一张便利贴："**好好学习，早日转正**"——笑天看到时**3 秒沉默**
+- 工位上没有绿萝（他还没继承前任员工留下的）——他还是干净的
+
+**笑天-老周-实习生小张 三代镜像**：
+- 老周 (48) = 笑天 (32) 的 10+ 年后（沉默 elder / 桌上 3-4 个茶杯）
+- 实习生小张 (22) = 笑天 (32) 的 10 年前（fresh face / 桌面便利贴"早日转正"）
+- 笑天 在中间——他**12 周前还是新人**，现在他成了"陈哥"。他没变，变的是**别人对他的称呼**
+
+**内在驱动**（character note，**绝不在剧本里 expose**）：
+- 普通本科毕业，这家公司是他**第 7 份面试**。他真的相信"实习转正 + 努力 + 跟着前辈学"路径
+- 他不知道这家公司近 12 个月**只转正过 1 个产品助理 candidate**（被王总监叫"潜力一般"然后 burnt out）
+- 他家在朝阳区——比笑天租房通勤距离短。他主动透露"我家就在朝阳区"暗示他想跟笑天 socialize（但笑天不想）
+- 他妈妈也在老家，**每周日下午 6:00 视频**（**比笑天的 8:30 早 2.5 小时**——他还没学会拖延）
+- 他爸爸还活着——在老家做小生意。他想"实习转正 + 5 年内升 P6 + 给爸妈在老家换大房子"——这是他 22 岁版本的"笑傲天下众生"
+
+**口头禅 / 行为标签**：
+- "**陈哥，这个您觉得怎么样？**"（问 deliverable feedback 开场永远先 "陈哥"）
+- "**明白了，我去改**"（永远说"明白"即使不明白——跟 Lisa S1 "笑天你看下这个行不行" 同结构但更 raw）
+- "**辛苦了**"（下班永远说——笑天觉得 ironic）
+- "**我家就在朝阳区**"（主动透露住址但笑天没问）
+- 朋友圈每天 1-2 条（自拍 + 工位 + "今天有学到东西"——比 David 节奏密但 raw）
+- 周报永远写 4 页（笑天初版 1 页）
+
+**笑/泪触发**：
+- **笑**：fresh face naivete + 朋友圈"完美收官" + V 字手势自拍 + 周报 4 页 vs 笑天 1 页对比 + "我家就在朝阳区" unprompted
+- **泪**：桌面便利贴"好好学习，早日转正" + 他不知道公司近 12 个月只转正 1 个 candidate + 笑天看着他重蹈 Lisa 的覆辙 + 笑天每次叫他"小张"时 internal "_我成了王总监_"
+
+**经典 dialog line**（**verbatim 锁定**——跨 series ink writer 必须保留这些 line 不变）：
+
+| Line | 触发 | 说明 |
+|---|---|---|
+| **"陈哥您好，我以后跟您学"** | S5 E20 周一入职第 1 天 | 笑天**第一次被叫"陈哥"** |
+| **"陈哥，这个您觉得怎么样？"** | S5+ 任意 deliverable feedback 请教场景 | 口头禅 baseline |
+| **"明白了，我去改"** | S5+ 任意 feedback 后 | 口头禅 baseline |
+| **"辛苦了"** | S5+ 任意下班场景 | 口头禅 baseline |
+| **"陈哥，第 1 周辛苦了"** + 自拍照（工位 + V 字手势）| S5 E20 周日朋友圈 | series finale anchor |
+| **"第一周完美收官！感谢陈哥指导，下周继续努力！"** | S5 E20 周日朋友圈 | 笑天 internal "_他真的相信。我也相信过。_" trigger |
+| **"陈哥，我感觉我可能不太适合"** | S10/S11 试用期评估周 | **Lisa S1-S2 verbatim callback**——他不知道他 echo 了 Lisa, 笑天意识到 echo 但不能告诉 |
+| **"陈哥新年快乐！明天什么时候到公司啊？"** | Endgame Variant D（仅 intern_score ≥ +10 触发）E52 春节回家最后一晚 | series finale anchor (per series-structure.md §5) |
+
+**跨 series 弧光**：
+
+- **S5（E17-E20）= 入场**：E20 周一入职第 1 天 → 王总监带他过来介绍工位 "**这个是陈天啊**"（running gag mispronounce cascade）→ 实习生小张听到"陈天"自然用"陈+哥"称呼大他 10 岁的同事 → "**陈哥您好，我以后跟您学**" → 笑天**第一次被叫"陈哥"**
+  - 4 archetype 在 1 集压缩（A 周一入职 / B 周二微信约咖啡 / C 周四便利贴"早日转正" / D 周日朋友圈"完美收官"）
+  - intern_score 起步：-3 ~ +12
+  - **关键 causal chain**：王总监 5 个 season 叫不准笑天名字（"小笑啊…陈天啊…"）→ S5 E20 介绍给实习生时也叫不准 → 实习生 instinctively 用"陈哥"。**这是 series 5 个 season 累积 running gag 的 narrative payoff** —— ink writer 必守"实习生'陈哥'必紧跟王总监 mispronounce setup"（per S5 round-1 reply Q5）
+
+- **S6（E21-E24）= mentor 加深**：David 燃尽离职 finale 期间，实习生小张 still 不知发生什么（他还没注意到 David）。路径 A 玩家王总监开始 push 笑天 mentor 实习生 + 张磊 双 channel。intern_score 持续累积（S6 末 +5 ~ +18 cumulative）
+
+- **S7-S8（E25-E32）= ramp-up 期**：实习生小张第一次写自己 PPT 给客户对接（笑天看着他经历 12 周前自己经历过的）。他开始**自我激励**——他开始向 David 模式靠近。S8 李阿姨退休那天实习生小张也在场（背景），他不懂为什么"突然没人倒水了"——**他还在系统外的 awareness layer**
+
+- **S9（E33-E36）= 第一次 quiet sign**：王总监被换。实习生小张第一次目睹"上面也会被换"。笑天看着他 0.5 秒沉默——他第一次开始怀疑（类比 Lisa S2 quiet sign 起步）
+
+- **S10-S11（E37-E44）= 试用期评估**：12 个月转正 deadline 到。王总监被换之后，新总监不熟悉他。实习生小张第一次说"**陈哥，我感觉我可能不太适合**"——这是 Lisa S1-S2 verbatim callback（他没意识到他 echo 了 Lisa）。**笑天意识到 echo，但他不能告诉**
+
+- **S12（E45-E48）= 试用期 final**：12 月 KPI 冲刺 + 实习生 final 试用期评估。路径取决于玩家累积 intern_score：
+  - **intern_score ≥ +10**：转正成功 → Endgame Variant D 触发条件 met
+  - **intern_score < +10**：转正失败 / 转正延期 → S12 finale 实习生小张 朋友圈"开启新阶段"（**Lisa B 路径 callback**）
+
+- **Endgame（E49-E52）= Variant D 触发（仅 intern_score ≥ +10）**：
+  - E52 春节回家最后一晚收到实习生小张微信："**陈哥新年快乐！明天什么时候到公司啊？**"
+  - 笑天回："早。"
+  - 笑天 internal："_陈哥。不是天哥。是陈哥。我成了 David。_ 不算多。但算个变化。"
+  - per series-structure.md §5 Variant D verbatim 锁定
+
+**series 出场频率**：
+- S5：E20 周一-周日（入职第 1 周，4 archetype 1 集压缩）
+- S6：每集 ~3-5 个 stitch（mentor 关系建立期）
+- S7-S8：每集 ~2-3 个 stitch（背景 + 偶尔 deliverable feedback）
+- S9：每集 ~2 个 stitch（背景 + 王总监被换震荡）
+- S10-S11：每集 ~3-5 个 stitch（试用期评估关键期）
+- S12：每集 ~5-7 个 stitch（finale 试用期 final + 转正决定）
+- Endgame：仅 E52 1 个 stitch（仅 Variant D 触发时）
+
+**笑天 × 实习生小张 内心独白基线**：
+
+| 触发 | 笑天独白 |
+|---|---|
+| 第一次被叫"陈哥"（S5 E20 周一）| "_陈哥。不是天哥。是陈哥。我成了 David。_" |
+| 看到他朋友圈"完美收官"（S5 E20 周日）| "_他真的相信"完美收官"。我也相信过。_" |
+| 看到他桌面便利贴"早日转正"（S5 E20 周四）| "_3 秒沉默。_" |
+| 听到他说"我感觉我可能不太适合"（S10/S11）| "_她也是这么说的。我没救成她。我也救不了你。_" |
+| Endgame Variant D 微信"陈哥新年快乐"（E52）| "_陈哥。不是天哥。是陈哥。我成了 David。不算多。但算个变化。_" |
+
+**❌ 禁忌**：
+
+- 不要让实习生小张说"恭维"话（如"陈哥您一定会升职的"）——他**还不会恭维**，他还相信
+- 不要让笑天对实习生小张说"你一定会转正的"——笑天不撒这种谎（他对 Lisa 也没说过）
+- 不要让实习生小张跟 David 互动 ≥ 1 句话——David S5-S6 burning out + S6 finale 离职，他们没机会建立关系
+- 不要让实习生小张跟老周互动——老周不教任何人，**包括实习生**
+- 不要让实习生小张"反思"或"看穿系统"——他的弧光是**慢慢成为 David**，不是 awakening
+- 不要在剧本里 expose "他不知道近 12 个月只转正 1 个 candidate" 这种 inside info——他**不知道**，character note only
+- 不要给实习生小张 完整 backstory expose（普通本科 + 第 7 份面试 + 朝阳区 + 妈妈 6:00 视频 + 爸爸老家小生意），挑 1-2 个细节 inline 即可
+- 不要让实习生小张"主动叫陈哥"before 王总监 mispronounce ("陈天") setup——per S5 round-1 reply Q5 causal chain 必守
+- 不要让实习生小张 在 S5 入职第 1 周就说"我感觉我可能不太适合"——那是 S10-S11 试用期评估周才说（Lisa verbatim callback 时机锁定）
+- 不要让实习生小张 在 Endgame Variant D 之外的 ending 出场——其他 5 个 variant（妈妈版 / 5 月日本机票 / Lisa 客户成功部 / 办公室空了 / 同学聚会装病）他都不出场
+- 不要让实习生小张 跟 林姐 互动——林姐对所有人 budget = 0，特别是新人
+- **跟张磊 / 食堂阿姨 区分**：张磊 / 食堂阿姨 = ambient flavor 无 score 系统无 dedicated arc。**实习生小张 = named NPC + intern_score 系统 + 跨 series 弧光 + Endgame anchor**——他的 stitch budget 是龙套 tier 的 3-4 倍
+
+**v2.2 追加 motivation 跟 v2 比较**：v2 npcs.md 是 S1-S3 时期写的，那时 S5 主线 anchor 候选 NPC 没明确——**实习生小张 是 series-structure.md §5 Endgame Variant D 已 named 但 npcs.md 一直没注册的 NPC**。S5 outline (W6 round-1) 写 §3.1 character note 之后 GM round-1 reply Q1 ✅ register，所以 v2.2 retro-add §11。
+
+---
+
+## NPC 同框矩阵（11 NPC 间的 cross-interaction）
 
 > 这个矩阵帮分身 CC session 决定"哪些 NPC 可以放在同一场戏里"。**孤岛 NPC 是 worker thinking——好戏总是 cross-NPC 的**。
 
@@ -529,6 +646,17 @@
 | **李阿姨 × 老周** | 李阿姨知道老周妻子的事（她 12 年前就在这扫地，那时老周妻子来过公司）。**绝不在剧本里 expose** |
 | **妈妈 × 任意** | 妈妈只在视频里出现。她从不和其他 NPC 直接互动 |
 | **林姐 × 笑天** | S5+ 茶水间偶遇——林姐对笑天点头但不主动说话。S10 可能她推荐猎头电话 |
+| **实习生小张 × 笑天** | S5 E20 周一第一次叫笑天"陈哥"（**series 5 个 season running gag narrative payoff**）。S5+ "陈哥, 这个您觉得怎么样?" deliverable feedback 请教。S10/S11 "陈哥, 我感觉我可能不太适合" Lisa callback。Endgame Variant D "陈哥新年快乐!" |
+| **实习生小张 × 王总监** | S5 E20 周一介绍工位 "这个是陈天啊" running gag 复用 → 实习生 instinctively 用"陈哥" causal chain。S5+ 王总监对实习生用"小张啊" 跟对笑天的"小笑啊" 同模式（mispronounce 链条延续）|
+| **实习生小张 × David** | **0 句话整 series**——David S5 burning out + S6 finale 离职, 他们没机会建立关系。E20 周一 David 在工位但没起来打招呼（David quiet sign 8）|
+| **实习生小张 × 老周** | **0 句话整 series**——老周不教任何人, 包括实习生。E20 周一实习生第一天没注意到老周（Lisa S1 第一天就注意到了——实习生 raw 程度比 Lisa 还 raw）|
+| **实习生小张 × Lisa** | 不互动（Lisa 已 S3 finale 离场——实习生 S5 E20 才入职, 时间不重叠）|
+| **实习生小张 × Zoe** | S5 E20 周一欢迎仪式 standard 5 分钟。S10-S11 试用期评估 Zoe 是 executor (类比 Lisa S2-S3 Zoe 角色)——但**这次笑天看着 Lisa S2-S3 处刑流程在实习生身上 callback** |
+| **实习生小张 × 食堂阿姨** | S5 E20 周三食堂 standard 一勺（vs 笑天多打半勺）= ambient signal "新人不被记住"。**食堂阿姨记住每周三都来 / 总点西红柿炒蛋的笑天**, 不记住实习生 |
+| **实习生小张 × Vivian** | S5 E20 周一入职 Vivian "嗨～新员工来啦～" + 实习生用 full name "您好我是张然"——跟笑天 12 周前自我介绍同模式 |
+| **实习生小张 × 林姐** | **0 句话整 series**——林姐对所有人 budget = 0, 特别是新人 |
+| **实习生小张 × 妈妈** | 妈妈不出现在视频以外的地方——不互动。但实习生周日 6:00 跟自己妈妈视频跟笑天 8:30 妈妈视频是 visual mirror（**两代打工人都在跟老家妈妈视频**）|
+| **实习生小张 × 张磊** | S4 张磊 (新人 ambient) → S5 E20 实习生小张入职——**张磊在场但 0 互动**（他自己已经 burning out 起步）。**两代新人时间错位**：张磊 S4 入职 + S5 E18 第一次叫笑天"陈哥" / 实习生 S5 E20 入职第 1 天叫"陈哥"——同 anchor 但不同 timing |
 
 ### 笑天 × 各 NPC 的内心独白基线
 
@@ -544,6 +672,7 @@
 | 老周 | 镜像识别——他是 10 年后的我 | "过完今天。" |
 | 妈妈 | 内疚——我对她说的话全是谎 | "再等等。" |
 | 林姐 | 旁观敬意——她证明了"不卷也能活" | "她不一样。" |
+| 实习生小张 | 镜像识别 (10 年前的自己) + 内疚（你救不了他但你看着他重蹈 Lisa）| "陈哥。不是天哥。是陈哥。我成了 David。" |
 
 ---
 
@@ -566,6 +695,9 @@
 - [ ] 老周是否每集 ≤ 1 句话？（说多了变 mentor，违背设计）
 - [ ] 妈妈是否每周日 8:30 都出现？（缺席 = 主角焦虑信号）
 - [ ] 林姐是否在 S3 finale 路径 A 之前**完全不出场**？（早出场会破坏 Lisa A 路径的"惊喜"）
+- [ ] 实习生小张是否在 S5 E20 周一才入职？（E17/E18/E19 出场会 break series-structure §2 S5 finale anchor）
+- [ ] 实习生小张第一次叫笑天"陈哥"是否紧跟王总监 mispronounce ("陈天") setup？（causal chain 必守 — per S5 round-1 reply Q5）
+- [ ] 实习生小张 跟 David / 老周 / 林姐 是否 0 句话整 series？（3 个 hard rule）
 
 **Cross-NPC**：
 
